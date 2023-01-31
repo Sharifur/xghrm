@@ -1,0 +1,30 @@
+.alert-success {
+    color: #011a0f;
+    background-color: #8be7bd;
+    border-color: #badbcc;
+    padding: 6px 15px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.alert-info {
+    color: #055160;
+    background-color: #c1e7ef;
+    border-color: #bed6db;
+    padding: 6px 15px;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.alert-danger {
+    color: #ffffff;
+    background-color: #d76565;
+    border-color: #e97d71;
+    padding: 6px 15px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.table-responsive{
+    overflow-x: initial;
+}

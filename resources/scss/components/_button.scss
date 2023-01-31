@@ -1,0 +1,25 @@
+.cmn-btn{
+    color: var(--paragraph-color);
+    font-size: 16px;
+    font-weight: 500;
+    font-family: var(--body-font);
+    display: inline-block;
+    border-radius: 5px;
+    text-transform: capitalize;
+    text-align: center;
+    cursor: pointer;
+    line-height: 34px;
+    padding: 5px 30px;
+    -webkit-transition: all 0.3s ease-in;
+    transition: all 0.3s ease-in;
+    &.btn-bg-1{
+        background: var(--main-color-one);
+        color: #fff;
+    }
+}
+
+.dashboard-list .list.logoutbtn button {
+    border: none;
+    background-color: transparent;
+    color: #fff;
+}

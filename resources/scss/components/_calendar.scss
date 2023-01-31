@@ -1,0 +1,166 @@
+:root{
+    --day-border: 1px solid #b8c2cc;
+    --day-border-highlight: 1px solid #b8c2cc;
+    --day-width: 90px;
+    --day-height: 90px;
+    --weekday-bg: #f8fafc;
+    --weekday-border: 1px solid #eaeaea;
+    border-radius: 0;
+    width: 100%;
+}
+.cleardar-wrapper{
+    .head-rapw {
+        text-align: center;
+        margin-bottom: 20px;
+        display: block;
+    }
+}
+ .custom-calendar-outer-wrap {
+
+     .vc-weeks{
+        padding: 0;
+     }
+    .vc-header {
+        background-color: #f1f5f8;
+        padding: 10px 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px 18px 0;
+    }
+    .vc-weekday{
+        background-color: var(--weekday-bg);
+        border-bottom: var(--weekday-border);
+        border-top: var(--weekday-border);
+        padding: 5px 0;
+        text-align: center;
+        color: var(--gray-500);
+        font-size: var(--text-sm);
+        font-weight: var(--font-bold);
+        line-height: 14px;
+        padding-top: 4px;
+        padding-bottom: 8px;
+        cursor: default;
+        -webkit-user-select: none;
+        user-select: none;
+
+    }
+
+    .date-box-wrapper {
+        overflow: hidden;
+        height: 100%;
+        flex-direction: column;
+        display: flex;
+        z-index: 10;
+        ::-webkit-scrollbar {
+            width: 0px;
+          }
+        ::-webkit-scrollbar-track {
+            display: none;
+        }
+        p{
+            max-width:var(--day-width);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 14px;
+            margin-bottom: 5px;
+            padding: 3px;
+            border-radius: 3px;
+            &.C\/In{
+                background-color: #62ad62;
+            }
+            &.C\/Out{
+                background-color: #e55252;
+            }
+            &.leave{
+                background-color: #a734a7;
+            }
+            &.sick-leave{
+                background-color: #5d6cc1;
+            }
+            &.paid-leave{
+                background-color: #4c4a4a;
+            }
+            &.holiday{
+                background-color: #efb662;
+            }
+        }
+        .day-label{
+            --text-opacity: 1;
+            color: #1a202c;
+            font-size: .875rem;
+        }
+        .custom-data-wrapper{
+            overflow-y: auto;
+            overflow-x: auto;
+            flex-grow: 1;
+        }
+    }
+    .vc-day{
+        padding: 0 5px 3px;
+        text-align: left;
+        height: var(--day-height);
+        min-width: var(--day-width);
+        background-color: #fff;
+        ::-webkit-scrollbar {
+            width: 0px;
+          }
+        ::-webkit-scrollbar-track {
+            display: none;
+          }
+        &:not(.on-right) {
+            border-right: var(--day-border);
+        }
+        &:not(.on-bottom) {
+            border-bottom: var(--day-border);
+        }
+    }
+
+ }
+
+.color-explanation{
+    margin: 0;
+    padding:0;
+    margin-bottom: 40px;
+    list-style: none;
+    li{
+        max-width:var(--day-width);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 14px;
+            margin-bottom: 5px;
+            padding: 3px;
+            border-radius: 3px;
+            display: inline-block;
+            .badge{
+                background-color: #fff;
+                color: #333;
+            }
+            &.C\/In{
+                background-color: #62ad62;
+            }
+            &.C\/Out{
+                background-color: #e55252;
+            }
+            &.leave{
+                background-color: #a734a7;
+            }
+            &.sick-leave{
+                background-color: #5d6cc1;
+            }
+            &.paid-leave{
+                background-color: #4c4a4a;
+            }
+            &.holiday{
+                background-color: #efb662;
+            }
+        +li{
+            margin-left: 20px;
+        }
+    }
+}
+
+
+

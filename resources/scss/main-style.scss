@@ -1,0 +1,31 @@
+//bootstrap
+@import "~bootstrap/scss/bootstrap";
+//fontawesome 5 free
+@import '~@fortawesome/fontawesome-free/scss/fontawesome';
+@import '~@fortawesome/fontawesome-free/scss/regular';
+@import '~@fortawesome/fontawesome-free/scss/solid';
+@import '~@fortawesome/fontawesome-free/scss/brands';
+
+//global
+@import "resources/scss/global/_mixins";
+@import "resources/scss/global/_variables";
+@import "resources/scss/global/_global";
+
+//sections
+@import "resources/scss/sections/_dashboard";
+@import "resources/scss/sections/_bootstrap-override";
+@import "resources/scss/sections/_pagination";
+@import "resources/scss/sections/thirdparty_plugin_css_override";
+@import "resources/scss/sections/invoice";
+@import "sections/salarySlip";
+@import "sections/user-dashboard";
+
+//components
+@import "resources/scss/components/iconpicker";
+@import "resources/scss/components/_button";
+@import "resources/scss/components/_datepicker";
+@import "resources/scss/components/media_uploader";
+@import "resources/scss/components/transition";
+@import "resources/scss/components/sweetalert";
+@import "resources/scss/components/calendar";
+
