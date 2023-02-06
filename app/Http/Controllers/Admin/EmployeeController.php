@@ -101,7 +101,8 @@ class EmployeeController extends Controller
         //todo
         $logs =  AttendanceLog::query()
             ->where(['employee_id' => $id])
-            ->whereMonth('date_time','>',Carbon::parse($request->month))->get();
+            ->whereMonth('date_time','=',Carbon::parse($request->month))->get();
+            
         $holidayCount = $logs->where('type','holiday')->count();
         $leaveCount = $logs->where('type','leave')->count();
         $inCount = $logs->where('type','C/In')->count();
