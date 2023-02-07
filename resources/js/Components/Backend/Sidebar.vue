@@ -39,6 +39,11 @@
                     </Link>
                 </li>
                 <li>
+                    <Link :href="route('admin.employee.advance.salary.all')" :class="{'active' : $page.url === ('/admin-home/employee/advance-salary/all')}">
+                        Advance Salary
+                    </Link>
+                </li>
+                <li>
                     <Link :href="route('admin.employee.attendance')" :class="{'active' : $page.url === ('/admin-home/employee/attendance/all')}">
                         Attendance Reports
                     </Link>
@@ -99,6 +104,11 @@
                     </Link>
                 </li>
             </ul>
+        </li>
+        <li class="list logoutbtn">
+            <Link :href="route('admin.database.upgrade')" method="post"  as="button" >
+                Database Upgrade
+            </Link>
         </li>
         <li class="list logoutbtn">
             <Link :href="route('admin.logout')" method="post"  as="button" >

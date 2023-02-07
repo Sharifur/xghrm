@@ -5,6 +5,7 @@
 =======================================*/
 Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function (){
     Route::get('/',[\App\Http\Controllers\Admin\AdminDashboardController::class,'index'])->name('admin.home');
+    Route::post('/database-upgrade',[\App\Http\Controllers\Admin\AdminDashboardController::class,'databaseUpdate'])->name('admin.database.upgrade');
 
     /*=================================
         EMPLOYEE ROUTES
@@ -22,6 +23,13 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
         Route::get('/attendance-check/{id}',[\App\Http\Controllers\Admin\EmployeeController::class,'attenadance_check'])->name('admin.employee.attendance.check');
         Route::post('/attendance-check-post',[\App\Http\Controllers\Admin\EmployeeController::class,'attenadance_check_post'])->name('admin.employee.attendance.post');
         Route::post('/details/{id}',[\App\Http\Controllers\Admin\EmployeeController::class,'details'])->name('admin.employee.details');
+
+        Route::get('/advance-salary/all',[\App\Http\Controllers\Admin\AdvanceSalaryController::class,'index'])->name('admin.employee.advance.salary.all');
+        Route::get('/advance-salary/new',[\App\Http\Controllers\Admin\AdvanceSalaryController::class,'create'])->name('admin.employee.advance.salary.new');
+        Route::post('/advance-salary/store',[\App\Http\Controllers\Admin\AdvanceSalaryController::class,'store'])->name('admin.employee.advance.salary.store');
+        Route::get('/advance-salary/edit/{id}',[\App\Http\Controllers\Admin\AdvanceSalaryController::class,'edit'])->name('admin.employee.advance.salary.edit');
+        Route::post('/advance-salary/update',[\App\Http\Controllers\Admin\AdvanceSalaryController::class,'update'])->name('admin.employee.advance.salary.update');
+        Route::post('/advance-salary/delete/{id}',[\App\Http\Controllers\Admin\AdvanceSalaryController::class,'delete'])->name('admin.employee.advance.salary.delete');
 
         /* category */
         Route::group(['prefix' => 'category'],function (){

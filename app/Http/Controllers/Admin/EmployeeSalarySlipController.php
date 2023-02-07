@@ -8,6 +8,7 @@ use App\Models\SalarySlip;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Employee;
+use Carbon\Carbon;
 
 class EmployeeSalarySlipController extends Controller
 {
@@ -22,12 +23,21 @@ class EmployeeSalarySlipController extends Controller
 
     public function store(SalarySlipRequest $request){
         $employee_details = Employee::find($request->employee_id);
-        SalarySlip::create(array_merge([
-            'salary' => $employee_details->salary,
-            'employee_id' => $employee_details->id,
-            'month' => $request->month,
-            'extraEarningFields' => json_encode($request->extraEarningFields),
-            'extraDeductionFields' => json_encode($request->extraDeductionFields),
-        ]));
+        $existingSlip = SalarySlip::where('employee_id',$employee_details->id)->whereMonth('month','=',Carbon::parse($request->month))->first();
+        if(is_null( $existingSlip)){
+            SalarySlip::create(array_merge([
+                'salary' => $employee_details->salary,
+                'employee_id' => $employee_details->id,
+                'month' => $request->month,
+                'extraEarningFields' => json_encode($request->extraEarningFields),
+                'extraDeductionFields' => json_encode($request->extraDeductionFields),
+            ]));
+        }else{
+            $existingSlip->extraEarningFields = json_encode($request->extraEarningFields);
+            $existingSlip->extraDeductionFields = json_encode($request->extraDeductionFields);
+            $existingSlip->month = $request->month;
+            $existingSlip->save();
+        }
+       
     }
 }

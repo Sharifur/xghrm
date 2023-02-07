@@ -42,7 +42,46 @@
 .salarySlipPdfOuterWrapper{
     margin-top: 100px;
     padding: 60px;
+    &.advanceSalary{
+        .paratext {
+            p{
+                font-size: 16px;
+                line-height: 26px;
+                color: #353535;
+                &:nth-child(2) {
+                    margin: 15px 0;
+                
+                }
+            }
+            
+        }
+        
+        .headerPart{
+            .subjectWarp{
+                margin-bottom: 50px;
+                p{
+                    text-align: center;
+                    font-size: 42px;
+                    line-height: 52px;
+                    font-weight: 700;
+                    position: relative;
+                    &:after{
+                        position: absolute;
+                        left: 50%;
+                        bottom: 0;
+                        width: 300px;
+                        height: 2px;
+                        background-color: #333;
+                        content: '';
+                        transform: translateX(-50%);
+                    }
+                }
+                border-bottom: none;
+            }
+        }
+    }
     .headerPart{
+       
         h1{
             font-size: 50px;
             font-weight: 700;

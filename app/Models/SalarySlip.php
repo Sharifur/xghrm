@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class SalarySlip extends Model
 {
     use HasFactory;
-
     protected $fillable = ['employee_id','month','extraEarningFields','extraDeductionFields','salary'];
 
     protected $casts = [
