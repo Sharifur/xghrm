@@ -18,8 +18,9 @@ class AdvanceSalaryController extends Controller
 {
     public function index(){
         $allSalaries = AdvanceSalary::with('employee')->orderBy('id','desc')->paginate(10)->through(function($item){
-           $item->monthName = Carbon::parse()->format('M'); 
-           $item->year = Carbon::parse()->format('Y'); 
+           $item->monthName = Carbon::parse($item->month)->format('M'); 
+           $item->year = Carbon::parse($item->month)->format('Y'); 
+           $item->created = Carbon::parse($item->created_at)->format('Y M d'); 
            return $item;
         });
 
@@ -36,6 +37,28 @@ class AdvanceSalaryController extends Controller
             'all_employee' => $all_employee
         ]);
     }
+
+    public function edit($id){
+        $all_employee = Employee::where('status',1)->get()->map(function ($item){
+            return ['label' => $item->name,'value' => $item->id];
+        });
+        $advance_salary =  AdvanceSalary::with(['employee' => function($q){
+            $q->with('category');
+        }])->where('id',$id)->first();
+      $advance_salaryData = [
+        'month' =>  Carbon::parse($advance_salary->month)->format('Y-m-d'),
+        'amount' => $advance_salary->amount,
+        'employee_id' => $advance_salary->employee_id,
+        'name' => $advance_salary?->employee?->name,
+        'category' => $advance_salary?->employee?->category?->title
+      ];
+
+        return Inertia::render('Backend/AdvanceSalary/Edit',[
+            'all_employee' => $all_employee,
+            'advance_salary' => $advance_salaryData
+        ]);
+    }
+
     // /store
     public function store(AdvanceSalaryRequest $request){
 
@@ -54,9 +77,8 @@ class AdvanceSalaryController extends Controller
         return response()->json('ok');
     }
     public function delete(Request $request,$id){
-        dd('dd');
         AdvanceSalary::find($id)->delete();
-        return response()->json('ok');
+        return back();
     }
     
 

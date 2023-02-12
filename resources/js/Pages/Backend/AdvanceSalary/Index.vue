@@ -16,6 +16,7 @@
                         <th>Employee Name</th>
                         <th>Month</th>
                         <th>Amount</th>
+                        <th>Created At</th>
                         <th>Action</th>
                         </thead>
                         <tbody>
@@ -24,6 +25,7 @@
                             <td>{{ salary?.employee?.name }}</td>
                             <td>{{ salary.monthName }} {{ salary.year }}</td>
                             <td>{{ salary.amount }}</td>
+                            <td>{{ salary.created }}</td>
                             <td>
                                 <Link as="button" class="btn btn-danger m-1" @click="deleteItem(salary)">
                                     <i class="fas fa-trash"></i>
@@ -65,6 +67,7 @@ export default {
         }
 
         function deleteItem(item){
+            console.log('test')
             Swal.fire({
                 title: 'Are you sure?',
                 text: "You won't be able to revert this!",
@@ -76,7 +79,7 @@ export default {
             }).then((result) => {
                 const EmployeeData = useForm({id:item.id})
                 if (result.isConfirmed) {
-                    EmployeeData.post(route('admin.employee.advance.salary.delete'),{
+                    EmployeeData.post(route('admin.employee.advance.salary.delete',item.id),{
                         onFinish : () => {
                             Swal.fire(
                                 'Deleted!',

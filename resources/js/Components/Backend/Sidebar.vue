@@ -90,21 +90,6 @@
                 </li>
             </ul>
         </li>
-        <li class="list has-submenu " :class="{'active' : $page.url.startsWith('/admin-home/products/')}">
-            <span> Uptime Monitor </span>
-            <ul class="sub-menu">
-                <li>
-                    <Link :href="route('admin.products.all')" :class="{'active' : $page.url === ('/admin-home/products/all')}">
-                        All
-                    </Link>
-                </li>
-                <li>
-                    <Link :href="route('admin.products.new')" :class="{'active' : $page.url === ('/admin-home/products/new')}">
-                        Add New
-                    </Link>
-                </li>
-            </ul>
-        </li>
         <li class="list logoutbtn">
             <Link :href="route('admin.database.upgrade')" method="post"  as="button" >
                 Database Upgrade

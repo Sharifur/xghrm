@@ -1,9 +1,9 @@
 <template>
-    <Head title="Create Advance Salary"/>
+    <Head title="Edit Advance Salary"/>
     <div class="row">
         <div class="col-lg-12">
             <div class="header-wrap d-flex justify-content-between">
-                <h2 class="dashboards-title margin-bottom-40">Create Advance Salary</h2>
+                <h2 class="dashboards-title margin-bottom-40">Edit Advance Salary</h2>
                 <div class="btn-wrp">
                     <Link class="btn btn-info m-1" :href="route('admin.employee.advance.salary.all')">Advance salary List</Link>
                 </div>
@@ -83,17 +83,19 @@ export default {
     },
     setup(){
         const employeeList = usePage().props.value.all_employee;
+        const advanceSalary = usePage().props.value.advance_salary;
         const payableAmount = ref(0);
+        payableAmount.value = advanceSalary.amount;
         const selectedEmployee = ref({
-            name : 'Name',
-            amount : 0,
-            category : 'Designation',
+            name : advanceSalary.name,
+            amount : advanceSalary.amount,
+            category : advanceSalary.category,
         });
 
         const salarySlipData = useForm({
-            employee_id: null,
-            month: null,
-            amount: null,
+            employee_id: advanceSalary.employee_id,
+            month: advanceSalary.month,
+            amount: advanceSalary.amount,
         });
 
         function changeAmount(){
