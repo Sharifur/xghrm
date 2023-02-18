@@ -62,14 +62,15 @@ class AdvanceSalaryController extends Controller
     // /store
     public function store(AdvanceSalaryRequest $request){
 
-        $advanceSalary = AdvanceSalary::where('employee_id',$request->employee_id)->whereMonth('month','=',Carbon::parse($request->month))->first();
+        $advanceSalary = AdvanceSalary::where('employee_id',$request->employee_id)->whereDate('created_at','=',Carbon::today())->first();
+        // dd($advanceSalary->created_at->isSameDay(Carbon::today()));
         if(is_null( $advanceSalary)){
             AdvanceSalary::create([
                 'amount' => $request->amount,
                 'employee_id' => $request->employee_id,
                 'month' => $request->month,
             ]);
-        }else{
+        }elseif($advanceSalary->created_at->isSameDay(Carbon::today())){
             $advanceSalary->amount = $request->amount;
             $advanceSalary->month = $request->month;
             $advanceSalary->save();
