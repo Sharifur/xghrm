@@ -101,7 +101,7 @@ export default {
         }
 
         function  exportToPDF(){
-            let pdfFileName = selectedEmployee.value.name +'-'+getSelectedMonthName(salarySlipData.month)+"-salary-slip.pdf";
+            let pdfFileName = selectedEmployee.value.name +'-'+getSelectedMonthName(salarySlipData.month)+"-advance-salary-application.pdf";
             html2pdf(document.getElementById("element-to-convert"), {
                 margin: 1,
                 filename: pdfFileName 

@@ -214,9 +214,10 @@ export default {
             }
         }
         function  exportToPDF(){
+            let pdfFileName = selectedEmployee.value.name +'-'+getSelectedMonthName(salarySlipData.month)+"-salary-slip.pdf";
             html2pdf(document.getElementById("element-to-convert"), {
                 margin: 1,
-                filename: selectedEmployee.name ? selectedEmployee.name +'-'+getSelectedMonthName(salarySlipData.month)+"-salary-slip.pdf" : "salary-slip.pdf",
+                filename: pdfFileName,
             });
             //todo: send ajax request with all the data to store it in database
             axios.post(route('admin.employee.salary.slip.create'),salarySlipData)
