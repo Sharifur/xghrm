@@ -28,6 +28,7 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
         Route::get('/advance-salary/new',[\App\Http\Controllers\Admin\AdvanceSalaryController::class,'create'])->name('admin.employee.advance.salary.new');
         Route::post('/advance-salary/store',[\App\Http\Controllers\Admin\AdvanceSalaryController::class,'store'])->name('admin.employee.advance.salary.store');
         Route::get('/advance-salary/edit/{id}',[\App\Http\Controllers\Admin\AdvanceSalaryController::class,'edit'])->name('admin.employee.advance.salary.edit');
+        Route::get('/advance-salary/view/{id}',[\App\Http\Controllers\Admin\AdvanceSalaryController::class,'view'])->name('admin.employee.advance.salary.view');
         Route::post('/advance-salary/update',[\App\Http\Controllers\Admin\AdvanceSalaryController::class,'update'])->name('admin.employee.advance.salary.update');
         Route::post('/advance-salary/delete/{id}',[\App\Http\Controllers\Admin\AdvanceSalaryController::class,'delete'])->name('admin.employee.advance.salary.delete');
 
@@ -71,8 +72,9 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
             Route::get('create',[\App\Http\Controllers\Admin\EmployeeSalarySlipController::class,'create'])->name('admin.employee.salary.slip.create');
             Route::post('create',[\App\Http\Controllers\Admin\EmployeeSalarySlipController::class,'store']);
             Route::get('edit/{id}',[\App\Http\Controllers\Admin\EmployeeSalarySlipController::class,'edit'])->name('admin.employee.salary.slip.edit');
+            Route::get('view/{id}',[\App\Http\Controllers\Admin\EmployeeSalarySlipController::class,'view'])->name('admin.employee.salary.slip.view');
             Route::post('update',[\App\Http\Controllers\Admin\EmployeeSalarySlipController::class,'update'])->name('admin.employee.salary.slip.update');
-            Route::post('delete',[\App\Http\Controllers\Admin\EmployeeSalarySlipController::class,'delete'])->name('admin.employee.salary.slip.delete');
+            Route::post('delete/{id}',[\App\Http\Controllers\Admin\EmployeeSalarySlipController::class,'delete'])->name('admin.employee.salary.slip.delete');
         });
 
     });

@@ -14,7 +14,7 @@
                         <thead>
                         <th>Id</th>
                         <th>Employee Name</th>
-                        <th>Month</th>
+                        <th>Salary Month</th>
                         <th>Amount</th>
                         <th>Created At</th>
                         <th>Action</th>
@@ -32,6 +32,9 @@
                                 </Link>
                                 <Link class="btn btn-info m-1" :href="route('admin.employee.advance.salary.edit',salary.id)">
                                     <i class="fas fa-pencil-alt"></i>
+                                </Link>
+                                <Link class="btn btn-secondary m-1" :href="route('admin.employee.advance.salary.view',salary.id)">
+                                    <i class="fas fa-eye"></i>
                                 </Link>
                             </td>
                         </tr>
@@ -95,7 +98,7 @@ export default {
             return usePage().props.value.allSalaries.links;
         }
 
-       
+
         return {
             salaryListLinks,
             salaryList,

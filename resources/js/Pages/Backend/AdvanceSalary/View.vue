@@ -9,18 +9,7 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-lg-4">
-                <form @submit.prevent>
-                    <div class="single-info-input margin-top-30">
-                        <label class="info-title">Salary Month</label>
-                        <Datepicker v-model="salarySlipData.month"/>
-                        <span class="info-text">Select Month First</span>
-                    </div>
-                    <Select title="Employee" @change="changeEmployeeSelect()" v-model="salarySlipData.employee_id" :options="employeeList" />
-                    <Input title="Amount" type="number" @input="changeAmount()" v-model="salarySlipData.amount" />
-                </form>
-            </div>
+        <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div id="element-to-convert">
                     <div class="salarySlipPdfOuterWrapper advanceSalary">
@@ -49,7 +38,7 @@
                     </div>
                 </div>
                 <div class="btn-wrapper margin-left-60">
-                    <BsButton type="button" @click="exportToPDF" button-text="Save and Download PDF"/>
+                    <BsButton type="button" @click="exportToPDF" button-text="Download PDF"/>
                 </div>
             </div>
 
@@ -82,7 +71,6 @@ export default {
         Link
     },
     setup(){
-        const employeeList = usePage().props.value.all_employee;
         const advanceSalary = usePage().props.value.advance_salary;
         const payableAmount = ref(0);
         payableAmount.value = advanceSalary.amount;
@@ -94,7 +82,7 @@ export default {
 
         const salarySlipData = useForm({
             employee_id: advanceSalary.employee_id,
-            month: new Date(advanceSalary.month),
+            month: advanceSalary.month,
             amount: advanceSalary.amount,
         });
 
@@ -108,35 +96,17 @@ export default {
                 margin: 1,
                 filename: pdfFileName
             });
-            //todo: send ajax request with all the data to store it in database
-
-                axios.post(route('admin.employee.advance.salary.store'),salarySlipData)
         }
 
-        function changeEmployeeSelect(){
-            axios.post(route('admin.employee.details',salarySlipData.employee_id),{month: salarySlipData.month})
-            .then((response) => {
-                let employeeDetails = response.data.details;
-                 selectedEmployee.value = {
-                    name : employeeDetails.name,
-                    amount : selectedEmployee.value.amount,
-                    category : employeeDetails.designation,
-                };
-            })
-
-        }
         function getSelectedMonthName(month){
             let  months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             return month != null ?  months[new Date(month).getMonth()] : '';
         }
 
-
         return {
-            employeeList,
             salarySlipData,
             exportToPDF,
             selectedEmployee,
-            changeEmployeeSelect,
             getSelectedMonthName,
             changeAmount,
             payableAmount

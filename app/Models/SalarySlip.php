@@ -14,4 +14,8 @@ class SalarySlip extends Model
       'month' => 'datetime',
       'employee_id' => 'integer',
     ];
+
+    public function employee(){
+        return $this->belongsTo(Employee::class,"employee_id");
+    }
 }

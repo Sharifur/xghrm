@@ -13,6 +13,7 @@
         <link rel="stylesheet" href="{{asset('css/main-style.css')}}">
         @routes
         <script src="{{ mix('js/app.js') }}" defer></script>
+        <script>window.Laravel = {csrfToken: '{{ csrf_token() }}'}</script>
     </head>
     <body class="font-sans antialiased">
         @inertia
