@@ -10,7 +10,7 @@
             </div>
         </div>
         <div class="row justify-content-center">
-            <div class="col-lg-8">
+            <div class="col-lg-10">
                 <div id="element-to-convert">
                     <div class="salarySlipPdfOuterWrapper advanceSalary">
                         <div class="headerPart">

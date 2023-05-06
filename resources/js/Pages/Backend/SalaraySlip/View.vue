@@ -10,7 +10,7 @@
             </div>
         </div>
         <div class="row justify-content-center">
-            <div class="col-lg-8">
+            <div class="col-lg-10">
                 <div class="head-raw margin-top-40 margin-left-60">
                     <h4>Color Explanation</h4>
                     <ul class="color-explanation">
