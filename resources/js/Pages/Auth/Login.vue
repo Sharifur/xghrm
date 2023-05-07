@@ -193,7 +193,7 @@ section {
 .container {
     position: relative;
     padding: 50px;
-    width: 600px;
+    max-width: 600px;
     min-height: 380px;
     display: flex;
     justify-content: center;
