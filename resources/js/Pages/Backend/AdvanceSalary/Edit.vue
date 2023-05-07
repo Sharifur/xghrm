@@ -13,7 +13,7 @@
             <div class="col-lg-4">
                 <form @submit.prevent>
                     <div class="single-info-input margin-top-30">
-                        <label class="info-title">Month</label>
+                        <label class="info-title">Salary Month</label>
                         <Datepicker v-model="salarySlipData.month"/>
                         <span class="info-text">Select Month First</span>
                     </div>
@@ -49,7 +49,7 @@
                     </div>
                 </div>
                 <div class="btn-wrapper margin-left-60">
-                    <BsButton type="button" @click="exportToPDF" button-text="Generate Pdf and Download"/>
+                    <BsButton type="button" @click="exportToPDF" button-text="Save and Download PDF"/>
                 </div>
             </div>
 
@@ -94,7 +94,7 @@ export default {
 
         const salarySlipData = useForm({
             employee_id: advanceSalary.employee_id,
-            month: advanceSalary.month,
+            month: new Date(advanceSalary.month),
             amount: advanceSalary.amount,
         });
 
@@ -106,7 +106,7 @@ export default {
             let pdfFileName = selectedEmployee.value.name +'-'+getSelectedMonthName(salarySlipData.month)+"-salary-slip.pdf";
             html2pdf(document.getElementById("element-to-convert"), {
                 margin: 1,
-                filename: pdfFileName 
+                filename: pdfFileName
             });
             //todo: send ajax request with all the data to store it in database
 

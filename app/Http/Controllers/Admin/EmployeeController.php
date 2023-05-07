@@ -8,6 +8,7 @@ use App\Models\AttendanceLog;
 use App\Models\Employee;
 use App\Models\EmployeeCategory;
 use App\Models\User;
+use App\Models\AdvanceSalary;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -62,7 +63,7 @@ class EmployeeController extends Controller
         ->get();
 
         $logsInfo = [];
-        
+
 
        $holidayCount = $logs->where('type','holiday')->count();
        $leaveCount = $logs->where('type','leave')->count();
@@ -102,7 +103,7 @@ class EmployeeController extends Controller
         $logs =  AttendanceLog::query()
             ->where(['employee_id' => $id])
             ->whereMonth('date_time','=',Carbon::parse($request->month))->get();
-            
+
         $holidayCount = $logs->where('type','holiday')->count();
         $leaveCount = $logs->where('type','leave')->count();
         $inCount = $logs->where('type','C/In')->count();
@@ -110,6 +111,9 @@ class EmployeeController extends Controller
         $sickLeaveCount = $logs->where('type','sick-leave')->count();
         $paidLeaveCount =$logs->where('type','paid-leave')->count();
         $attenadnceCount = max($inCount ,$outCount);
+
+        //advance salary this month
+        $AdvanceSalary = AdvanceSalary::whereMonth("month",Carbon::parse($request->month))->get()->pluck("amount")->sum();
 
         return response([
             'details' => $details,
@@ -119,7 +123,8 @@ class EmployeeController extends Controller
             'outCount' => $outCount ?? 0,
             'sickLeaveCount' => $sickLeaveCount ?? 0,
             'paidLeaveCount' => $paidLeaveCount ?? 0,
-            'attenadnceCount' => $attenadnceCount ?? 0
+            'attenadnceCount' => $attenadnceCount ?? 0,
+            'AdvanceSalary' => $AdvanceSalary ?? 0
         ]);
     }
 

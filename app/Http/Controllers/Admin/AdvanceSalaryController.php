@@ -18,9 +18,9 @@ class AdvanceSalaryController extends Controller
 {
     public function index(){
         $allSalaries = AdvanceSalary::with('employee')->orderBy('id','desc')->paginate(10)->through(function($item){
-           $item->monthName = Carbon::parse($item->month)->format('M'); 
-           $item->year = Carbon::parse($item->month)->format('Y'); 
-           $item->created = Carbon::parse($item->created_at)->format('Y M d'); 
+           $item->monthName = Carbon::parse($item->month)->format('M');
+           $item->year = Carbon::parse($item->month)->format('Y');
+           $item->created = Carbon::parse($item->created_at)->format('Y M d');
            return $item;
         });
 
@@ -59,11 +59,27 @@ class AdvanceSalaryController extends Controller
         ]);
     }
 
+    public function view($id){
+        $advance_salary =  AdvanceSalary::with(['employee' => function($q){
+            $q->with('category');
+        }])->where('id',$id)->first();
+
+      $advance_salaryData = [
+        'month' =>  Carbon::parse($advance_salary->month)->format('Y-m-d'),
+        'amount' => $advance_salary->amount,
+        'employee_id' => $advance_salary->employee_id,
+        'name' => $advance_salary?->employee?->name,
+        'category' => $advance_salary?->employee?->category?->title
+      ];
+
+        return Inertia::render('Backend/AdvanceSalary/View',[
+            'advance_salary' => $advance_salaryData
+        ]);
+    }
+
     // /store
     public function store(AdvanceSalaryRequest $request){
-
         $advanceSalary = AdvanceSalary::where('employee_id',$request->employee_id)->whereDate('created_at','=',Carbon::today())->first();
-        // dd($advanceSalary->created_at->isSameDay(Carbon::today()));
         if(is_null( $advanceSalary)){
             AdvanceSalary::create([
                 'amount' => $request->amount,
@@ -81,6 +97,6 @@ class AdvanceSalaryController extends Controller
         AdvanceSalary::find($id)->delete();
         return back();
     }
-    
+
 
 }

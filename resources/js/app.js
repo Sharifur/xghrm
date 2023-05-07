@@ -7,7 +7,10 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 import country from "./Components/data/country";
 
 import { SetupCalendar, Calendar, DatePicker } from 'v-calendar';
+window.axios = require('axios')
 
+window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+window.axios.defaults.headers.common['X-CSRF-TOKEN'] = window.Laravel.csrfToken;
 
 const numToWordObj = {
     0: 'zero',

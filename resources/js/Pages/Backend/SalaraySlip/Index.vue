@@ -2,302 +2,113 @@
     <Head title="All Salary Slip"/>
     <div class="row">
         <div class="col-lg-12">
-            <h2 class="title">All Salary Slip</h2>
-        </div>
-        <div class="row">
-            <div class="col-lg-4">
-                <form @submit.prevent>
-                    <div class="single-info-input margin-top-30">
-                        <label class="info-title">Month</label>
-                        <Datepicker v-model="salarySlipData.month"/>
-                        <span class="info-text">Select Month First</span>
+            <div class="dashboard-settings margin-top-40">
+                <div class="header-wrap d-flex justify-content-between">
+                    <h2 class="dashboards-title margin-bottom-40">All Salary Slip</h2>
+                    <div class="btn-wrp">
+                        <Link class="btn btn-info m-1" :href="route('admin.employee.salary.slip.create')">Add New</Link>
                     </div>
-                    <Select title="Employee" @change="changeEmployeeSelect()" v-model="salarySlipData.employee_id" :options="employeeList" />
-                    <div class="repeaterFieldWarp">
-                        <h4 class="repeater-title">Extra Earning Fields</h4>
-                        <div class="repeater-inner-wrap" >
-                            <div class="individualItemWrapper" v-for="earningField in salarySlipData.extraEarningFields" :key="earningField.index">
-                                <Input type="text" title="Description" v-model="earningField.description"/>
-                                <Input type="number" min="0" @input="calculateSalary()" title="Amount" v-model="earningField.amount"/>
-                                <div class="actionButtonWrap">
-                                    <span class="addMore" @click="addMoreEarningField()"><i class="fas fa-plus"></i></span>
-                                    <span class="removeItem" @click="removeEarningField(earningField)"><i class="fas fa-times"></i></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="repeaterFieldWarp">
-                        <h4 class="repeater-title">Extra Deduction Fields</h4>
-                        <div class="repeater-inner-wrap" >
-                            <div class="individualItemWrapper" v-for="deductionField in salarySlipData.extraDeductionFields" :key="deductionField.index">
-                                <Input type="text" title="Description" v-model="deductionField.description"/>
-                                <Input type="number" min="0" @input="calculateSalary()" title="Amount" v-model="deductionField.amount"/>
-                                <div class="actionButtonWrap">
-                                    <span class="addMore" @click="addMoreDeductionField()"><i class="fas fa-plus"></i></span>
-                                    <span class="removeItem" @click="removeDeductionField(deductionField)"><i class="fas fa-times"></i></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-stripped">
+                        <thead>
+                        <th>Id</th>
+                        <th>Employee Name</th>
+                        <th>Salary Month</th>
+                        <th>Base Salary</th>
+                        <th>Created At</th>
+                        <th>Action</th>
+                        </thead>
+                        <tbody>
+                        <tr v-for="salary in salaryList()" v-bind:key="salary.id">
+                            <td>{{salary.id}}</td>
+                            <td>{{ salary?.employee?.name }}</td>
+                            <td>{{ salary.monthName }} {{ salary.year }}</td>
+                            <td>{{ salary.salary }}BDT</td>
+                            <td>{{ salary.created }}</td>
+                            <td>
+                                <Link as="button" class="btn btn-danger m-1" @click="deleteItem(salary)">
+                                    <i class="fas fa-trash"></i>
+                                </Link>
+                                <Link class="btn btn-info m-1" :href="route('admin.employee.salary.slip.edit',salary.id)">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </Link>
+                                <Link class="btn btn-secondary m-1" :href="route('admin.employee.salary.slip.view',salary.id)">
+                                    <i class="fas fa-eye"></i>
+                                </Link>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <Pagination :links="salaryListLinks()"/>
             </div>
-            <div class="col-lg-8">
-                <div class="head-raw margin-top-40 margin-left-60">
-                    <h4>Color Explanation</h4>
-                    <ul class="color-explanation">
-                        <li class="bg-success">Attendance <span class="badge">{{attenadnceCount}}</span></li>
-                        <li class="holiday">Holiday <span class="badge">{{holidayCount}}</span></li>
-                        <li class="leave">leave  <span class="badge">{{leaveCount}}</span></li>
-                        <li class="C/In">C/In  <span class="badge">{{inCount}}</span></li>
-                        <li class="C/Out">C/Out  <span class="badge">{{outCount}}</span></li>
-                        <li class="sick-leave">Sick Leave  <span class="badge">{{sickLeaveCount}}</span></li>
-                        <li class="paid-leave">Paid Leave  <span class="badge">{{paidLeaveCount}}</span></li>
-                    </ul>
-                </div>
-                <div id="element-to-convert">
-                    <div class="salarySlipPdfOuterWrapper">
-                        <div class="headerPart">
-                            
-                            <div class="subjectWarp">
-                                <p>Payslip for the month of <span class="period">{{getSelectedMonthName(salarySlipData.month)}}</span> {{new Date().getFullYear()}}</p>
-                            </div>
-                        </div>
-                        <div class="employeeInfoWrap">
-                            <h3><strong>Name: </strong> {{selectedEmployee.name}}</h3>
-                            <h4><strong>Department:</strong> {{selectedEmployee.category}}</h4>
-                        </div>
-                        <div class="tableWithCalculation table-responsive">
-                            <div class="salary-sheet">
-                                <div class="salary-sheet-flex">
-                                    <div class="salary-sheet-item">
-                                        <div class="salary-sheet-contents">
-                                            <ul class="salary-sheet-contents-list">
-                                                <li class="salary-sheet-list salary-sheet-head"><span class="list-title left">EARNINGS</span> <span class="list-title list-para right"> PER MONTH </span></li>
-                                                <li class="salary-sheet-list"><span class="list-para left">Basic Salary</span> <span class="list-para right">{{parseFloat(selectedEmployee.salary).toFixed(2)}} </span></li>
-                                                <li class="salary-sheet-list" v-for="earningField in salarySlipData.extraEarningFields" :key="earningField.index" >
-                                                    <span v-if="earningField.description !== null" class="list-para left">{{ earningField.description }}</span>
-                                                    <span v-if="earningField.description !== null" class="list-para right"> {{ earningField.amount > 0 ? parseFloat(earningField.amount).toFixed(2) : 0.00 }} </span>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    <div class="salary-sheet-item">
-                                        <div class="salary-sheet-contents">
-                                            <ul class="salary-sheet-contents-list">
-                                                <li class="salary-sheet-list salary-sheet-head"><span class="list-title left">DEDUCTIONS</span> <span class="list-title list-para right"> PER MONTH </span></li>
-                                                <li class="salary-sheet-list"  v-for="deductionField in salarySlipData.extraDeductionFields" :key="deductionField.index">
-                                                    <span class="list-para left" v-if="deductionField.description !== null" >{{ deductionField.description }}</span>
-                                                    <span class="list-para right" v-if="deductionField.description !== null " > {{ deductionField.amount > 0 ? parseFloat(deductionField.amount).toFixed(2) : 0.00 }} </span>
-                                                </li>
-
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="salary-sheet-gross">
-                                    <div class="salary-sheet-gross-item">
-                                        <div class="gross-list"><span class="gross-para left">Gross Earnings(A)</span> <span class="gross-para right">{{ parseFloat(grossEarning).toFixed(2)  }}</span></div>
-                                    </div>
-                                    <div class="salary-sheet-gross-item">
-                                        <div class="gross-list"><span class="gross-para left">Gross Deductions(B)</span> <span class="gross-para right">{{ parseFloat(grossDeduction).toFixed(2)  }}</span></div>
-                                    </div>
-                                </div>
-                                <div class="salary-sheet-gross">
-                                    <div class="salary-sheet-gross-item">
-                                        <div class="gross-list"><span class="gross-para left">Net Salary Payable(A-B)</span> <span class="gross-para right">{{ parseFloat(payableAmount).toFixed(2)  }}</span></div>
-                                    </div>
-                                </div>
-                                <div class="salary-sheet-gross">
-                                    <div class="salary-sheet-gross-item">
-                                        <div class="gross-list"><span class="gross-para left">Net Salary Payable(in words)</span> <span class="gross-para right">{{ numberToWord(payableAmount) }} Tk Only</span></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="footerPartWrapper">
-                            <div class="signature">
-                                <span class="signature">Signature</span>
-                                <h2>Sharifur Rahman</h2>
-                                <span class="designation">Ceo - Xgenious</span>
-                            </div>
-                            <div class="signature">
-                                <span class="signature">Signature</span>
-                                <h2>{{selectedEmployee.name}}</h2>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="btn-wrapper margin-left-60">
-                    <Button type="button" @click="exportToPDF" button-text="Generate Pdf and Download"/>
-                </div>
-            </div>
-
         </div>
     </div>
 </template>
 
 <script>
-
+import {Link, useForm, usePage,Head} from "@inertiajs/inertia-vue3";
+import Pagination from "@/Components/Pagination";
 import AdminMaster from "@/Layouts/AdminMaster";
-import {useForm,usePage,Head} from "@inertiajs/inertia-vue3";
-import Button from "@/Components/BsForm/Button";
-import Input from "@/Components/BsForm/Input";
-import Select from "@/Components/BsForm/Select";
-import Textarea from "@/Components/BsForm/Textarea";
-import Datepicker from "vue3-datepicker";
 import Swal from "sweetalert2";
-import {ref, watch} from "vue";
-import html2pdf from "html2pdf.js";
+import StatusShow from "@/Components/StatusShow";
+
 
 export default {
+    name: "Employee",
     layout: AdminMaster,
     components:{
-        Button,
-        Input,
-        Select,
-        Textarea,
-        Head,
-        Datepicker
+        StatusShow,
+        Link,
+        Pagination,
+        Head
     },
     setup(){
-        const employeeList = usePage().props.value.all_employee;
-        const selectedEmployee = ref({
-            name : 'Name',
-            salary : 0,
-            category : 'Designation',
-        });
-        const attenadnceCount = ref(0);
-        const holidayCount = ref(0);
-        const leaveCount = ref(0);
-        const inCount = ref(0);
-        const outCount = ref(0);
-        const sickLeaveCount = ref(0);
-        const paidLeaveCount = ref(0);
-        //gross details
-        const grossEarning = ref(0);
-        const grossDeduction = ref(0);
-        const payableAmount = ref(0);
-
-        const salarySlipData = useForm({
-            employee_id: null,
-            month: null,
-            extraEarningFields: [{
-                'description' : null,
-                'amount' : 0,
-            }],
-            extraDeductionFields: [{
-                    'description' : null,
-                    'amount' : 0,
-            }],
-        });
-        function addMoreEarningField(){
-             salarySlipData.extraEarningFields.push({
-                'description' : null,
-                'amount' : 0,
-            });
-        }
-        function addMoreDeductionField(){
-             salarySlipData.extraDeductionFields.push({
-                'description' : null,
-                'amount' : 0,
-            });
-        }
-        function removeEarningField(item){
-            if (salarySlipData.extraEarningFields.length >1){
-                salarySlipData.extraEarningFields.splice(salarySlipData.extraEarningFields.indexOf(item),1);
-            }
-        }
-        function removeDeductionField(item){
-            if (salarySlipData.extraDeductionFields.length >1){
-                salarySlipData.extraDeductionFields.splice(salarySlipData.extraDeductionFields.indexOf(item),1);
-            }
-        }
-        function  exportToPDF(){
-            html2pdf(document.getElementById("element-to-convert"), {
-                margin: 1,
-                filename: selectedEmployee.name ? selectedEmployee.name +'-'+getSelectedMonthName(salarySlipData.month)+"-salary-slip.pdf" : "salary-slip.pdf",
-            });
-            //todo: send ajax request with all the data to store it in database
-            axios.post(route('admin.employee.salary.slip.create'),salarySlipData)
+        function salaryList(){
+            return usePage().props.value.allSalaries.data;
         }
 
-        function changeEmployeeSelect(){
-            axios.post(route('admin.employee.details',salarySlipData.employee_id),{month: salarySlipData.month})
-            .then((response) => {
-                let responseData = response.data;
-                let employeeDetails = response.data.details;
-                 selectedEmployee.value = {
-                    name : employeeDetails.name,
-                    salary : employeeDetails.salary,
-                    category : employeeDetails.designation,
-                };
-                 attenadnceCount.value =responseData.attenadnceCount;
-                 holidayCount.value = responseData.holidayCount;
-                 leaveCount.value = responseData.leaveCount;
-                 inCount.value = responseData.inCount;
-                 outCount.value = responseData.outCount;
-                 sickLeaveCount.value = responseData.sickLeaveCount;
-                 paidLeaveCount.value = responseData.paidLeaveCount;
-
-                calculateSalary();
-            })
-
-        }
-        function getSelectedMonthName(month){
-            let  months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            return month != null ?  months[new Date(month).getMonth()] : '';
-        }
-
-        function calculateSalary(){
-            let grossEarnings = 0;
-                salarySlipData.extraEarningFields.map((item) => {
-                    if (item.amount > 0){
-                        grossEarnings += parseFloat(item.amount)
-                    }
-            });
-
-            let grossDeductions = 0;
-            salarySlipData.extraDeductionFields.map((item) => {
-                if (item.amount > 0){
-                    grossDeductions += parseFloat(item.amount)
+        function deleteItem(item){
+            console.log('test')
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                const EmployeeData = useForm({id:item.id})
+                if (result.isConfirmed) {
+                    // write code for delete salary slip
+                    EmployeeData.post(route('admin.employee.salary.slip.delete',item.id),{
+                        onFinish : () => {
+                            Swal.fire(
+                                'Deleted!',
+                                'Entry deleted.',
+                                'success'
+                            )
+                        }
+                    });
                 }
-            });
-            grossEarning.value = grossEarnings > 0 ? parseFloat(grossEarnings) : 0;
-            grossDeduction.value = grossDeductions > 0 ? parseFloat(grossDeductions) : 0;
-
-           if(selectedEmployee.salary !== "undefined" ){
-                grossEarning.value +=  parseFloat(selectedEmployee.value.salary);
-           }
-           payableAmount.value = parseFloat(grossEarning.value) - parseFloat(grossDeduction.value);
-
+            })
+        }
+        function salaryListLinks(){
+            return usePage().props.value.allSalaries.links;
         }
 
 
         return {
-            employeeList,
-            salarySlipData,
-            addMoreEarningField,
-            addMoreDeductionField,
-            removeEarningField,
-            removeDeductionField,
-            exportToPDF,
-            selectedEmployee,
-            changeEmployeeSelect,
-            holidayCount ,
-            leaveCount,
-            inCount,
-            outCount,
-            sickLeaveCount,
-            paidLeaveCount,
-            attenadnceCount,
-            getSelectedMonthName,
-            grossEarning,
-            grossDeduction,
-            payableAmount,
-            calculateSalary
+            salaryListLinks,
+            salaryList,
+            deleteItem
         }
     }
 }
-
 </script>
+
+<style scoped>
+
+</style>
