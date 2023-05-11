@@ -113,7 +113,7 @@ class EmployeeController extends Controller
         $attenadnceCount = max($inCount ,$outCount);
 
         //advance salary this month
-        $AdvanceSalary = AdvanceSalary::whereMonth("month",Carbon::parse($request->month))->get()->pluck("amount")->sum();
+        $AdvanceSalary = AdvanceSalary::where(['employee_id' => $id])->whereMonth("month",Carbon::parse($request->month))->get()->pluck("amount")->sum();
 
         return response([
             'details' => $details,
