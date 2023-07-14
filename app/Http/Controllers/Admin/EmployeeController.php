@@ -55,14 +55,65 @@ class EmployeeController extends Controller
         return back();
     }
     public function attenadance_check_post(Request $request){
-       $logs =  AttendanceLog::query()
-        ->where(['employee_id' => $request->employee_id])
-        ->whereDate('date_time','>',Carbon::parse($request->startDate))
-        ->whereDate('date_time' ,'<',Carbon::parse($request->endDate))
-        ->OrWhere('type','holiday')
-        ->get();
+//       $logs =  AttendanceLog::query()
+//        ->where(['employee_id' => $request->employee_id])
+//        ->whereDate('date_time','>',Carbon::parse($request->startDate))
+//        ->whereDate('date_time' ,'<',Carbon::parse($request->endDate))
+//        ->OrWhere('type','holiday')
+//        ->get();
+//
+//        $logsInfo = [];
 
+
+        $logQeuery =  AttendanceLog::query()->where(['employee_id' =>  $request->employee_id]);
+        if (!empty($request->startDate)){
+            $logQeuery->whereDate('date_time','>',Carbon::parse($request->startDate));
+        }
+        if (!empty($request->endDate)){
+            $logQeuery->whereDate('date_time' ,'<',Carbon::parse($request->endDate));
+        }
+        if (!empty($request->month)){
+            $logQeuery->whereMonth('date_time' ,'=',Carbon::parse($request->month));
+        }
+        if (!empty($request->filter)){
+            $logQeuery->whereIn("type",$request->filter);
+        }else{
+            $logQeuery->whereIn("type",["holiday","C/In","C/Out","leave","sick-leave","work-from-home"]);
+        }
+
+
+        $logs = $logQeuery->where("status",1)->orderBy("date_time")->get();
         $logsInfo = [];
+
+        foreach($logs as $log){
+            $parsed_date = Carbon::parse($log->date_time)->format("d-m-Y");
+            if (isset($logsInfo[$parsed_date])){
+                //alreayd have this day index
+                if ($log->type == "C/Out"){
+                    //added Out_time
+                    $logsInfo[$parsed_date][str_replace("c/","",strtolower($log->type))."_time"] =
+                        $log->type === "holiday" ? " ": Carbon::parse($log->date_time)->format('g:i A');
+
+                    //todo if in time available then calculate total office hour
+                    if (isset($logsInfo[$parsed_date]["in_time"])){
+                        $dt_str = $parsed_date." ".$logsInfo[$parsed_date]["in_time"];
+                        $check_intime = Carbon::parse($dt_str);
+                        $logsInfo[$parsed_date]["working_hour"] = $check_intime->diff(Carbon::parse($log->date_time))->format("%H:%I:%S");
+                    }
+                }
+                $logsInfo[$parsed_date]["working_nature"] = $this->workNature($log->type);
+            }else{
+                //added in_time
+                $logsInfo[$parsed_date] = [
+                    str_replace("c/","",strtolower($log->type))."_time" =>
+                        $log->type === "holiday" ? " ": Carbon::parse($log->date_time)->format('g:i A'),
+                    "working_nature" => $this->workNature($log->type),
+                    "dateTime" => $log->date_time
+
+                ];
+            }
+            //if found cout/cin then show total office hour
+        }
 
 
        $holidayCount = $logs->where('type','holiday')->count();
@@ -74,7 +125,7 @@ class EmployeeController extends Controller
        $workFormHome =$logs->where('type','work-form-home')->count();
 
         return response()->json([
-            'logs' => $logs,
+            'logs' => $logsInfo,
               'holidayCount' => $holidayCount ?? 0 ,
               'leaveCount' => $leaveCount?? 0,
               'inCount' => $inCount ?? 0,
@@ -153,4 +204,13 @@ class EmployeeController extends Controller
             'type' => $type
         ],200);
     }
+    private function workNature($type){
+        return match ($type){
+            "holiday" => "Holiday",
+            "C/In", "C/Out" => "Office",
+            "leave","sick-leave", => "Leave",
+            "work-from-home" => "Remote"
+        };
+    }
+
 }

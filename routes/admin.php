@@ -59,6 +59,7 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
             Route::get('all',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'index'])->name('admin.employee.attendance.logs');
             Route::get('create',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'create'])->name('admin.employee.attendance.logs.create');
             Route::post('create',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'store']);
+            Route::post('approve',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'approve'])->name('admin.employee.attendance.logs.approve');
             Route::get('edit/{id}',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'edit'])->name('admin.employee.attendance.logs.edit');
             Route::post('update',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'update'])->name('admin.employee.attendance.logs.update');
             Route::post('delete',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'delete'])->name('admin.employee.attendance.logs.delete');

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class AttendanceLog extends Model
 {
     use HasFactory;
-    protected $fillable = ['name','date_time','type','employee_id'];
+    protected $fillable = ['name','date_time','type','employee_id','status'];
 
     protected $casts = [
       'employee_id' => 'integer',

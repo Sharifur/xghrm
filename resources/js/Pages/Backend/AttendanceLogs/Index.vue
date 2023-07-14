@@ -5,11 +5,13 @@
             <div class="dashboard-settings margin-top-40 margin-bottom-30">
                 <div class="header-wrap d-flex justify-content-between">
                     <h2 class="dashboards-title margin-bottom-40">All Attendance Logs</h2>
+
                     <div class="btn-wrapper">
                          <BsModalButton target="addnewcategory" button-class="btn btn-info m-1" >Add New Log</BsModalButton>
                     </div>
                 </div>
-                <div class="table-wrap table-responsive">
+<!--                <Select title="Filter Attendance" :options="filterOptions" v-model="filterData.filter" @change="applyFilter($event.target.value)"/>-->
+                <div class="table-wrap table-responsive mt-5">
                     <table class="table table-light">
                         <thead>
                             <th>ID</th>
@@ -23,7 +25,11 @@
                             <tr v-for="attendant in attendancesData()" v-bind:key="attendant.id">
                                 <td>{{attendant.id}}</td>
                                 <td>{{attendant.name}}</td>
-                                <td><span class="alert text-capitalize" :class="attendant.type === 'C/In' ? 'alert-success' : 'alert-danger'">{{attendant.type.replace('-',' ')}}</span></td>
+                                <td>
+                                    <span class="alert text-capitalize" :class="attendant.type === 'C/In' ? 'alert-success' : 'alert-danger'">{{attendant.type.replace('-',' ')}}</span>
+
+                                    <Link v-show="attendant.status === 0" @click="submitApproveData(attendant.id)" class="btn btn-success m-2"><i class="fas fa-check"></i></Link>
+                                </td>
                                 <td>{{readableDateFormat(attendant.date_time)}}</td>
 
                                 <td>{{new Date(attendant.date_time).toLocaleTimeString('en-US',{timeZone:'Asia/Dhaka'})}}</td>
@@ -67,11 +73,14 @@ import BsSelect from "@/Components/BsForm/Select";
 import BsButton from "@/Components/BsForm/Button";
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
 import Datepicker from "vue3-datepicker";
+import Select from "@/Components/BsForm/Select.vue";
+import {ref} from "vue";
 
 export default {
     name: "Index",
     layout: AdminMaster,
     components:{
+        Select,
         Pagination,
         Link,
         usePage,
@@ -85,7 +94,10 @@ export default {
         Head
     },
     setup(){
-
+        const filterOptions = [
+            {"label": "Pending", value: 0},
+            {"label": "Approved", value: 1}
+        ];
         const attendanceTypes = [
             {label: 'C/In' , value: 'C/In'},
             {label: 'C/Out' , value: 'C/Out'},
@@ -96,11 +108,18 @@ export default {
             {label: 'Work From Home' , value: 'work-form-home'},
         ];
 
+        const filterData = useForm({
+            filter: null
+        });
         const newLogData = useForm({
             employee_id: null,
             type: null,
             date_time: null
         });
+
+        function applyFilter(){
+            filterData.get(route('admin.employee.attendance.logs'));
+        }
 
         function attendancesData(){
             return usePage().props.value.attendance_logs.data;
@@ -129,8 +148,30 @@ export default {
 
                 }
             })
-
         }
+        function submitApproveData(item){
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Approve it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    useForm({
+                        id: item
+                    }).post(route('admin.employee.attendance.logs.approve'),{
+                        onSuccess: () => {
+                            //Swal.fire('Approved','log approve','success');
+                        }
+                    });
+
+                }
+            })
+        }
+
         function addAttendanceLogFormSubmit(){
             newLogData.post(route('admin.employee.attendance.log.add'),{
                 onSuccess: (response) => {
@@ -151,7 +192,11 @@ export default {
             addAttendanceLogFormSubmit,
             attendanceTypes,
             newLogData,
-            employeesList
+            employeesList,
+            filterOptions,
+            applyFilter,
+            filterData,
+            submitApproveData
         }
     }
 }
