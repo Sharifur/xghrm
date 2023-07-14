@@ -38,4 +38,14 @@ class Handler extends ExceptionHandler
             //
         });
     }
+    public function render($request, Throwable $e)
+    {
+        if(request()->is('api/*')){
+            $message =  $e->getMessage();
+            return response()->json([
+                "message" => $message,
+                "trace" => $e->getTrace()
+            ],500);
+        }
+    }
 }

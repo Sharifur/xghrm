@@ -136,28 +136,19 @@ export default {
                 ...employeeData
             })
             .then((response) => {
-                let logs = response.data.logs;
-                // console.log(Object.keys(logs).length);
-                 if (Object.keys(logs).length > 0){
-                    let attenData = logs;
+                 if (Object.keys(response.data.logs).length > 1){
+                    let attenData = response.data.logs;
                     let calendarData = [];
-                    console.log(attenData);
-                     Object.keys(attenData).forEach(function(key) {
-                         let currentItem = attenData[key];
-                         Object.keys(currentItem).forEach((key) => {
-                             if(key === "dateTime"){
-                                 return;
-                             }
-                             calendarData.push({
-                                 key: key,
-                                 customData: {
-                                     title: `${key.replaceAll("_"," ")}: ${currentItem[key]}`,
-                                     class: key
-                                 },
-                                 dates: new Date(currentItem.dateTime),
-                             })
-                         });
-                     });
+                    attenData.forEach((value,index) => {
+                        calendarData.push({
+                            key: index,
+                            customData: {
+                                title: `${value.type}: ${new Date(value.date_time).toLocaleTimeString('en-US',{timeZone: 'Asia/Dhaka'})} `,
+                                class: value.type,
+                            },
+                            dates: new Date(value.date_time),
+                        })
+                    });
                     CalendarAttributes.value = calendarData;
                     attendanceShow.value = true;
                     //todo set value of const

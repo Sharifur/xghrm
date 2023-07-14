@@ -67,16 +67,17 @@
             margin-bottom: 5px;
             padding: 3px;
             border-radius: 3px;
-            &.C\/In{
+            text-transform: capitalize;
+            &.in_time{
                 background-color: #62ad62;
             }
-            &.C\/Out{
+            &.out_time{
                 background-color: #e55252;
             }
-            &.leave{
+            &.working_nature{
                 background-color: #a734a7;
             }
-            &.sick-leave{
+            &.working_hour{
                 background-color: #5d6cc1;
             }
             &.paid-leave{

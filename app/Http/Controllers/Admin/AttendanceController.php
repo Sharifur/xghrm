@@ -16,8 +16,15 @@ use Inertia\Inertia;
 
 class AttendanceController extends Controller
 {
-    public function index(){
-        $atteandances = Attendance::orderBy('id','desc')->paginate(10);
+    public function index(Request $request){
+
+        $atteandancesQuery = Attendance::query();
+
+        if (!empty($request->filter)){
+            $atteandancesQuery->where("status",$request->filter);
+        }
+
+        $atteandances = $atteandancesQuery->orderBy('id','desc')->paginate(10)->withQueryString();
 
         return Inertia::render('Backend/Attendance/Index',[
             'attendances' => $atteandances,
@@ -239,7 +246,7 @@ class AttendanceController extends Controller
                 $selected_attendance_type_column_value = array_search($request->attendance_type_column_value, current($csv_header));
                 foreach ($csv_rows as $row){
                     if ( !empty($row)){
-                        
+
                         $column_value = $row[$selected_column_index];
                         // dd($column_value,
                         // strtolower($em->att_id),

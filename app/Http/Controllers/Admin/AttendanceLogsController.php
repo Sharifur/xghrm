@@ -10,8 +10,14 @@ use Inertia\Inertia;
 
 class AttendanceLogsController extends Controller
 {
-    public function index(){
-        $attendance_logs = AttendanceLog::with('employee')->orderBy('id','desc')->paginate(10);
+    public function index(Request $request){
+        $attendance_logsQuery = AttendanceLog::query();
+
+        if (!empty($request->get("filter"))){
+            $attendance_logsQuery->where("status",$request->get("filter"));
+        }
+        $attendance_logs  = $attendance_logsQuery->with('employee')->orderBy('id','desc')->paginate(10)->withQueryString();
+
         $employees = Employee::where('status',1)->get()->map(function ($item){
             return ['label' => $item->name,'value' => $item->id];
         });
@@ -22,6 +28,14 @@ class AttendanceLogsController extends Controller
     }
     public function delete(Request $request){
         AttendanceLog::find($request->id)->delete();
+        return back();
+    }
+
+    public function approve(Request $request){
+        AttendanceLog::find($request->id)->update([
+            "status" => 1
+        ]);
+        //fire a push notification so that employee can understand his leave,sick
         return back();
     }
 }
