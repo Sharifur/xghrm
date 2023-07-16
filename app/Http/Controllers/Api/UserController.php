@@ -129,7 +129,8 @@ class UserController extends Controller
         return response()->json([
             "type" => "success",
             "userInfo" => [
-                "email" => $userInfo->email ,
+                "name" => $userInfo->name,
+                "email" => $userInfo->email,
                 "id" => $userInfo->id,
                 "phone" => $userInfo->phone,
                 "address" => $userInfo->address,
