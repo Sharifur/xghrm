@@ -81,4 +81,13 @@ class UserServices
             'address' => $validatedData["address"],
         ]);
     }
+
+    public static function leaveList(array $validatedData){
+        return User::find(auth("sanctum")->id())->update([
+            'email' => $validatedData["email"],
+            'name' => $validatedData["name"],
+            'phone' => $validatedData["phone"],
+            'address' => $validatedData["address"],
+        ]);
+    }
 }
