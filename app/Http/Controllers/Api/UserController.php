@@ -139,5 +139,17 @@ class UserController extends Controller
         ]);
     }
 
+    public function leaveList(Request $request){
+
+        $userInfo = User::find(\auth("sanctum")->id());
+        $leaveList = AttendanceLog::select(['name','date_time','type','status'])->where(['employee_id' => $userInfo?->employee?->id,'type' => 'leave'])->get();
+        //todo: update profile information
+
+        return response()->json([
+            "type" => "success",
+            'leaveList' => $leaveList
+        ]);
+    }
+
 
 }

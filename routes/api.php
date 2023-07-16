@@ -24,6 +24,7 @@ Route::group(["prefix" => "user","middleware" => "auth:sanctum","controller" => 
     Route::post('/change-password', [\App\Http\Controllers\Api\UserController::class, 'changePassword']);
     Route::post('/update-profile', [\App\Http\Controllers\Api\UserController::class, 'changeProfileInfo']);
     Route::get('/info', [\App\Http\Controllers\Api\UserController::class, 'userInfo']);
+    Route::get('/leave-list', [\App\Http\Controllers\Api\UserController::class, 'leaveList']);
 
     //salary related apis
     Route::post("salaries",[\App\Http\Controllers\Api\SalaryController::class,"salariesList"]);
