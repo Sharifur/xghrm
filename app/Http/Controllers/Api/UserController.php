@@ -142,7 +142,7 @@ class UserController extends Controller
     public function leaveList(Request $request){
 
         $userInfo = User::find(\auth("sanctum")->id());
-        $leaveList = AttendanceLog::select(['name','date_time','type','status'])->where(['employee_id' => $userInfo?->employee?->id,'type' => 'leave'])->get();
+        $leaveList = AttendanceLog::select(['name','date_time','type','status'])->where(['employee_id' => $userInfo?->employee?->id])->whereIn('type' ,[ 'leave','sick-leave','work-from-home'])->paginate(20)->withQueryString();
         //todo: update profile information
 
         return response()->json([
