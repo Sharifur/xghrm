@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Services\UserServices;
+use App\Mail\BasicMail;
 use App\Models\AdvanceSalary;
 use App\Models\AttendanceLog;
 use App\Models\Employee;
@@ -131,7 +132,18 @@ class AttendanceController extends Controller
                 "msg" => $validation->errors()
             ],422);
         }
+        $requested_date = \Illuminate\Support\Carbon::parse($request->date_time);
+
+        if ($requested_date->lessThan(Carbon::today())){
+            return response()->json([
+                "type" => "danger",
+                "msg" => __('please provide a valid date')
+            ],422);
+        }
+
         $exists = AttendanceLog::whereDate("date_time","=",\Illuminate\Support\Carbon::parse($request->date_time))->where([ 'employee_id'=> $userInfo->employee->id,  'type'=> $request->type])->exists();
+
+
 
         if ($exists){
             return response()->json([
@@ -144,10 +156,19 @@ class AttendanceController extends Controller
         AttendanceLog::create([
             'employee_id'=> $userInfo->employee->id,
             'type'=> $request->type,
-            'date_time'=> \Illuminate\Support\Carbon::parse($request->date_time),
+            'date_time'=> $requested_date,
             'name'=> $userInfo->employee->att_id ?? '',
             "status" => 0
         ]);
+        try{
+            $message = sprintf('A "%s" request received from "%s" for the date of "%s"',ucwords(str_replace(['-','_'],' ',$request->type)),$userInfo->name,Carbon::parse($request->date_time)->format('D d-M-Y'));
+            \Mail::to('hr@xgenious.com')->send(new BasicMail([
+                'subject' => sprintf('A new "%s" request received.',ucwords(str_replace(['-','_'],' ',$request->type))),
+                'message' => $message,
+            ]));
+        }catch (\Exception $e){
+            \Log::error($e->getMessage());
+        }
 
         return response()->json([
             "type" => "success",

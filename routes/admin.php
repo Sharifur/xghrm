@@ -6,6 +6,7 @@
 Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function (){
     Route::get('/',[\App\Http\Controllers\Admin\AdminDashboardController::class,'index'])->name('admin.home');
     Route::post('/database-upgrade',[\App\Http\Controllers\Admin\AdminDashboardController::class,'databaseUpdate'])->name('admin.database.upgrade');
+    Route::post('/smtp-test',[\App\Http\Controllers\Admin\AdminDashboardController::class,'smtpTest'])->name('admin.smtp.test');
 
     /*=================================
         EMPLOYEE ROUTES

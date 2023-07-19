@@ -96,6 +96,11 @@
             </Link>
         </li>
         <li class="list logoutbtn">
+            <Link :href="route('admin.smtp.test')" method="post"  as="button" >
+                Send Test Email
+            </Link>
+        </li>
+        <li class="list logoutbtn">
             <Link :href="route('admin.logout')" method="post"  as="button" >
                 <i class="las la-sign-out-alt"></i> Log Out
             </Link>
