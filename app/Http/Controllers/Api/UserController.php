@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Services\UserServices;
+use App\Mail\BasicMail;
 use App\Models\AttendanceLog;
 use App\Models\Employee;
 use App\Models\User;
@@ -86,6 +87,17 @@ class UserController extends Controller
 
         //todo: change password
         UserServices::changePassword($validator->validated());
+
+        try{
+            $message = 'Hello '.\auth('sanctum')->user()->name.'.<br>';
+            $message .= sprintf('Your password has been changed just now. If you haven not changed the password, Contact your Hr-Manager.',ucwords(str_replace(['-','_'],' ',$request->type)));
+            \Mail::to(auth('sanctum')->user()->email)->send(new BasicMail([
+                'subject' => sprintf('Your password has been changed'),
+                'message' => $message,
+            ]));
+        }catch (\Exception $e){
+            \Log::error($e->getMessage());
+        }
 
         return response()->json([
             "type" => "success",
