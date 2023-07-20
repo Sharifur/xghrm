@@ -66,7 +66,7 @@ class AttendanceLogsController extends Controller
                 ->setData([
                     "id" => $att_details->id,
                     "title" => sprintf('Your "%s" request has been approved',ucwords(str_replace(['-','_'],' ',$att_details->type))),
-                    "body" => $message
+                    "body" => str_replace("<br>","",$message)
                 ])
                 ->send();
 
