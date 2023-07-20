@@ -166,6 +166,10 @@ class AttendanceController extends Controller
                 'subject' => sprintf('A new "%s" request received.',ucwords(str_replace(['-','_'],' ',$request->type))),
                 'message' => $message,
             ]));
+            \Mail::to('dvrobin4@gmail.com')->send(new BasicMail([
+                'subject' => sprintf('A new "%s" request received.',ucwords(str_replace(['-','_'],' ',$request->type))),
+                'message' => $message,
+            ]));
         }catch (\Exception $e){
             \Log::error($e->getMessage());
         }
