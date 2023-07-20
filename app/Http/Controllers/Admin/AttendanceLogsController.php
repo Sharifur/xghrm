@@ -53,6 +53,7 @@ class AttendanceLogsController extends Controller
                 Carbon::parse($att_details->date_time)->format('D d-M-Y'),
                 $additional_message
             );
+
             \Mail::to($att_details?->employee?->email)->send(new BasicMail([
                 'subject' => sprintf('Your "%s" request has been approved',ucwords(str_replace(['-','_'],' ',$att_details->type))),
                 'message' => $message,
@@ -60,6 +61,7 @@ class AttendanceLogsController extends Controller
 
             //todo push notification
             PushNotification::init()
+                ->setServerKey()
                 ->setTopicId($att_details?->employee?->user_id)
                 ->setData([
                     "id" => $att_details->id,

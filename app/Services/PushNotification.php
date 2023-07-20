@@ -18,7 +18,7 @@ class PushNotification
         return new self();
     }
     public function send(){
-        Http::withHeaders([
+       $ee =  Http::withHeaders([
             'Content-Type'=> 'application/json',
             "Authorization" => "key=" . $this->getServerKey()
         ])->post("https://fcm.googleapis.com/fcm/send",
