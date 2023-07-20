@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\BasicMail;
 use App\Models\AttendanceLog;
 use App\Models\Employee;
+use App\Services\PushNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -56,6 +57,17 @@ class AttendanceLogsController extends Controller
                 'subject' => sprintf('Your "%s" request has been approved',ucwords(str_replace(['-','_'],' ',$att_details->type))),
                 'message' => $message,
             ]));
+
+            //todo push notification
+            PushNotification::init()
+                ->setTopicId($att_details?->employee?->user_id)
+                ->setData([
+                    "id" => $att_details->id,
+                    "title" => sprintf('Your "%s" request has been approved',ucwords(str_replace(['-','_'],' ',$att_details->type))),
+                    "body" => $message
+                ])
+                ->send();
+
         }catch (\Exception $e){
             \Log::error($e->getMessage());
         }
