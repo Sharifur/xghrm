@@ -31,6 +31,7 @@ class AttendanceController extends Controller
 
         ]);
     }
+
     public function create(){
         return Inertia::render('Backend/Attendance/Create');
     }

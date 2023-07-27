@@ -62,6 +62,7 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
         /* attendance */
         Route::group(['prefix' => 'attendance'],function (){
             Route::get('all',[\App\Http\Controllers\Admin\AttendanceController::class,'index'])->name('admin.employee.attendance');
+
             Route::get('create',[\App\Http\Controllers\Admin\AttendanceController::class,'create'])->name('admin.employee.attendance.create');
             Route::post('create',[\App\Http\Controllers\Admin\AttendanceController::class,'store']);
             Route::get('edit/{id}',[\App\Http\Controllers\Admin\AttendanceController::class,'edit'])->name('admin.employee.attendance.edit');
@@ -76,6 +77,7 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
         /* attendance logs */
         Route::group(['prefix' => 'attendancelogs'],function (){
             Route::get('all',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'index'])->name('admin.employee.attendance.logs');
+            Route::get('request',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'attendanceRequest'])->name('admin.employee.attendance.request');
             Route::get('create',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'create'])->name('admin.employee.attendance.logs.create');
             Route::post('create',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'store']);
             Route::post('approve',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'approve'])->name('admin.employee.attendance.logs.approve');

@@ -53,6 +53,11 @@
                         Attendance Logs
                     </Link>
                 </li>
+                <li>
+                    <Link :href="route('admin.employee.attendance.request')" :class="{'active' : $page.url === '/admin-home/employee/attendancelogs/request'}">
+                        Attendance Request
+                    </Link>
+                </li>
             </ul>
         </li>
 
