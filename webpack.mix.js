@@ -15,10 +15,10 @@ mix.js('resources/js/app.js', 'public/js')
     .vue()
     .postCss('resources/css/app.css', 'public/css', [
         require('postcss-import'),
-        // require('tailwindcss'),
         require('autoprefixer'),
     ])
     .sass("resources/scss/main-style.scss", "public/css")
+    .sass("resources/scss/loginscreen.scss", "public/css")
     .options({
         postCss: [
             require("autoprefixer"),

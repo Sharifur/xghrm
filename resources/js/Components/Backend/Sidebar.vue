@@ -55,50 +55,41 @@
                 </li>
             </ul>
         </li>
-        <li class="list has-submenu " :class="{'active' : $page.url.startsWith('/admin-home/earning/')}">
-            <span>Earnings </span>
+
+        <li class="list has-submenu " :class="{'active' : $page.url.startsWith('/admin-home/notice/')}">
+            <span> Notices </span>
             <ul class="sub-menu">
                 <li>
-                    <Link :href="route('admin.earning.all')" :class="{'active' : $page.url === ('/admin-home/earning/all')}">
-                        Statements
-                    </Link>
-                </li>
-                <li>
-                    <Link :href="route('admin.earning.new')" :class="{'active' : $page.url === ('/admin-home/earning/new')}">
-                        Add New Statement
-                    </Link>
-                </li>
-                <li>
-                    <Link :href="route('admin.earning.settings')" :class="{'active' : $page.url === '/admin-home/employee/settings'}">
-                        Settings
+                    <Link :href="route('admin.notice')" :class="{'active' : $page.url === ('/admin-home/notice')}">
+                        All Notice
                     </Link>
                 </li>
             </ul>
         </li>
-        <li class="list has-submenu " :class="{'active' : $page.url.startsWith('/admin-home/products/')}">
-            <span> Products </span>
+        <li class="list has-submenu " :class="{'active' : $page.url.startsWith('/admin-home/general/')}">
+            <span> Settings </span>
             <ul class="sub-menu">
                 <li>
-                    <Link :href="route('admin.products.all')" :class="{'active' : $page.url === ('/admin-home/products/all')}">
-                        All
+                    <Link :href="route('admin.general.settings')" :class="{'active' : $page.url === ('/admin-home/general/settings')}">
+                        General
                     </Link>
                 </li>
                 <li>
-                    <Link :href="route('admin.products.new')" :class="{'active' : $page.url === ('/admin-home/products/new')}">
-                        Add New
+                    <Link :href="route('admin.general.sync.data')" as="button" method="post" :class="{'active' : $page.url === ('/admin-home/general/sync-data')}">
+                        Sync Data from ZKTECO
+                    </Link>
+                </li>
+                <li>
+                    <Link :href="route('admin.database.upgrade')" as="button" method="post" :class="{'active' : $page.url === ('/admin-home/general/database-upgrade')}">
+                        Upgrade Database
+                    </Link>
+                </li>
+                <li>
+                    <Link :href="route('admin.smtp.test')" method="post" as="button" :class="{'active' : $page.url === ('/admin-home/general/smtp-test')}">
+                        Send SMTP Test Mail
                     </Link>
                 </li>
             </ul>
-        </li>
-        <li class="list logoutbtn">
-            <Link :href="route('admin.database.upgrade')" method="post"  as="button" >
-                Database Upgrade
-            </Link>
-        </li>
-        <li class="list logoutbtn">
-            <Link :href="route('admin.smtp.test')" method="post"  as="button" >
-                Send Test Email
-            </Link>
         </li>
         <li class="list logoutbtn">
             <Link :href="route('admin.logout')" method="post"  as="button" >
