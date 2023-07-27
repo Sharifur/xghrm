@@ -13,6 +13,24 @@ use Inertia\Inertia;
 
 class AttendanceLogsController extends Controller
 {
+    public function attendanceRequest(Request $request){
+        $attendance_logsQuery = AttendanceLog::query();
+
+        if (!empty($request->get("filter"))){
+            $attendance_logsQuery->where("status",$request->get("filter"));
+        }
+        $attendance_logs  = $attendance_logsQuery->with('employee')->where('status' , 0)->orderBy('id','desc')->paginate(10)->withQueryString();
+
+        $employees = Employee::where('status',1)->get()->map(function ($item){
+            return ['label' => $item->name,'value' => $item->id];
+        });
+        return Inertia::render('Backend/AttendanceLogs/Index',[
+            'attendance_logs' => $attendance_logs,
+            'employees' => $employees,
+            'page_type' => 'pending',
+        ]);
+    }
+
     public function index(Request $request){
         $attendance_logsQuery = AttendanceLog::query();
 
@@ -27,6 +45,7 @@ class AttendanceLogsController extends Controller
         return Inertia::render('Backend/AttendanceLogs/Index',[
             'attendance_logs' => $attendance_logs,
             'employees' => $employees,
+            'page_type' => 'index',
         ]);
     }
     public function delete(Request $request){

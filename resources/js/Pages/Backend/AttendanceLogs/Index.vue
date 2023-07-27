@@ -4,7 +4,7 @@
         <div class="col-lg-12">
             <div class="dashboard-settings margin-top-40 margin-bottom-30">
                 <div class="header-wrap d-flex justify-content-between">
-                    <h2 class="dashboards-title margin-bottom-40">All Attendance Logs</h2>
+                    <h2 class="dashboards-title margin-bottom-40">All {{page_type}} Attendance Logs</h2>
 
                     <div class="btn-wrapper">
                          <BsModalButton target="addnewcategory" button-class="btn btn-info m-1" >Add New Log</BsModalButton>
@@ -116,7 +116,7 @@ export default {
             type: null,
             date_time: null
         });
-
+        const page_type = usePage().props.value.page_type;
         function applyFilter(){
             filterData.get(route('admin.employee.attendance.logs'));
         }
@@ -196,6 +196,7 @@ export default {
             filterOptions,
             applyFilter,
             filterData,
+            page_type,
             submitApproveData
         }
     }

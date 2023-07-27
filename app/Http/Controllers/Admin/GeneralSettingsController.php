@@ -5,9 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Helpers\ZktecoHelper;
 use App\Http\Controllers\Controller;
 use App\Mail\BasicMail;
+use App\Models\AttendanceLog;
+use App\Models\Employee;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class GeneralSettingsController extends Controller
@@ -31,10 +35,33 @@ class GeneralSettingsController extends Controller
     public function syncData(){
         $zkHelper = ZktecoHelper::init();
         $getData = $zkHelper->getData();
-        $getUsers= $zkHelper->users();
-        dd($getUsers,$getUsers->where("name","Siam")->first(),$getData);
-        dd($getData,$getUsers);
-//        ->getAttendance();
-//        dd($data);
+        $getUsers =  $zkHelper->users();
+        $allEmployee = Employee::where('status',1)->get();
+        $buildDataForAttendanceLog = [];
+
+        foreach ($getData as $data){
+            //build attendance log array for saving in database
+            $emp = $allEmployee->where('zktecho_user_id',$data['id'])->first();
+            if (is_null($emp)){
+                continue;
+            }
+            $buildDataForAttendanceLog[] = [
+                'name' => $emp->att_id,
+                'employee_id' => $emp->id,
+                'type' => $zkHelper->getType($data['type']),
+                'date_time' => $data['timestamp'] ,
+                'status' => 1,
+                'uuid' => Str::uuid()
+            ];
+        }
+
+        foreach ($buildDataForAttendanceLog as $att){
+            AttendanceLog::updateOrCreate( [
+                'date_time' => Carbon::parse($att['date_time'])->toDateTimeString(),
+                'type' => $att['type'],
+                'employee_id' => $att['employee_id'],
+            ],$att);
+        }
+        return back()->with(['msg' => __('Data import success'),'type' => "success"]);
     }
 }

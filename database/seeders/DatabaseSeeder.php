@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Helpers\ZktecoHelper;
 use App\Models\Admin;
 use App\Models\Employee;
 use Illuminate\Database\Seeder;
@@ -16,9 +17,15 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $allEmployee = Employee::where('status',1)->get();
-        //run foreach
-        //set zketeco user id into database automatically
+        $zkHelper = ZktecoHelper::init();
+        $getUsers= $zkHelper->users();
 
+        foreach ($allEmployee as $employee){
+            $zkUser = $getUsers->where("name",$employee->att_id)->first();
+            Employee::where(['id' =>$employee->id])->update([
+                'zktecho_user_id' => $zkUser['userid'] ?? 0
+            ]);
+        }
 
 
         // \App\Models\User::factory(10)->create();
