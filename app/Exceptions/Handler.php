@@ -47,5 +47,6 @@ class Handler extends ExceptionHandler
                 "trace" => $e->getTrace()
             ],500);
         }
+        return parent::render($request,  $e);
     }
 }

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Admin;
+use App\Models\Employee;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -14,6 +15,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        $allEmployee = Employee::where('status',1)->get();
+        //run foreach
+        //set zketeco user id into database automatically
+
 
 
         // \App\Models\User::factory(10)->create();
