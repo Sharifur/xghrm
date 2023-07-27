@@ -69,6 +69,11 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-xl-12">
+                        a chart with all user attendance
+                        a chart of each month salary spends
+
+                    </div>
                 </div>
             </div>
         </div>
