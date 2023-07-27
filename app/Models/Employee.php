@@ -24,7 +24,8 @@ class Employee extends Model
         'dateOfBirth',
         'status',
         'att_id',
-        'user_id'
+        'user_id',
+        'zktecho_user_id',
     ];
 
     public function category(){

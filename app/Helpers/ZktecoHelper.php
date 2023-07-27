@@ -33,16 +33,16 @@ class ZktecoHelper
         return $this;
     }
     public function getData(){
-        Cache::forget("zktech_attendance");
+        Cache::forget('zktech_attendance');
+        set_time_limit(-1);
         if (is_null($this->attendnace)){
             $this->attendnace = Cache::remember("zktech_attendance",Carbon::now()->addHours(1),function (){
                 $col = collect(array_reverse($this->connection()->getAttendance()));
                 return $col->filter(function ($item){
-                    if (Carbon::parse($item['timestamp'])->isSameMonth(Carbon::today()->subMonth(1))){
+                    if (Carbon::parse($item['timestamp'])->gt(Carbon::today()->subDays(30))){
                         return $item;
                     }
                 });
-            return $col;
             });
         }
         return $this->attendnace;
