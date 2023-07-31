@@ -80,9 +80,9 @@
                     </Link>
                 </li>
                 <li>
-                    <Link :href="route('admin.general.sync.data')" as="button" method="post" :class="{'active' : $page.url === ('/admin-home/general/sync-data')}">
-                        Sync Data from ZKTECO
-                    </Link>
+                    <a :href="route('admin.general.sync.data')" target="_blank" download>
+                        Download Data from ZKTECO
+                    </a>
                 </li>
                 <li>
                     <Link :href="route('admin.database.upgrade')" as="button" method="post" :class="{'active' : $page.url === ('/admin-home/general/database-upgrade')}">
