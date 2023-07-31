@@ -14,7 +14,7 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
         Route::get('/settings',[\App\Http\Controllers\Admin\GeneralSettingsController::class,'settings'])->name('admin.general.settings');
         Route::post('/database-upgrade',[\App\Http\Controllers\Admin\GeneralSettingsController::class,'databaseUpdate'])->name('admin.database.upgrade');
         Route::post('/smtp-test',[\App\Http\Controllers\Admin\GeneralSettingsController::class,'smtpTest'])->name('admin.smtp.test');
-        Route::post('/sync-data',[\App\Http\Controllers\Admin\GeneralSettingsController::class,'syncData'])->name('admin.general.sync.data');
+        Route::get('/sync-data',[\App\Http\Controllers\Admin\GeneralSettingsController::class,'syncData'])->name('admin.general.sync.data');
     });
 
     /*=================================
