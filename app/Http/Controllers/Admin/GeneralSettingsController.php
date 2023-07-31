@@ -78,6 +78,8 @@ class GeneralSettingsController extends Controller
         }
 
         fclose($fl);
+
+
         return response()->download($filename);
 //        Storage::put('last-30days-attendance'.Str::uuid()->toString().'.csv',)
 

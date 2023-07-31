@@ -33,7 +33,6 @@ class ZktecoHelper
         return $this;
     }
     public function getData(){
-        Cache::forget('zktech_attendance');
         set_time_limit(-1);
         if (is_null($this->attendnace)){
             $this->attendnace = Cache::remember("zktech_attendance",Carbon::now()->addHours(1),function (){
