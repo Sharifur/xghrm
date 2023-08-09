@@ -47,7 +47,9 @@ class AttendanceController extends Controller
         }
 
 
+
         $logs = $logQeuery->where("status",1)->orderBy("date_time")->get();
+
         $logsInfo = [];
 
         foreach($logs as $log){
@@ -85,7 +87,7 @@ class AttendanceController extends Controller
         $outCount = $logs->where('type','C/Out')->count();
         $sickLeaveCount = $logs->where('type','sick-leave')->count();
         $paidLeaveCount =$logs->where('type','paid-leave')->count();
-        $workFormHome =$logs->where('type','work-form-home')->count();
+        $workFormHome =$logs->where('type','work-from-home')->count();
 
         //profile data by date with a group of check in, out time , or type
 

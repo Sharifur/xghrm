@@ -40,7 +40,7 @@ class GeneralSettingsController extends Controller
         $getUsers =  $zkHelper->users();
         $allEmployee = Employee::where('status',1)->get();
         $buildDataForAttendanceLog = [];
-
+dd($getData);
         $filename = 'attendance-file/last-30days-attendance'.Str::uuid()->toString().'.csv';
         file_put_contents($filename,'');
         $fl =  fopen(public_path($filename),'w');
@@ -78,6 +78,8 @@ class GeneralSettingsController extends Controller
         }
 
         fclose($fl);
+
+
         return response()->download($filename);
 //        Storage::put('last-30days-attendance'.Str::uuid()->toString().'.csv',)
 
