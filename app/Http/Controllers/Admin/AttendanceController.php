@@ -312,7 +312,7 @@ class AttendanceController extends Controller
 
                 foreach ($attr as $type => $time){
 //                    dd($type,$time);
-                    if (is_null($type)){
+                    if (is_null($time)){
                         continue;
                     }
                     AttendanceLog::updateOrCreate( [
@@ -328,7 +328,7 @@ class AttendanceController extends Controller
             }
         }
     }
-    
+
 
     private function getAttendanceType($attend) {
         foreach (['C/In', 'C/Out'] as $type) {
