@@ -16,3 +16,4 @@ yarn-error.log
 /public/uploads
 /cgi-bin
 /.well-known
+/public/attendance-file/*

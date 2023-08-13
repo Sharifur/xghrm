@@ -268,42 +268,73 @@ class AttendanceController extends Controller
 
             $attendance_arr = [];
             //run loop
-            $last_att_type = '';
-            $last_att_date = '';
+            $lastType = '';
+            $lastDate = '';
             $last_inserted_id = '';
-            foreach($attendance_logs as $attend){
-                $current_att_type = array_key_first($attend);
-                preg_match('/C\/Out|C\/In/',$current_att_type,$matches);
-                $current_att_type = current($matches);
-                //dd($attend[$current_att_type],$current_att_type,Carbon::parse($attend[$current_att_type]));
-                if(!isset($attend[$current_att_type])){
+            $last_att_date = '';
+            $last_att_type = '';
+
+
+            $groupedData = [];
+
+            foreach ($attendance_logs as $attend) {
+                $currentType = $this->getAttendanceType($attend);
+                if (!$currentType) {
                     continue;
                 }
-                $current_att_date = Carbon::parse($attend[$current_att_type]);
-                // have to filter for // C/In // C/Out
-                if ( $current_att_date->isSameDay($last_att_date)){
-                    if($last_att_type !== $current_att_type){
-                        $attendance_arr[] = $this->setDataForDB($current_att_type,$attend[$current_att_type],$em);
-                    }elseif($last_att_type === 'C/Out') {
-                        $last = array_key_last($attendance_arr);
-                        $attendance_arr[$last] = $this->setDataForDB($current_att_type,$attend[$current_att_type],$em);
-                    }
 
-                }else{
-                    $attendance_arr[] =$this->setDataForDB($current_att_type,$attend[$current_att_type],$em);
+                $currentDateTime = Carbon::parse($attend[$currentType]);
+                $currentDate = $currentDateTime->format('Y-m-d');
+                $employeeId = $em->id;
+
+                if (!isset($groupedData[$employeeId][$currentDate])) {
+                    $groupedData[$employeeId][$currentDate] = [
+                        'C/In' => null,
+                        'C/Out' => null,
+                    ];
                 }
-                $last_att_type = $current_att_type;
-                $last_att_date = Carbon::parse($attend[$current_att_type]);
+
+                // If it's a check-in and either we don't have a check-in for the day yet or the current one is earlier
+                if ($currentType === 'C/In' && (!$groupedData[$employeeId][$currentDate]['C/In'] || $currentDateTime->lt(Carbon::parse($groupedData[$employeeId][$currentDate]['C/In'])))) {
+                    $groupedData[$employeeId][$currentDate]['C/In'] = $attend[$currentType];
+                }
+
+                // If it's a check-out and either we don't have a check-out for the day yet or the current one is later
+                if ($currentType === 'C/Out' && (!$groupedData[$employeeId][$currentDate]['C/Out'] || $currentDateTime->gt(Carbon::parse($groupedData[$employeeId][$currentDate]['C/Out'])))) {
+                    $groupedData[$employeeId][$currentDate]['C/Out'] = $attend[$currentType];
+                }
             }
 
-            foreach ($attendance_arr as $att){
-                AttendanceLog::updateOrCreate( [
-                    'date_time' => Carbon::parse($att['date_time'])->toDateTimeString(),
-                    'type' => $att['type'],
-                    'employee_id' => $em->id,
-                ],$att);
+//            dd($groupedData);
+            foreach (current($groupedData) as $date => $attr){
+
+                foreach ($attr as $type => $time){
+//                    dd($type,$time);
+                    if (is_null($type)){
+                        continue;
+                    }
+                    AttendanceLog::updateOrCreate( [
+                        'date_time' => Carbon::parse($time)->toDateTimeString(),
+                        'type' => $type,
+                        'employee_id' => $em->id,
+                    ],[
+                        'date_time' => Carbon::parse($time)->toDateTimeString()
+                    ]);
+                }
+
+
             }
         }
+    }
+
+    private function getAttendanceType($attend) {
+        foreach (['C/In', 'C/Out'] as $type) {
+            if (isset($attend[$type])) {
+                return $type;
+            }
+        }
+
+        return null;
     }
 
 }
