@@ -274,6 +274,8 @@ class AttendanceController extends Controller
             $last_att_date = '';
             $last_att_type = '';
 
+            //optimise code here
+            // write a function for this
 
             $groupedData = [];
 
@@ -326,6 +328,7 @@ class AttendanceController extends Controller
             }
         }
     }
+    
 
     private function getAttendanceType($attend) {
         foreach (['C/In', 'C/Out'] as $type) {
