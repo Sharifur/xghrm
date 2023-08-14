@@ -241,7 +241,6 @@ class AttendanceController extends Controller
                 $csv_reader = new CsvReader($file_path);
                 $csv_header = $csv_reader->head();
                 $csv_rows = $csv_reader->rows();
-                // $selected_column_index = array_search($em->att_id, current($csv_header));
                 $selected_column_index = array_search("Name", current($csv_header));
                 $selected_attendance_column_index = array_search($request->attendance_column_value, current($csv_header));
                 $selected_attendance_type_column_value = array_search($request->attendance_type_column_value, current($csv_header));
@@ -249,10 +248,6 @@ class AttendanceController extends Controller
                     if ( !empty($row)){
 
                         $column_value = $row[$selected_column_index];
-                        // dd($column_value,
-                        // strtolower($em->att_id),
-                        // $selected_column_index
-                        // ,$em->att_id);
                         if (strtolower($column_value) == strtolower($em->att_id)){
                             $attendance_logs[] = [
                                 $row[$selected_attendance_type_column_value] => $row[$selected_attendance_column_index]
@@ -261,21 +256,9 @@ class AttendanceController extends Controller
                     }
                 }
             }
-// dd($attendance_logs);
             if (empty($attendance_logs)){
                 continue;
             }
-
-            $attendance_arr = [];
-            //run loop
-            $lastType = '';
-            $lastDate = '';
-            $last_inserted_id = '';
-            $last_att_date = '';
-            $last_att_type = '';
-
-            //optimise code here
-            // write a function for this
 
             $groupedData = [];
 
@@ -307,11 +290,9 @@ class AttendanceController extends Controller
                 }
             }
 
-//            dd($groupedData);
             foreach (current($groupedData) as $date => $attr){
 
                 foreach ($attr as $type => $time){
-//                    dd($type,$time);
                     if (is_null($time)){
                         continue;
                     }
@@ -319,6 +300,7 @@ class AttendanceController extends Controller
                         'date_time' => Carbon::parse($time)->toDateTimeString(),
                         'type' => $type,
                         'employee_id' => $em->id,
+                        'name' => $em->att_id
                     ],[
                         'date_time' => Carbon::parse($time)->toDateTimeString()
                     ]);
