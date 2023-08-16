@@ -38,6 +38,7 @@ class GeneralSettingsController extends Controller
         $zkHelper = ZktecoHelper::init();
         $getData = $zkHelper->getData();
         $getUsers =  $zkHelper->users();
+//        dd($getUsers);
         $allEmployee = Employee::where('status',1)->get();
         $buildDataForAttendanceLog = [];
         $filename = 'attendance-file/last-30days-attendance'.Str::uuid()->toString().'.csv';
