@@ -45,7 +45,6 @@ class GeneralSettingsController extends Controller
         file_put_contents($filename,'');
         $fl =  fopen(public_path($filename),'w');
         $header_added = false;
-
         foreach ($getData as $data){
 
             //build attendance log array for saving in database
