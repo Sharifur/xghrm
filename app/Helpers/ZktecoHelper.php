@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Helpers;
+
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Rats\Zkteco\Lib\ZKTeco;
@@ -12,33 +13,38 @@ class ZktecoHelper
     private $attendnace;
     private $users;
 
-    public static function init(){
-        if (is_null(self::$instance)){
+    public static function init()
+    {
+        if (is_null(self::$instance)) {
             return (new self());
         }
         return self::$instance;
     }
 
-    private function connection(){
-        if (!is_null($this->connection)){
+    private function connection()
+    {
+        if (!is_null($this->connection)) {
             return $this->connection;
         }
-        $con = new ZKTeco('192.168.0.100','4370');
+        $con = new ZKTeco('192.168.0.100', '4370');
         $con->connect();
-        return  $this->connection =$con;
+        return $this->connection = $con;
     }
 
-    public function connectDevice(){
+    public function connectDevice()
+    {
         $this->connection();
         return $this;
     }
-    public function getData(){
+
+    public function getData()
+    {
         set_time_limit(-1);
-        if (is_null($this->attendnace)){
-            $this->attendnace = Cache::remember("zktech_attendance",Carbon::now()->addHours(1),function (){
+        if (is_null($this->attendnace)) {
+            $this->attendnace = Cache::remember("zktech_attendance", Carbon::now()->addHours(1), function () {
                 $col = collect(array_reverse($this->connection()->getAttendance()));
-                return $col->filter(function ($item){
-                    if (Carbon::parse($item['timestamp'])->gt(Carbon::today()->subDays(30))){
+                return $col->filter(function ($item) {
+                    if (Carbon::parse($item['timestamp'])->gt(Carbon::today()->subDays(30))) {
                         return $item;
                     }
                 });
@@ -46,19 +52,23 @@ class ZktecoHelper
         }
         return $this->attendnace;
     }
-    public function users(){
-        if (is_null($this->users)){
-            return $this->users = Cache::remember("zktech_users",Carbon::now()->addHours(1),function (){
+
+    public function users()
+    {
+        if (is_null($this->users)) {
+            return $this->users = Cache::remember("zktech_users", Carbon::now()->addHours(1), function () {
                 return collect($this->connection()->getUser());
             });
         }
         return $this->users;
     }
 
-    public function getType($type){
-        return match ($type){
-          0 => 'C/In',
-          1 => 'C/Out',
+    public function getType($type)
+    {
+        return match ($type) {
+            0 => 'C/In',
+            1 => 'C/Out',
+            default => 'uknown'
         };
     }
 
