@@ -131,7 +131,7 @@ class EmployeeController extends Controller
 
         $allEmployees  = Employee::with(['category','user'])
         ->with('attendanceLog',function($q){
-            $q->WhereIn('type',['leave','sick-leave','paid-leave']);
+            $q->whereYear('date_time',Carbon::today())->WhereIn('type',['leave','sick-leave','paid-leave']);
         })
         ->orderBy('id','desc')
         ->paginate(10);
@@ -190,6 +190,7 @@ class EmployeeController extends Controller
                     $logsInfo[$parsed_date]["working_nature"] = $this->workNature($log->type);
                 }else{
                     //added in_time
+
                     $logsInfo[$parsed_date] = [
                         str_replace("c/","",strtolower($log->type))."_time" =>
                             $log->type === "holiday" ? " ": Carbon::parse($log->date_time)->format('g:i A'),
@@ -256,10 +257,11 @@ class EmployeeController extends Controller
     private function workNature($type){
         return match ($type){
             "holiday" => "Holiday",
-            "C/In", "C/Out" => "Office",
-            "leave","sick-leave", => "Leave",
             "work-from-home" => "Remote",
-            "paid-leave" => "Paid Leave",
+            "C/In", "C/Out" => "Office",
+            "leave",
+            "sick-leave","paid-leave" => "Leave",
+            default => " "
         };
     }
 
