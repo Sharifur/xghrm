@@ -131,7 +131,7 @@ class EmployeeController extends Controller
 
         $allEmployees  = Employee::with(['category','user'])
         ->with('attendanceLog',function($q){
-            $q->WhereIn('type',['leave','sick-leave','paid-leave']);
+            $q->whereYear('date_time',Carbon::today())->WhereIn('type',['leave','sick-leave','paid-leave']);
         })
         ->orderBy('id','desc')
         ->paginate(10);
