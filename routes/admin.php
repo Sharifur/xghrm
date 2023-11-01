@@ -41,6 +41,8 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
         Route::post('/delete',[\App\Http\Controllers\Admin\EmployeeController::class,'delete'])->name('admin.employee.delete');
         Route::get('/attendance-check/{id}',[\App\Http\Controllers\Admin\EmployeeController::class,'attenadance_check'])->name('admin.employee.attendance.check');
         Route::post('/attendance-check-post',[\App\Http\Controllers\Admin\EmployeeController::class,'attenadance_check_post'])->name('admin.employee.attendance.post');
+        Route::get('/attendancelogs/check',[\App\Http\Controllers\Admin\EmployeeController::class,'attenadance_check_global'])->name('admin.employee.attendance.check.global');
+        Route::post('/attendancelogs/check',[\App\Http\Controllers\Admin\EmployeeController::class,'attenadance_check_global']);
         Route::post('/details/{id}',[\App\Http\Controllers\Admin\EmployeeController::class,'details'])->name('admin.employee.details');
 
         Route::get('/advance-salary/all',[\App\Http\Controllers\Admin\AdvanceSalaryController::class,'index'])->name('admin.employee.advance.salary.all');
@@ -101,19 +103,7 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
 
     });
 
-//    /*=================================
-//        EARNING ROUTES
-//    ==================================*/
-//    Route::group(['prefix' => 'earning'],function (){
-//        Route::get('/all',[\App\Http\Controllers\Admin\EarningController::class,'index'])->name('admin.earning.all');
-//        Route::get('/new',[\App\Http\Controllers\Admin\EarningController::class,'new'])->name('admin.earning.new');
-//        Route::post('/new',[\App\Http\Controllers\Admin\EarningController::class,'store']);
-//        Route::post('/update',[\App\Http\Controllers\Admin\EarningController::class,'update'])->name('admin.earning.update');
-//        Route::post('/delete',[\App\Http\Controllers\Admin\EarningController::class,'delete'])->name('admin.earning.delete');
-//        Route::get('/calculate/{id}',[\App\Http\Controllers\Admin\EarningController::class,'calculate'])->name('admin.earning.calculate');
-//        Route::get('/settings',[\App\Http\Controllers\Admin\EarningController::class,'settings_page'])->name('admin.earning.settings');
-//        Route::post('/settings',[\App\Http\Controllers\Admin\EarningController::class,'update_settings']);
-//    });
+
     /*=================================
         LEAVES ROUTES
     ==================================*/
@@ -121,19 +111,6 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
         Route::get('/all',[\App\Http\Controllers\Admin\LeavesController::class,'index'])->name('admin.leaves.all');
     });
 
-//    /*=================================
-//       PRODUCT ROUTES
-//   ==================================*/
-//    Route::group(['prefix' => 'products'],function (){
-//        Route::get('/all',[\App\Http\Controllers\Admin\ProductsController::class,'index'])->name('admin.products.all');
-//        Route::get('/new',[\App\Http\Controllers\Admin\ProductsController::class,'new'])->name('admin.products.new');
-//        Route::post('/new',[\App\Http\Controllers\Admin\ProductsController::class,'store']);
-//        Route::get('/edit/{id}',[\App\Http\Controllers\Admin\ProductsController::class,'edit'])->name('admin.products.edit');
-//        Route::get('/view/{id}',[\App\Http\Controllers\Admin\ProductsController::class,'view'])->name('admin.products.view');
-//        Route::post('/update',[\App\Http\Controllers\Admin\ProductsController::class,'update'])->name('admin.products.update');
-//        Route::post('/delete',[\App\Http\Controllers\Admin\ProductsController::class,'delete'])->name('admin.products.delete');
-//        Route::post('/calculate',[\App\Http\Controllers\Admin\ProductsController::class,'calculate'])->name('admin.products.fetch');
-//    });
 
   /*=================================
        USERS ROUTES

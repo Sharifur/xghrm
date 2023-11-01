@@ -68,6 +68,9 @@
             padding: 3px;
             border-radius: 3px;
             text-transform: capitalize;
+            .badge{
+                margin-left: 5px;
+            }
             &.in_time{
                 background-color: #62ad62;
             }
@@ -81,12 +84,13 @@
                 background-color: #5d6cc1;
             }
             &.paid-leave{
-                background-color: #4c4a4a;
+                background-color: #79b6b8;
             }
             &.sick-leave_time{
                 background-color: #5d6cc1;
             }
-            &.holiday{
+            &.holiday,
+            &.holiday_time{
                 background-color: #efb662;
             }
             &.work-from-home_time {
@@ -132,7 +136,7 @@
     margin-bottom: 40px;
     list-style: none;
     li{
-        max-width:var(--day-width);
+            max-width: 230px;
             color: #fff;
             font-size: 12px;
             font-weight: 600;
@@ -144,6 +148,7 @@
             .badge{
                 background-color: #fff;
                 color: #333;
+                margin-left: 5px;
             }
             &.C\/In{
                 background-color: #62ad62;
@@ -158,6 +163,9 @@
                 background-color: #5d6cc1;
             }
             &.paid-leave{
+                background-color: #79b6b8;
+            }
+            &.work-from-home{
                 background-color: #4c4a4a;
             }
             &.holiday{

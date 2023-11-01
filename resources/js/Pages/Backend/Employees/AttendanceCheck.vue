@@ -20,16 +20,17 @@
 
                                     <div class="single-dashboard-input">
                                         <div class="single-info-input margin-top-30">
-                                            <label class="info-title"> Start Date </label>
+                                            <label class="info-title"> Select Month </label>
                                             <Datepicker v-model="employeeData.startDate"/>
+                                            <span>any date you select in this calendar, system will get data for the selected date month</span>
                                         </div>
                                     </div>
-                                    <div class="single-dashboard-input">
+                                    <!-- <div class="single-dashboard-input">
                                         <div class="single-info-input margin-top-30">
                                             <label class="info-title"> End Date</label>
                                             <Datepicker v-model="employeeData.endDate"/>
                                         </div>
-                                    </div>
+                                    </div> -->
                                     <div class="btn-wrapper margin-top-35">
                                         <BsButton button-text="Get Details" @click="getAttendanceDetails" classes="cmn-btn btn-bg-1"/>
                                     </div>
@@ -45,11 +46,10 @@
                     <ul class="color-explanation">
                         <li class="holiday">Holiday<span class="badge">{{holidayCount}}</span></li>
                         <li class="leave">leave<span class="badge">{{leaveCount}}</span></li>
-                        <li class="C/In">C/In<span class="badge">{{inCount}}</span></li>
-                        <li class="C/Out">C/Out<span class="badge">{{outCount}}</span></li>
+                        <li class="C/In">OfficeDays<span class="badge">{{OfficeDays}}</span></li>
                         <li class="sick-leave">Sick Leave<span class="badge">{{sickLeaveCount}}</span></li>
                         <li class="paid-leave">Paid Leave<span class="badge">{{paidLeaveCount}}</span></li>
-                        <li class="paid-leave">Work From Home<span class="badge">{{workFormHome}}</span></li>
+                        <li class="work-from-home">Work From Home<span class="badge">{{workFormHome}}</span></li>
                     </ul>
                </div>
                 <Calendar
@@ -111,8 +111,7 @@ export default {
     setup(){
         const holidayCount = ref(0);
         const leaveCount = ref(0);
-        const inCount = ref(0);
-        const outCount = ref(0);
+        const OfficeDays = ref(0);
         const sickLeaveCount = ref(0);
         const paidLeaveCount = ref(0);
         const workFormHome = ref(0);
@@ -141,7 +140,6 @@ export default {
                  if (Object.keys(logs).length > 0){
                     let attenData = logs;
                     let calendarData = [];
-                    console.log(attenData);
                      Object.keys(attenData).forEach(function(key) {
                          let currentItem = attenData[key];
                          Object.keys(currentItem).forEach((key) => {
@@ -154,7 +152,7 @@ export default {
                                      title: `${key.replaceAll("_"," ")}: ${currentItem[key]}`,
                                      class: key
                                  },
-                                 dates: new Date(currentItem.dateTime),
+                                dates: new Date(currentItem.dateTime),
                              })
                          });
                      });
@@ -163,8 +161,7 @@ export default {
                     //todo set value of const
                      holidayCount.value = response.data.holidayCount;
                      leaveCount.value = response.data.leaveCount;
-                     inCount.value = response.data.inCount;
-                     outCount.value = response.data.outCount;
+                     OfficeDays.value = response.data.OfficeDays;
                      sickLeaveCount.value = response.data.sickLeaveCount;
                      paidLeaveCount.value = response.data.paidLeaveCount;
                      workFormHome.value = response.data.workFormHome;
@@ -199,8 +196,7 @@ export default {
             CalendarAttributes,
             holidayCount ,
             leaveCount,
-            inCount,
-            outCount,
+            OfficeDays,
             sickLeaveCount,
             paidLeaveCount,
             workFormHome,

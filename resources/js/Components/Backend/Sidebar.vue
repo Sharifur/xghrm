@@ -58,6 +58,11 @@
                         Attendance Request
                     </Link>
                 </li>
+                <li>
+                    <Link :href="route('admin.employee.attendance.check.global')" :class="{'active' : $page.url === '/admin-home/employee/attendancelogs/check'}">
+                        Attendance Check
+                    </Link>
+                </li>
             </ul>
         </li>
 

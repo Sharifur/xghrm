@@ -35,6 +35,10 @@ class Employee extends Model
         return $this->belongsTo(User::class,'user_id','id');
     }
 
+    public function attendanceLog(){
+        return $this->hasMany(AttendanceLog::class,'employee_id');
+    }
+
     protected $casts = [
         'user_id' => 'integer',
         'catId' => 'integer',

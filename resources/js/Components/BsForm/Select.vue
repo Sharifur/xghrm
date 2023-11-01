@@ -5,6 +5,7 @@
             <select class="form-control" :class="inputClass" v-model="modelValue" @change="$emit('update:modelValue', $event.target.value)">
                 <option v-for="option in options" :value="option.value" >{{option.label}}</option>
             </select>
+            <span v-show="info != ''">{{ info }}</span>
         </div>
     </div>
 </template>
@@ -21,7 +22,8 @@ export default {
         inputClass: {
             type: String,
             default: null
-        }
+        },
+        info: String
     },
     emits: ['update:modelValue'],
 }
