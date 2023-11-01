@@ -54,8 +54,6 @@
                         <li class="bg-success">Attendance <span class="badge">{{attenadnceCount}}</span></li>
                         <li class="holiday">Holiday <span class="badge">{{holidayCount}}</span></li>
                         <li class="leave">leave  <span class="badge">{{leaveCount}}</span></li>
-                        <li class="C/In">C/In  <span class="badge">{{inCount}}</span></li>
-                        <li class="C/Out">C/Out  <span class="badge">{{outCount}}</span></li>
                         <li class="sick-leave">Sick Leave  <span class="badge">{{sickLeaveCount}}</span></li>
                         <li class="paid-leave">Paid Leave  <span class="badge">{{paidLeaveCount}}</span></li>
                     </ul>
@@ -179,8 +177,6 @@ export default {
         const attenadnceCount = ref(usePage().props.value.attenadnceCount);
         const holidayCount = ref(usePage().props.value.holidayCount);
         const leaveCount = ref(usePage().props.value.leaveCount);
-        const inCount = ref(usePage().props.value.inCount);
-        const outCount = ref(usePage().props.value.outCount);
         const sickLeaveCount = ref(usePage().props.value.sickLeaveCount);
         const paidLeaveCount = ref(usePage().props.value.paidLeaveCount);
         //gross details
@@ -240,8 +236,6 @@ export default {
                  attenadnceCount.value =responseData.attenadnceCount;
                  holidayCount.value = responseData.holidayCount;
                  leaveCount.value = responseData.leaveCount;
-                 inCount.value = responseData.inCount;
-                 outCount.value = responseData.outCount;
                  sickLeaveCount.value = responseData.sickLeaveCount;
                  paidLeaveCount.value = responseData.paidLeaveCount;
 
@@ -290,8 +284,6 @@ export default {
             changeEmployeeSelect,
             holidayCount ,
             leaveCount,
-            inCount,
-            outCount,
             sickLeaveCount,
             paidLeaveCount,
             attenadnceCount,

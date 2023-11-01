@@ -15,6 +15,9 @@
                         <th>Id</th>
                         <th>Title</th>
                         <th>Category</th>
+                        <th>Join Date</th>
+                        <th>Salary</th>
+                        <th>Total Leave ( {{ new Date().getFullYear() }} )</th>
                         <th>Status</th>
                         <th>Action</th>
                         </thead>
@@ -23,6 +26,9 @@
                             <td>{{employee.id}}</td>
                             <td>{{ employee.name }} <Link v-show="employee?.user" :href="userRoute(employee)"><i class="fas fa-user btn-success text-white btn btn-sm" title="An User" ></i></Link></td>
                             <td>{{ employee?.category?.title }}</td>
+                            <td>{{ new Date(employee.joinDate).toLocaleDateString() }}</td>
+                            <td>{{employee.salary}} BDT</td>
+                            <td>{{ employee?.attendance_log ? employee?.attendance_log.length : 0 }}</td>
                             <td><span class="alert" :class="employee.status === 1 ? 'alert-success' : 'alert-danger'">{{employeeStatus(employee.status)}}</span></td>
                             <td>
                                 <Link class="btn btn-secondary m-1" :href="route('admin.employee.view',employee.id)">
@@ -70,6 +76,7 @@ export default {
     },
     setup(){
         function employeeList(){
+            console.log(usePage().props.value.allEmployees.data);
             return usePage().props.value.allEmployees.data;
         }
 

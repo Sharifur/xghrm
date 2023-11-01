@@ -44,6 +44,7 @@
                             <div class="signature">
                                 <span class="signature">Signature</span>
                                 <h2>{{selectedEmployee.name}}</h2>
+                                <span class="designation">{{selectedEmployee.category}}</span>
                             </div>
                         </div>
                     </div>

@@ -19,8 +19,18 @@
                     <Select v-if="attendanceLogData.importType === 'individual'" title="CSV Column For Search Name" @change="getCsvColumnValues" v-model="attendanceLogData.csv_column" :options="csvHeader" />
                     <Select v-if="attendanceLogData.importType === 'individual'" title="Column Value For Name" v-model="attendanceLogData.column_value" :options="columnValueData" />
 
-                    <Select title="CSV Attendance Column Date/Time"  v-model="attendanceLogData.attendance_column_value" :options="csvHeader" />
-                    <Select title="CSV Attendance In/Out Type"  v-model="attendanceLogData.attendance_type_column_value" :options="csvHeader" />
+                    <Select
+                    title="CSV Attendance Column Date/Time"
+                    v-model="attendanceLogData.attendance_column_value"
+                    :options="csvHeader"
+                    info="select date column"
+                    />
+                    <Select
+                    title="CSV Attendance In/Out Type"
+                     v-model="attendanceLogData.attendance_type_column_value"
+                     :options="csvHeader"
+                     info="select check in/ check out column"
+                     />
                     <Button button-text="Submit Changes" @click="createAttendanceLog"/>
                 </form>
             </div>

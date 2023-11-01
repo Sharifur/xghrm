@@ -17,7 +17,7 @@ use Inertia\Inertia;
 class AdvanceSalaryController extends Controller
 {
     public function index(){
-        $allSalaries = AdvanceSalary::with('employee')->orderBy('id','desc')->paginate(10)->through(function($item){
+        $allSalaries = AdvanceSalary::with('employee')->orderBy('created_at','desc')->paginate(10)->through(function($item){
            $item->monthName = Carbon::parse($item->month)->format('M');
            $item->year = Carbon::parse($item->month)->format('Y');
            $item->created = Carbon::parse($item->created_at)->format('Y M d');

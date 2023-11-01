@@ -13,14 +13,6 @@
                 <form @submit.prevent>
                     <Input title="Name" v-model="attendanceData.name"/>
                     <div class="single-info-input margin-top-30">
-                        <label class="info-title">Start Date</label>
-                        <Datepicker v-model="attendanceData.start_date"/>
-                    </div>
-                    <div class="single-info-input margin-top-30">
-                        <label class="info-title">End Date</label>
-                        <Datepicker v-model="attendanceData.end_date"/>
-                    </div>
-                    <div class="single-info-input margin-top-30">
                         <MediaUploader button-text="Upload File" v-model="attendanceData.file_id"/>
                         <small>select only csv file</small>
                     </div>

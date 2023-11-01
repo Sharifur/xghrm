@@ -53,9 +53,7 @@
                     <ul class="color-explanation">
                         <li class="bg-success">Attendance <span class="badge">{{attenadnceCount}}</span></li>
                         <li class="holiday">Holiday <span class="badge">{{holidayCount}}</span></li>
-                        <li class="leave">leave  <span class="badge">{{leaveCount}}</span></li>
-                        <li class="C/In">C/In  <span class="badge">{{inCount}}</span></li>
-                        <li class="C/Out">C/Out  <span class="badge">{{outCount}}</span></li>
+                        <li class="leave">leave<span class="badge">{{leaveCount}}</span></li>
                         <li class="sick-leave">Sick Leave  <span class="badge">{{sickLeaveCount}}</span></li>
                         <li class="paid-leave">Paid Leave  <span class="badge">{{paidLeaveCount}}</span></li>
                     </ul>
@@ -129,6 +127,7 @@
                             <div class="signature">
                                 <span class="signature">Signature</span>
                                 <h2>{{selectedEmployee.name}}</h2>
+                                <span class="designation">{{selectedEmployee.designation}}</span>
                             </div>
                         </div>
                     </div>
@@ -172,12 +171,11 @@ export default {
             name : 'Name',
             salary : 0,
             category : 'Designation',
+            designation : 'Designation',
         });
         const attenadnceCount = ref(0);
         const holidayCount = ref(0);
         const leaveCount = ref(0);
-        const inCount = ref(0);
-        const outCount = ref(0);
         const sickLeaveCount = ref(0);
         const paidLeaveCount = ref(0);
         //gross details
@@ -249,12 +247,11 @@ export default {
                     name : employeeDetails.name,
                     salary : employeeDetails.salary,
                     category : employeeDetails.designation,
+                    designation : employeeDetails.designation,
                 };
                  attenadnceCount.value =responseData.attenadnceCount;
                  holidayCount.value = responseData.holidayCount;
                  leaveCount.value = responseData.leaveCount;
-                 inCount.value = responseData.inCount;
-                 outCount.value = responseData.outCount;
                  sickLeaveCount.value = responseData.sickLeaveCount;
                  paidLeaveCount.value = responseData.paidLeaveCount;
 
@@ -262,12 +259,6 @@ export default {
                 salarySlipData.extraEarningFields.push({
                     'description' : `${responseData.attenadnceCount} Days Lunch`,
                     'amount' : parseInt(responseData.attenadnceCount) * 35
-                });
-
-                //5% incentive
-                salarySlipData.extraEarningFields.push({
-                    'description' : `5% Incentive`,
-                    'amount' : 1000
                 });
 
                 //add sick leave
@@ -293,9 +284,6 @@ export default {
                         'amount' : responseData.AdvanceSalary
                     });
                 }
-
-
-
 
                 calculateSalary();
             })
@@ -343,8 +331,6 @@ export default {
             changeEmployeeSelect,
             holidayCount ,
             leaveCount,
-            inCount,
-            outCount,
             sickLeaveCount,
             paidLeaveCount,
             attenadnceCount,
