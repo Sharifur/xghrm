@@ -87,7 +87,10 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
             Route::post('update',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'update'])->name('admin.employee.attendance.logs.update');
             Route::post('delete',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'delete'])->name('admin.employee.attendance.logs.delete');
             Route::get('extract/{id}',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'extract'])->name('admin.employee.attendance.logs.extract');
-            Route::post('get-logs',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'get_csv_column_values'])->name('admin.employee.attendance.logs.by.period');Route::post('insert-attendance-logs',[\App\Http\Controllers\Admin\AttendanceController::class,'insert_attendance_log_from_csv_column'])->name('admin.employee.attendance.log.from.csv');
+            Route::post('get-logs',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'get_csv_column_values'])->name('admin.employee.attendance.logs.by.period');
+            Route::post('insert-attendance-logs',[\App\Http\Controllers\Admin\AttendanceController::class,'insert_attendance_log_from_csv_column'])->name('admin.employee.attendance.log.from.csv');
+            Route::post('approve-all',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'approve_all_pending_request'])->name('admin.employee.attendance.logs.approve.pending');
+            Route::post('insert-attendance-logs',[\App\Http\Controllers\Admin\AttendanceController::class,'insert_attendance_log_from_csv_column'])->name('admin.employee.attendance.log.from.csv');
         });
 
         /* salary slip */

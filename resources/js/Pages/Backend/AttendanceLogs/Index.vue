@@ -7,6 +7,7 @@
                     <h2 class="dashboards-title margin-bottom-40">All {{page_type}} Attendance Logs</h2>
 
                     <div class="btn-wrapper">
+                        <button  @click="approveAllLogs" class="btn btn-danger" >Approve All Pending Log</button>
                          <BsModalButton target="addnewcategory" button-class="btn btn-info m-1" >Add New Log</BsModalButton>
                     </div>
                 </div>
@@ -184,6 +185,24 @@ export default {
             return usePage().props.value.employees
         }
 
+        function approveAllLogs(){
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    //todo:: fire an axios call to update it
+                    //admin.employee.attendance.logs.approve.pending
+                    axios.post(route('admin.employee.attendance.logs.approve.pending'));
+                    window.location.reload();
+                }
+            })
+        }
 
         return {
             attendancesData,
@@ -197,7 +216,8 @@ export default {
             applyFilter,
             filterData,
             page_type,
-            submitApproveData
+            submitApproveData,
+            approveAllLogs
         }
     }
 }

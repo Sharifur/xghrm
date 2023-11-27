@@ -9,6 +9,7 @@
                         <Link class="btn btn-info m-1" :href="route('admin.employee.salary.slip.create')">Add New</Link>
                     </div>
                 </div>
+
                 <div class="table-responsive">
                     <table class="table table-stripped">
                         <thead>
