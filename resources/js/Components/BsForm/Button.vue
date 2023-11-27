@@ -1,5 +1,5 @@
 <template>
-        <button :type="buttonType" class="btn margin-top-40" :disabled="disabled" :class="classes">{{buttonText}}</button>
+        <button :type="buttonType" class="btn" :disabled="disabled" :class="classes">{{buttonText}}</button>
 </template>
 
 <script>
@@ -12,7 +12,7 @@ export default {
         },
         classes: {
             type: String,
-            default: 'btn-primary'
+            default: 'btn-primary  margin-top-40'
         },
         disabled: Boolean,
         buttonType:{

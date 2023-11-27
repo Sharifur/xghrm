@@ -11,6 +11,7 @@ use App\Models\Employee;
 use App\Models\SalarySlip;
 use App\Models\User;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -48,7 +49,7 @@ class AttendanceController extends Controller
 
 
 
-        $logs = $logQeuery->where("status",1)->orderBy("date_time")->get();
+        $logs = $logQeuery->where("status",1)->orderBy("date_time",'desc')->get();
 
         $logsInfo = [];
 
@@ -114,6 +115,7 @@ class AttendanceController extends Controller
     }
 
     public function atteandacneCreate(Request $request){
+
         $userInfo = User::find(\auth("sanctum")->id());
 
         if (is_null($userInfo)){
@@ -155,13 +157,32 @@ class AttendanceController extends Controller
         }
 
         //todo:: create new attendance log
-        AttendanceLog::create([
-            'employee_id'=> $userInfo->employee->id,
-            'type'=> $request->type,
-            'date_time'=> $requested_date,
-            'name'=> $userInfo->employee->att_id ?? '',
-            "status" => 0
-        ]);
+        if (empty($request->end_date)){
+            AttendanceLog::create([
+                'employee_id'=> $userInfo->employee->id,
+                'type'=> $request->type,
+                'date_time'=> $requested_date,
+                'name'=> $userInfo->employee->att_id ?? '',
+                "status" => 0
+            ]);
+        }else{
+            $date_time = Carbon::parse($request->date_time);
+            $end_date = Carbon::parse($request->end_date);
+            $listOfDays = CarbonPeriod::create($date_time,$end_date);
+            foreach ($listOfDays as $day){
+                if ($day->isFriday()) {
+                    continue; // Skip Fridays
+                }
+                AttendanceLog::create([
+                    'employee_id'=> $userInfo->employee->id,
+                    'type'=> $request->type,
+                    'date_time'=> $day,
+                    'name'=> $userInfo->employee->att_id ?? '',
+                    "status" => 0
+                ]);
+            }
+        }
+
         try{
             $message = sprintf('A "%s" request received from "%s" for the date of "%s"',ucwords(str_replace(['-','_'],' ',$request->type)),$userInfo->name,Carbon::parse($request->date_time)->format('D d-M-Y'));
             \Mail::to('hr@xgenious.com')->send(new BasicMail([

@@ -96,4 +96,13 @@ class AttendanceLogsController extends Controller
         //fire a push notification so that employee can understand his leave,sick
         return back();
     }
+
+    public function approve_all_pending_request() {
+
+        AttendanceLog::where(['status' => 0])->update([
+            "status" => 1
+        ]);
+
+        return back();
+    }
 }

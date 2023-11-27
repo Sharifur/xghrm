@@ -38,12 +38,14 @@ class EmployeeSalarySlipController extends Controller
 
     public function store(SalarySlipRequest $request){
         $employee_details = Employee::find($request->employee_id);
-        $existingSlip = SalarySlip::where('employee_id',$employee_details->id)->whereMonth('month','=',Carbon::parse($request->month))->first();
+        $existingSlip = SalarySlip::where('employee_id',$employee_details->id)
+            ->whereYear('month', '=', Carbon::parse($request->month)->year)
+            ->whereMonth('month','=',Carbon::parse($request->month))->first();
         if(is_null( $existingSlip)){
             SalarySlip::create(array_merge([
                 'salary' => $employee_details->salary,
                 'employee_id' => $employee_details->id,
-                'month' => $request->month,
+                'month' => Carbon::parse($request->month),
                 'extraEarningFields' => json_encode($request->extraEarningFields),
                 'extraDeductionFields' => json_encode($request->extraDeductionFields),
             ]));
