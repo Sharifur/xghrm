@@ -106,7 +106,7 @@ export default {
             {label: 'Sick Leave' , value: 'sick-leave'},
             {label: 'Paid Leave' , value: 'paid-leave'},
             {label: 'Holiday' , value: 'holiday'},
-            {label: 'Work From Home' , value: 'work-form-home'},
+            {label: 'Work From Home' , value: 'work-from-home'},
         ];
 
         const filterData = useForm({

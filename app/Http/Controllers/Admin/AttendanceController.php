@@ -165,7 +165,8 @@ class AttendanceController extends Controller
             'employee_id'=> $request->employee_id,
             'type'=> $request->type,
             'date_time'=> Carbon::parse($request->date_time)->addDay(1),
-            'name'=> $employee_details->att_id ?? ''
+            'name'=> $employee_details->att_id ?? '',
+            'status' => 1
         ]);
 
         return back();
