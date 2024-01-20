@@ -72,12 +72,12 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
             Route::post('delete',[\App\Http\Controllers\Admin\AttendanceController::class,'delete'])->name('admin.employee.attendance.delete');
             Route::get('extract/{id}',[\App\Http\Controllers\Admin\AttendanceController::class,'extract'])->name('admin.employee.attendance.extract');
             Route::post('get-column-values',[\App\Http\Controllers\Admin\AttendanceController::class,'get_csv_column_values'])->name('admin.employee.attendance.csv.column.value');
-            Route::post('insert-attendance-logs',[\App\Http\Controllers\Admin\AttendanceController::class,'insert_attendance_log_from_csv_column'])->name('admin.employee.attendance.log.from.csv');
+//            Route::post('insert-attendance-logs',[\App\Http\Controllers\Admin\AttendanceController::class,'insert_attendance_log_from_csv_column'])->name('admin.employee.attendance.log.from.csv');
             Route::post('new-attendance-log',[\App\Http\Controllers\Admin\AttendanceController::class,'new_attendance_log'])->name('admin.employee.attendance.log.add');
         });
 
         /* attendance logs */
-        Route::group(['prefix' => 'attendancelogs'],function (){
+        Route::prefix("attendancelogs")->group(function (){
             Route::get('all',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'index'])->name('admin.employee.attendance.logs');
             Route::get('request',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'attendanceRequest'])->name('admin.employee.attendance.request');
             Route::get('create',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'create'])->name('admin.employee.attendance.logs.create');
@@ -88,7 +88,6 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
             Route::post('delete',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'delete'])->name('admin.employee.attendance.logs.delete');
             Route::get('extract/{id}',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'extract'])->name('admin.employee.attendance.logs.extract');
             Route::post('get-logs',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'get_csv_column_values'])->name('admin.employee.attendance.logs.by.period');
-            Route::post('insert-attendance-logs',[\App\Http\Controllers\Admin\AttendanceController::class,'insert_attendance_log_from_csv_column'])->name('admin.employee.attendance.log.from.csv');
             Route::post('approve-all',[\App\Http\Controllers\Admin\AttendanceLogsController::class,'approve_all_pending_request'])->name('admin.employee.attendance.logs.approve.pending');
             Route::post('insert-attendance-logs',[\App\Http\Controllers\Admin\AttendanceController::class,'insert_attendance_log_from_csv_column'])->name('admin.employee.attendance.log.from.csv');
         });

@@ -16,7 +16,9 @@
             <link rel="stylesheet" href="{{asset('css/loginscreen.css')}}">
         @endif
         @routes
-        <script src="{{ mix('js/app.js') }}" defer></script>
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @inertiaHead
+{{--        <script src="{{ mix('js/app.js') }}" defer></script>--}}
         <script>window.Laravel = {csrfToken: '{{ csrf_token() }}'}</script>
     </head>
     <body class="font-sans antialiased">
