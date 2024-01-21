@@ -50,10 +50,10 @@
 
 <script>
 import {Link, useForm, usePage,Head} from "@inertiajs/inertia-vue3";
-import Pagination from "@/Components/Pagination";
-import AdminMaster from "@/Layouts/AdminMaster";
+import Pagination from "@/Components/Pagination.vue";
+import AdminMaster from "@/Layouts/AdminMaster.vue";
 import Swal from "sweetalert2";
-import StatusShow from "@/Components/StatusShow";
+import StatusShow from "@/Components/StatusShow.vue";
 
 
 export default {

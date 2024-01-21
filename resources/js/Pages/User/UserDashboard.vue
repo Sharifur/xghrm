@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import UserMaster from "@/Layouts/UserMaster";
+import UserMaster from "@/Layouts/UserMaster.vue";
 import {Head} from "@inertiajs/inertia-vue3";
 
 

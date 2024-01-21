@@ -63,15 +63,15 @@
 </template>
 
 <script>
-import AdminMaster from "@/Layouts/AdminMaster";
+import AdminMaster from "@/Layouts/AdminMaster.vue";
 import {Link,usePage,useForm,Head} from "@inertiajs/inertia-vue3";
-import Pagination from "@/Components/Pagination";
+import Pagination from "@/Components/Pagination.vue";
 import Swal from "sweetalert2";
-import BsModal from "@/Components/BsModal";
-import BsModalButton from "@/Components/BsModalButton";
-import BsInput from "@/Components/BsForm/Input";
-import BsSelect from "@/Components/BsForm/Select";
-import BsButton from "@/Components/BsForm/Button";
+import BsModal from "@/Components/BsModal.vue";
+import BsModalButton from "@/Components/BsModalButton.vue";
+import BsInput from "@/Components/BsForm/Input.vue";
+import BsSelect from "@/Components/BsForm/Select.vue";
+import BsButton from "@/Components/BsForm/Button.vue";
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
 import Datepicker from "vue3-datepicker";
 import Select from "@/Components/BsForm/Select.vue";

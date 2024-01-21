@@ -39,9 +39,9 @@
 </template>
 
 <script>
-import AdminMaster from "@/Layouts/AdminMaster";
+import AdminMaster from "@/Layouts/AdminMaster.vue";
 import {Link,usePage,useForm} from "@inertiajs/inertia-vue3";
-import Pagination from "@/Components/Pagination";
+import Pagination from "@/Components/Pagination.vue";
 import Swal from "sweetalert2";
 
 export default {

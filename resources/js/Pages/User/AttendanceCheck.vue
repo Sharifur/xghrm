@@ -80,16 +80,14 @@
 
 <script>
 import {Head,Link,useForm,usePage} from '@inertiajs/inertia-vue3';
-import BsInput from "@/Components/BsForm/Input";
-import BsSelect from "@/Components/BsForm/Select";
-import BsTextarea from "@/Components/BsForm/Textarea";
-import BsButton from "@/Components/BsForm/Button";
+import BsSelect from "@/Components/BsForm/Select.vue";
+import BsButton from "@/Components/BsForm/Button.vue";
 import Datepicker from 'vue3-datepicker'
-import ValidationErrors from "@/Components/ValidationErrors";
+import ValidationErrors from "@/Components/ValidationErrors.vue";
 import Swal from "sweetalert2";
 import { ref } from '@vue/runtime-core';
 import axios from 'axios';
-import UserMaster from "@/Layouts/UserMaster";
+import UserMaster from "@/Layouts/UserMaster.vue";
 
 
 export default {

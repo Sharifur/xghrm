@@ -39,15 +39,15 @@
 </template>
 
 <script>
-import AdminMaster from "@/Layouts/AdminMaster";
+import AdminMaster from "@/Layouts/AdminMaster.vue";
 import {Link, useForm, usePage,Head} from "@inertiajs/inertia-vue3";
-import Input from "@/Components/BsForm/Input";
-import Button from "@/Components/BsForm/Button";
-import Select from "@/Components/BsForm/Select";
-import MediaUploader from "@/Components/MediaUploader";
+import Input from "@/Components/BsForm/Input.vue";
+import Button from "@/Components/BsForm/Button.vue";
+import Select from "@/Components/BsForm/Select.vue";
+import MediaUploader from "@/Components/MediaUploader.vue";
 import Datepicker from "vue3-datepicker";
 import Swal from "sweetalert2";
-import ValidationErrors from "@/Components/ValidationErrors";
+import ValidationErrors from "@/Components/ValidationErrors.vue";
 import {ref} from "vue";
 
 export default {
