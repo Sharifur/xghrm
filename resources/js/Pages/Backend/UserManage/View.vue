@@ -69,7 +69,7 @@
 
 <script>
 import {Link,usePage} from "@inertiajs/inertia-vue3";
-import  AdminMaster from "@/Layouts/AdminMaster";
+import  AdminMaster from "@/Layouts/AdminMaster.vue";
 export default {
     name: "View",
     layout: AdminMaster,

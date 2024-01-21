@@ -101,21 +101,22 @@
 </template>
 
 <script>
-import AdminMaster from "@/Layouts/AdminMaster";
+import AdminMaster from "../../../Layouts/AdminMaster.vue";
 import {usePage, Link, useForm,Head} from "@inertiajs/inertia-vue3";
-import Pagination from "@/Components/Pagination";
-import DropdownButtons from "@/Components/DropdownButtons";
+import Pagination from "@/Components/Pagination.vue";
+import DropdownButtons from "@/Components/DropdownButtons.vue";
 import Swal from "sweetalert2";
-import BsModal from "@/Components/BsModal";
-import BsModalButton from "@/Components/BsModalButton";
+import BsModal from "@/Components/BsModal.vue";
+import BsModalButton from "@/Components/BsModalButton.vue";
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
-import BsInput from "@/Components/BsForm/Input";
-import BsButton from "@/Components/BsForm/Button";
-import BsSelect from "@/Components/BsForm/Select";
-import MediaUploader from "@/Components/MediaUploader";
-import BsTextarea from "@/Components/BsForm/Textarea";
+import BsInput from "@/Components/BsForm/Input.vue";
+import BsButton from "@/Components/BsForm/Button.vue";
+import BsSelect from "@/Components/BsForm/Select.vue";
+import MediaUploader from "@/Components/MediaUploader.vue";
+import BsTextarea from "@/Components/BsForm/Textarea.vue";
 import Datepicker from 'vue3-datepicker'
 import {ref} from "vue";
+
 
 export default {
     name: "AllUsers",

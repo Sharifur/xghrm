@@ -46,15 +46,15 @@
 </template>
 
 <script>
-import AdminMaster from "@/Layouts/AdminMaster";
-import BsButton from "@/Components/BsForm/Button"
-import Input from "@/Components/BsForm/Input"
-import BsSelect from "@/Components/BsForm/Select"
+import AdminMaster from "@/Layouts/AdminMaster.vue";
+import BsButton from "@/Components/BsForm/Button.vue";
+import Input from "@/Components/BsForm/Input.vue";
+import BsSelect from "@/Components/BsForm/Select.vue";
 import {useForm, Link,Head} from "@inertiajs/inertia-vue3";
-import ValidationErrors from "@/Components/ValidationErrors";
-import FlashMsg from "@/Components/FlashMsg";
-import Datepicker from 'vue3-datepicker'
-import MediaUploader from "@/Components/MediaUploader";
+import ValidationErrors from "@/Components/ValidationErrors.vue";
+import FlashMsg from "@/Components/FlashMsg.vue";
+import Datepicker from 'vue3-datepicker';
+import MediaUploader from "@/Components/MediaUploader.vue";
 
 const options = [
     {

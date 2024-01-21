@@ -14,7 +14,7 @@
                 </div>
             </div>
         </div>
-        <input type="hidden" v-model="modelValue" @input="$emit('update:modelValue',$event.target.value)">
+        <input type="hidden"v-bind:modelValue="modelValue" @input="$emit('update:modelValue',$event.target.value)">
        <div class="btn-wrapper">
            <button type="button" class="media-upload-button" @click="openMediaModal">
                {{ buttonTextData }}

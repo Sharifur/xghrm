@@ -1,25 +1,28 @@
 {
     "private": true,
+    "type": "module",
     "scripts": {
-        "dev": "npm run development",
         "development": "mix",
         "watch": "mix watch",
         "watch-poll": "mix watch -- --watch-options-poll=1000",
         "hot": "mix watch --hot",
         "prod": "npm run production",
-        "production": "mix --production"
+        "production": "mix --production",
+        "dev": "vite",
+        "build": "vite build"
     },
     "devDependencies": {
         "@fortawesome/fontawesome-free": "^5.15.4",
-        "@inertiajs/inertia": "^0.10.0",
-        "@inertiajs/inertia-vue3": "^0.5.1",
+        "@inertiajs/inertia": "^0.10.1",
+        "@inertiajs/inertia-vue3": "^0.5.2",
         "@inertiajs/progress": "^0.2.6",
         "@tailwindcss/forms": "^0.2.1",
+        "@vitejs/plugin-vue": "^5.0.3",
         "@vue/compiler-sfc": "^3.0.5",
         "alpinejs": "^3.4.2",
         "autoprefixer": "^10.2.4",
         "axios": "^0.21.4",
-        "laravel-mix": "^6.0.6",
+        "laravel-vite-plugin": "^1.0.1",
         "lodash": "^4.17.19",
         "postcss": "^8.3.11",
         "postcss-import": "^14.0.1",
@@ -28,6 +31,7 @@
         "sass": "^1.43.4",
         "sass-loader": "^12.3.0",
         "tailwindcss": "^2.1.2",
+        "vite": "^5.0.12",
         "vue": "^3.0.5",
         "vue-loader": "^16.1.2"
     },
@@ -36,7 +40,8 @@
         "dropzone": "^6.0.0-beta.2",
         "html2pdf.js": "^0.10.1",
         "moment-timezone": "^0.5.34",
-        "v-calendar": "^3.0.0-alpha.6",
+        "path": "^0.12.7",
+        "v-calendar": "^3.0.0-alpha.9",
         "vue-sweetalert2": "^5.0.2",
         "vue3-datepicker": "^0.2.5"
     }

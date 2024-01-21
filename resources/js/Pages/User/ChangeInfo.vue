@@ -31,16 +31,10 @@
 
 <script>
 import {Head,Link,useForm,usePage} from '@inertiajs/inertia-vue3';
-import BsInput from "@/Components/BsForm/Input";
-import BsSelect from "@/Components/BsForm/Select";
-import BsTextarea from "@/Components/BsForm/Textarea";
-import BsButton from "@/Components/BsForm/Button";
-import Datepicker from 'vue3-datepicker'
-import ValidationErrors from "@/Components/ValidationErrors";
-import Swal from "sweetalert2";
-import { ref } from '@vue/runtime-core';
-import axios from 'axios';
-import UserMaster from "@/Layouts/UserMaster";
+import BsInput from "@/Components/BsForm/Input.vue";
+import BsButton from "@/Components/BsForm/Button.vue";
+import ValidationErrors from "@/Components/ValidationErrors.vue";
+import UserMaster from "@/Layouts/UserMaster.vue";
 
 
 export default {

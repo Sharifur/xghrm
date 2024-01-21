@@ -60,12 +60,12 @@
 
 <script>
 
-import AdminMaster from "@/Layouts/AdminMaster";
+import AdminMaster from "@/Layouts/AdminMaster.vue";
 import {useForm,usePage,Head,Link} from "@inertiajs/inertia-vue3";
-import BsButton from "@/Components/BsForm/Button";
-import Input from "@/Components/BsForm/Input";
-import Select from "@/Components/BsForm/Select";
-import Textarea from "@/Components/BsForm/Textarea";
+import BsButton from "@/Components/BsForm/Button.vue";
+import Input from "@/Components/BsForm/Input.vue";
+import Select from "@/Components/BsForm/Select.vue";
+import Textarea from "@/Components/BsForm/Textarea.vue";
 import Datepicker from "vue3-datepicker";
 import Swal from "sweetalert2";
 import {ref, watch} from "vue";

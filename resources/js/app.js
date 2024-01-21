@@ -1,13 +1,15 @@
-require('./bootstrap');
+import * as bootstrap from 'bootstrap'
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/inertia-vue3';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+
+
 import { InertiaProgress } from '@inertiajs/progress';
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 import country from "./Components/data/country";
-
-import { SetupCalendar, Calendar, DatePicker } from 'v-calendar';
-window.axios = require('axios')
+import axios from "axios";
+window.axios = axios;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 window.axios.defaults.headers.common['X-CSRF-TOKEN'] = window.Laravel.csrfToken;
@@ -80,17 +82,18 @@ const numToWord = (num) => {
 
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
+
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
-    resolve: (name) => require(`./Pages/${name}.vue`),
+    resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
     setup({ el, app, props, plugin }) {
          return createApp({ render: () => h(app, props) })
             .use(plugin)
             .use(VueSweetalert2)
-            .use(SetupCalendar, {})
+            // .use(SetupCalendar, {})
             // Use the components
-            .component('Calendar', Calendar)
-            .component('DatePicker', DatePicker)
+            // .component('Calendar', Calendar)
+            // .component('DatePicker', DatePicker)
             .mixin({ methods: {
                 route,
                 countryNameBySlug(slug){

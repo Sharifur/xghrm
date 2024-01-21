@@ -24,14 +24,14 @@
 </template>
 
 <script>
-import AdminMaster from "@/Layouts/AdminMaster";
+import AdminMaster from "@/Layouts/AdminMaster.vue";
 import {Link, useForm, usePage} from "@inertiajs/inertia-vue3";
-import Input from "@/Components/BsForm/Input";
-import Button from "@/Components/BsForm/Button";
-import MediaUploader from "@/Components/MediaUploader";
+import Input from "@/Components/BsForm/Input.vue";
+import Button from "@/Components/BsForm/Button.vue";
+import MediaUploader from "@/Components/MediaUploader.vue";
 import Datepicker from "vue3-datepicker";
 import Swal from "sweetalert2";
-import ValidationErrors from "@/Components/ValidationErrors";
+import ValidationErrors from "@/Components/ValidationErrors.vue";
 
 export default {
     name: "Edit",

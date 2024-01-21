@@ -11,10 +11,10 @@
 </template>
 
 <script>
-import AdminMaster from "@/Layouts/AdminMaster";
-import Input from "@/Components/BsForm/Input";
-import Select from "@/Components/BsForm/Select";
-import Button from "@/Components/BsForm/Button";
+import AdminMaster from "@/Layouts/AdminMaster.vue";
+import Input from "@/Components/BsForm/Input.vue";
+import Select from "@/Components/BsForm/Select.vue";
+import Button from "@/Components/BsForm/Button.vue";
 import {useForm, usePage} from "@inertiajs/inertia-vue3";
 import Swal from "sweetalert2";
 

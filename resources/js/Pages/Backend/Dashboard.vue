@@ -8,7 +8,7 @@
                     <div class="col-xl-3 col-md-6 margin-top-30 orders-child">
                         <div class="single-orders">
                             <div class="orders-shapes">
-                                <img src="images/dashboard//orders-shapes.png" alt="">
+                                <img src="images/dashboard/orders-shapes.png" alt="">
                             </div>
                             <div class="orders-flex-content">
                                 <div class="icon">
@@ -24,7 +24,7 @@
                     <div class="col-xl-3 col-md-6 margin-top-30 orders-child">
                         <div class="single-orders">
                             <div class="orders-shapes">
-                                <img src="images/dashboard//orders-shapes2.png" alt="">
+                                <img src="images/dashboard/orders-shapes2.png" alt="">
                             </div>
                             <div class="orders-flex-content">
                                 <div class="icon">

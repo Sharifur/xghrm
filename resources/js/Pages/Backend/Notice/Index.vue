@@ -142,18 +142,18 @@
 </template>
 
 <script>
-import AdminMaster from "@/Layouts/AdminMaster";
-import Pagination from "@/Components/Pagination";
+import AdminMaster from "@/Layouts/AdminMaster.vue";
+import Pagination from "@/Components/Pagination.vue";
 import {useForm, Link} from "@inertiajs/inertia-vue3";
-import BsModal from "@/Components/BsModal";
-import BsModalButton from "@/Components/BsModalButton";
+import BsModal from "@/Components/BsModal.vue";
+import BsModalButton from "@/Components/BsModalButton.vue";
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
-import FlashMsg from "@/Components/FlashMsg";
-import BsInput from "@/Components/BsForm/Input";
-import BsSelect from "@/Components/BsForm/Select";
-import BsButton from "@/Components/BsForm/Button";
+import FlashMsg from "@/Components/FlashMsg.vue";
+import BsInput from "@/Components/BsForm/Input.vue";
+import BsSelect from "@/Components/BsForm/Select.vue";
+import BsButton from "@/Components/BsForm/Button.vue";
 import Datepicker from 'vue3-datepicker'
-import MediaUploader from "@/Components/MediaUploader";
+import MediaUploader from "@/Components/MediaUploader.vue";
 import Swal from "sweetalert2";
 
 const options = [

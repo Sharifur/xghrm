@@ -52,18 +52,18 @@
 
 <script>
 import { ref } from 'vue';
-import AdminMaster from "@/Layouts/AdminMaster";
-import BsModal from "@/Components/BsModal";
-import BsModalButton from "@/Components/BsModalButton";
-import BsInput from "@/Components/BsForm/Input";
-import BsSelect from "@/Components/BsForm/Select";
-import IconPicker from "@/Components/IconPicker";
-import BsButton from "@/Components/BsForm/Button";
+import AdminMaster from "@/Layouts/AdminMaster.vue";
+import BsModal from "@/Components/BsModal.vue";
+import BsModalButton from "@/Components/BsModalButton.vue";
+import BsInput from "@/Components/BsForm/Input.vue";
+import BsSelect from "@/Components/BsForm/Select.vue";
+import IconPicker from "@/Components/IconPicker.vue";
+import BsButton from "@/Components/BsForm/Button.vue";
 import {useForm,Link} from "@inertiajs/inertia-vue3";
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
-import FlashMsg from "@/Components/FlashMsg";
-import Pagination from "@/Components/Pagination";
-import StatusShow from "@/Components/StatusShow";
+import FlashMsg from "@/Components/FlashMsg.vue";
+import Pagination from "@/Components/Pagination.vue";
+import StatusShow from "@/Components/StatusShow.vue";
 
 
 let options = [
