@@ -70,9 +70,9 @@
       "resources/js/app.js"
     ]
   },
-  "_MediaUploader-!~{010}~.js": {
+  "_MediaUploader-!~{011}~.js": {
     "file": "assets/MediaUploader-JdgemgHW.css",
-    "src": "_MediaUploader-!~{010}~.js"
+    "src": "_MediaUploader-!~{011}~.js"
   },
   "_MediaUploader-XLJWAQfV.js": {
     "css": [
@@ -175,6 +175,11 @@
     "file": "assets/purify.es-zHtM-7sw.js",
     "isDynamicEntry": true,
     "src": "node_modules/dompurify/dist/purify.es.js"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-HzQhOQzM.css",
+    "isEntry": true,
+    "src": "resources/css/app.css"
   },
   "resources/js/Pages/Admin/Login.vue": {
     "file": "assets/Login-GedlPRKO.js",
