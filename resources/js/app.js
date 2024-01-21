@@ -1,9 +1,12 @@
-import * as bootstrap from 'bootstrap'
+
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/inertia-vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-
-
+import VCalendar from 'v-calendar';
+import 'v-calendar/style.css';
+import { setupCalendar, Calendar, DatePicker } from 'v-calendar';
+import "../scss/main-style.scss"
+;
 import { InertiaProgress } from '@inertiajs/progress';
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
@@ -90,10 +93,11 @@ createInertiaApp({
          return createApp({ render: () => h(app, props) })
             .use(plugin)
             .use(VueSweetalert2)
-            // .use(SetupCalendar, {})
+            .use(VCalendar, {})
+            .use(setupCalendar, {})
             // Use the components
-            // .component('Calendar', Calendar)
-            // .component('DatePicker', DatePicker)
+            .component('Calendar', Calendar)
+            .component('DatePicker', DatePicker)
             .mixin({ methods: {
                 route,
                 countryNameBySlug(slug){

@@ -1,31 +1,31 @@
 //bootstrap
-@import "~bootstrap/scss/bootstrap";
-//fontawesome 5 free
-@import '~@fortawesome/fontawesome-free/scss/fontawesome';
-@import '~@fortawesome/fontawesome-free/scss/regular';
-@import '~@fortawesome/fontawesome-free/scss/solid';
-@import '~@fortawesome/fontawesome-free/scss/brands';
+@import "bootstrap/scss/bootstrap";
+////fontawesome 5 free
+@import '@fortawesome/fontawesome-free/scss/fontawesome';
+@import '@fortawesome/fontawesome-free/scss/regular';
+@import '@fortawesome/fontawesome-free/scss/solid';
+@import '@fortawesome/fontawesome-free/scss/brands';
 
 //global
-@import "resources/scss/global/_mixins";
-@import "resources/scss/global/_variables";
-@import "resources/scss/global/_global";
+@import "global/_mixins";
+@import "global/_variables";
+@import "global/_global";
 
 //sections
-@import "resources/scss/sections/_dashboard";
-@import "resources/scss/sections/_bootstrap-override";
-@import "resources/scss/sections/_pagination";
-@import "resources/scss/sections/thirdparty_plugin_css_override";
-@import "resources/scss/sections/invoice";
+@import "sections/_dashboard";
+@import "sections/_bootstrap-override";
+@import "sections/_pagination";
+@import "sections/thirdparty_plugin_css_override";
+@import "sections/invoice";
 @import "sections/salarySlip";
 @import "sections/user-dashboard";
 
 //components
-@import "resources/scss/components/iconpicker";
-@import "resources/scss/components/_button";
-@import "resources/scss/components/_datepicker";
-@import "resources/scss/components/media_uploader";
-@import "resources/scss/components/transition";
-@import "resources/scss/components/sweetalert";
-@import "resources/scss/components/calendar";
+@import "components/iconpicker";
+@import "components/_button";
+@import "components/_datepicker";
+@import "components/media_uploader";
+@import "components/transition";
+@import "components/sweetalert";
+@import "components/calendar";
 
