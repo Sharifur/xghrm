@@ -6,7 +6,10 @@ import VCalendar from 'v-calendar';
 import 'v-calendar/style.css';
 import { setupCalendar, Calendar, DatePicker } from 'v-calendar';
 import "../scss/main-style.scss"
-;
+
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css'
+
 import { InertiaProgress } from '@inertiajs/progress';
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
@@ -98,6 +101,7 @@ createInertiaApp({
             // Use the components
             .component('Calendar', Calendar)
             .component('DatePicker', DatePicker)
+             .component('VueDatePicker', VueDatePicker)
             .mixin({ methods: {
                 route,
                 countryNameBySlug(slug){

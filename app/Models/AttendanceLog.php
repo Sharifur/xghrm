@@ -11,7 +11,8 @@ class AttendanceLog extends Model
     protected $fillable = ['name','date_time','type','employee_id','status','uuid'];
 
     protected $casts = [
-      'employee_id' => 'integer',
+        'employee_id' => 'integer',
+        'status' => 'integer'
     ];
 
     public function employee(){

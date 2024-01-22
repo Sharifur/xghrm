@@ -17,7 +17,7 @@ export default {
         options: [Array,Object],
         modelValue: {
             type: [String,Number,Object],
-            default: ""
+            default: null
         },
         title: String,
         inputClass: {

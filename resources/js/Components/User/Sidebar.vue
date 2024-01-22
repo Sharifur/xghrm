@@ -11,7 +11,7 @@
             </Link>
         </li>
         <li class="list" v-if="isEmployee">
-            <Link :href="route('logout')">
+            <Link :href="route('user.leaves.index')">
                <span>Leaves</span>
             </Link>
         </li>
