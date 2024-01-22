@@ -20,7 +20,7 @@
                         <tbody>
                             <tr v-for="attendant in attendancesData()" v-bind:key="attendant.id">
                                 <td>{{attendant.id}}</td>
-                                <td><span class="alert text-capitalize" :class="attendant.type === 'C/In' ? 'alert-success' : 'alert-danger'">{{attendant.type.replace('-',' ')}}</span></td>
+                                <td><span class="alert text-capitalize" :class="attendant.type">{{attendant.type.replaceAll('-',' ')}}</span></td>
                                 <td><span class="alert text-capitalize" :class="attendant.status === 1 ? 'alert-success' : 'alert-danger'">{{attendant.status === 1 ? "Approved" : "pending"}}</span></td>
                                 <td>{{readableDateFormat(attendant.date_time)}}</td>
                             </tr>
@@ -80,7 +80,8 @@ export default {
 
         const attendanceTypes = [
             {label: 'Leave' , value: 'leave'},
-            {label: 'Sick Leave' , value: 'sick-leave'}
+            {label: 'Sick Leave' , value: 'sick-leave'},
+            {label: 'Work From Home' , value: 'work-from-home'},
         ];
 
         const newLogData = useForm({

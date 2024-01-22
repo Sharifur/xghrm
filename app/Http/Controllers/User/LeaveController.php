@@ -22,7 +22,7 @@ class LeaveController extends Controller
 
         $attendance_logs = AttendanceLog::with('employee')
             ->where('employee_id',$user_details?->employee?->id)
-            ->whereIn('type',['leave','sick-leave','paid-leave'])
+            ->whereIn('type',['leave','sick-leave','paid-leave','work-from-home'])
             ->orderBy('id','desc')
             ->paginate(10);
 
