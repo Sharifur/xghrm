@@ -43,7 +43,7 @@
         <BsSelect title="Status" :options="attendanceTypes" v-model="newLogData.type"/>
         <div class="single-info-input margin-top-30">
             <label class="info-title">Date Time</label>
-            <Datepicker v-model="newLogData.date_time"/>
+            <VueDatePicker v-model="newLogData.date_time"/>
         </div>
         <BsButton button-text="Submit" button-type="submit" @click="addAttendanceLogFormSubmit" :disabled="newLogData.processing"/>
 
@@ -64,6 +64,7 @@ import BsSelect from "@/Components/BsForm/Select.vue";
 import BsButton from "@/Components/BsForm/Button.vue";
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
 import Datepicker from "vue3-datepicker";
+import VueDatePicker from "@vuepic/vue-datepicker";
 
 export default {
     name: "Index",
@@ -79,7 +80,8 @@ export default {
         BsButton,
         BreezeValidationErrors,
         Datepicker,
-        Head
+        Head,
+        VueDatePicker
     },
     setup(){
 

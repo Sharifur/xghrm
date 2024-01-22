@@ -156,7 +156,7 @@ class AttendanceController extends Controller
 
     public function new_attendance_log(Request $request){
         $this->validate($request,[
-            'employee_id'=> 'nullable|numeric',
+            'employee_id'=> 'required_unless:type,==,holiday|numeric',
             'type'=> 'required|string',
             'date_time'=> 'required|string'
         ]);
@@ -164,7 +164,7 @@ class AttendanceController extends Controller
         AttendanceLog::create([
             'employee_id'=> $request->employee_id,
             'type'=> $request->type,
-            'date_time'=> Carbon::parse($request->date_time)->addDay(1),
+            'date_time'=> Carbon::parse($request->date_time),
             'name'=> $employee_details->att_id ?? '',
             'status' => 1
         ]);

@@ -28,7 +28,6 @@
                                 <td>{{attendant.name}}</td>
                                 <td>
                                     <span class="alert text-capitalize" :class="attendant.type === 'C/In' ? 'alert-success' : 'alert-danger'">{{attendant.type.replace('-',' ')}}</span>
-
                                     <Link v-show="attendant.status === 0" @click="submitApproveData(attendant.id)" class="btn btn-success m-2"><i class="fas fa-check"></i></Link>
                                 </td>
                                 <td>{{readableDateFormat(attendant.date_time)}}</td>
@@ -53,7 +52,7 @@
         <BsSelect title="Status" :options="attendanceTypes" v-model="newLogData.type"/>
         <div class="single-info-input margin-top-30">
             <label class="info-title">Date Time</label>
-            <Datepicker v-model="newLogData.date_time"/>
+            <VueDatePicker v-model="newLogData.date_time"/>
         </div>
         <BsButton button-text="Submit" button-type="submit" @click="addAttendanceLogFormSubmit" :disabled="newLogData.processing"/>
 
@@ -76,11 +75,13 @@ import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
 import Datepicker from "vue3-datepicker";
 import Select from "@/Components/BsForm/Select.vue";
 import {ref} from "vue";
+import VueDatePicker from "@vuepic/vue-datepicker";
 
 export default {
     name: "Index",
     layout: AdminMaster,
     components:{
+        VueDatePicker,
         Select,
         Pagination,
         Link,

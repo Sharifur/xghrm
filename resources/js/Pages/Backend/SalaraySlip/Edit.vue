@@ -14,7 +14,7 @@
                 <form @submit.prevent>
                     <div class="single-info-input margin-top-30">
                         <label class="info-title">Salary Month</label>
-                        <Datepicker v-model="salarySlipData.month"/>
+                        <VueDatePicker v-model="salarySlipData.month"/>
                         <span class="info-text">Select Month First</span>
                     </div>
                     <Select title="Employee" @change="changeEmployeeSelect()" v-model="salarySlipData.employee_id" :options="employeeList" />
@@ -153,6 +153,7 @@ import Swal from "sweetalert2";
 import {ref, watch} from "vue";
 import html2pdf from "html2pdf.js";
 import { onMounted } from "vue";
+import VueDatePicker from "@vuepic/vue-datepicker";
 
 export default {
     layout: AdminMaster,
@@ -163,7 +164,8 @@ export default {
         Textarea,
         Head,
         Datepicker,
-        Link
+        Link,
+        VueDatePicker
     },
     setup(){
         const employeeList = usePage().props.value.all_employee;

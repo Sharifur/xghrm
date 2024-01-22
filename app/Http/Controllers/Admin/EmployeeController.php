@@ -110,7 +110,7 @@ class EmployeeController extends Controller
         $OfficeDays = 0;
         $sickLeaveCount = $logs->where('type','sick-leave')->count();
         $paidLeaveCount =$logs->where('type','paid-leave')->count();
-        $workFormHome =$logs->where('type','work-form-home')->count();
+        $workFormHome =$logs->where('type','work-from-home')->count();
         foreach( $logsInfo as $log){
             if($log['working_nature'] === 'Office'){
                 $OfficeDays++;
