@@ -14,8 +14,9 @@
                                     <i class="fas fa-tasks"></i>
                                 </div>
                                 <div class="contents">
-                                    <h2 class="order-titles"> 12 </h2>
-                                    <span class="order-para"> Total Leave </span>
+                                    <h2 class="order-titles"> 12 ..</h2>
+                                    <span class="order-para"> Total Leave</span>
+                                    <small class="d-block text-white">not dynamic</small>
                                 </div>
                             </div>
                         </div>
@@ -30,8 +31,9 @@
                                     <i class="fas fa-handshake"></i>
                                 </div>
                                 <div class="contents">
-                                    <h2 class="order-titles"> 2350 </h2>
+                                    <h2 class="order-titles"> 2350 ..</h2>
                                     <span class="order-para"> Salary Slip </span>
+                                    <small class="d-block text-white">not dynamic</small>
                                 </div>
                             </div>
                         </div>
