@@ -178,7 +178,6 @@ export default {
             newLogData.post(route('admin.employee.attendance.log.add'),{
                 onSuccess: (response) => {
                     Swal.fire('Success','new attendance log added','success');
-                    newLogData.reset( 'employee_id','type','date_time','name');
                 }
             })
         }
