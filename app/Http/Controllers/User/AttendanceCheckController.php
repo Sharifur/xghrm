@@ -29,7 +29,9 @@ class AttendanceCheckController extends Controller
     public function check(Request $request){
 
         $user = Auth::guard('web')->getUser();
-        $logQeuery =  AttendanceLog::query()->where(['employee_id' =>  $user->employee?->id]);
+
+        $logQeuery =  AttendanceLog::query()
+            ->where(['employee_id' =>  $user->employee?->id]);
         if (!empty($request->startDate)){
             $logQeuery->whereBetween('date_time',[Carbon::parse($request->startDate)->startOfMonth(),Carbon::parse($request->startDate)->endOfMonth()]);
         }
@@ -42,37 +44,10 @@ class AttendanceCheckController extends Controller
 
 
         $logs = $logQeuery->where("status",1)->orderBy("date_time")->get();
-        $logsInfo = [];
 
-        foreach($logs as $log){
-            $parsed_date = Carbon::parse($log->date_time)->format("d-m-Y");
-            if (isset($logsInfo[$parsed_date])){
-                //alreayd have this day index
-                if ($log->type == "C/Out"){
-                    //added Out_time
-                    $logsInfo[$parsed_date][str_replace("c/","",strtolower($log->type))."_time"] =
-                        $log->type === "holiday" ? " ": Carbon::parse($log->date_time)->format('g:i A');
+        $logsInfo = $this->logAsArray($logs);
 
-                    //todo if in time available then calculate total office hour
-                    if (isset($logsInfo[$parsed_date]["in_time"])){
-                        $dt_str = $parsed_date." ".$logsInfo[$parsed_date]["in_time"];
-                        $check_intime = Carbon::parse($dt_str);
-                        $logsInfo[$parsed_date]["working_hour"] = $check_intime->diff(Carbon::parse($log->date_time))->format("%H:%I:%S");
-                    }
-                }
-                $logsInfo[$parsed_date]["working_nature"] = $this->workNature($log->type);
-            }else{
-                //added in_time
-                $logsInfo[$parsed_date] = [
-                    str_replace("c/","",strtolower($log->type))."_time" =>
-                        $log->type === "holiday" ? " ": Carbon::parse($log->date_time)->format('g:i A'),
-                    "working_nature" => $this->workNature($log->type),
-                    "dateTime" => $log->date_time
 
-                ];
-            }
-            //if found cout/cin then show total office hour
-        }
 
         $holidayCount = $logs->where('type','holiday')->count();
         $leaveCount = $logs->where('type','leave')->count();
