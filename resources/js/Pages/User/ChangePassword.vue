@@ -12,7 +12,6 @@
                         <div class="dashboard-profile-flex">
                             <div class="dashboard-address-details">
                                 <form @submit.prevent>
-                                    <BsInput type="password" title="Old Password*" v-model="userData.oldPassword"/>
                                     <BsInput type="password" title="New Password*" v-model="userData.password"/>
                                     <BsInput type="password" title="Confirm Password*" v-model="userData.password_confirmation"/>
                                     <div class="btn-wrapper margin-top-35">
@@ -35,6 +34,7 @@ import BsInput from "@/Components/BsForm/Input.vue";
 import BsButton from "@/Components/BsForm/Button.vue";
 import ValidationErrors from "@/Components/ValidationErrors.vue";
 import UserMaster from "@/Layouts/UserMaster.vue";
+import Swal from "sweetalert2";
 
 
 export default {
@@ -50,13 +50,18 @@ export default {
     setup(){
 
         const userData = useForm({
-            oldPassword: null,
             password : null,
             password_confirmation : null
         });
 
         function changePassword(){
             //todo: submit form
+            userData.post(route('user.profile.change.password'),{
+                onSuccess: (response) => {
+                    Swal.fire('Success','password change success','success');
+                    userData.reset( 'password','password_confirmation');
+                }
+            })
         }
         return {
             userData,

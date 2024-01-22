@@ -18,4 +18,8 @@ Route::group(['prefix' => 'user-home','middleware' => 'auth:web'],function (){
         Route::get('/',[\App\Http\Controllers\User\LeaveController::class,'index'])->name('user.leaves.index');
         Route::post('/',[\App\Http\Controllers\User\LeaveController::class,'new_leave'])->name('user.leaves.new');
     });
+    Route::group(['prefix' => 'salary-slip'],function (){
+        Route::get('/',[\App\Http\Controllers\User\SalaryController::class,'index'])->name('user.salary.slip.index');
+        Route::get('/{id}',[\App\Http\Controllers\User\SalaryController::class,'view_details'])->name('user.salary.slip.view');
+    });
 });

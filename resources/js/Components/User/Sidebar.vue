@@ -2,7 +2,7 @@
     <ul class="dashboard-list dashboard-menu-ul">
         <li class="list" :class="{'active' : $page.url === '/user-home'}">
             <Link :href="route('user.home')" >
-                <i class="fas fa-bars"></i> Dashboard
+                <span>Dashboard</span>
             </Link>
         </li>
         <li class="list" v-if="isEmployee">
@@ -16,19 +16,14 @@
             </Link>
         </li>
         <li class="list" v-if="isEmployee">
-            <Link :href="route('logout')">
+            <Link :href="route('user.salary.slip.index')">
                 <span> Salary Slip</span>
             </Link>
         </li>
-        <li class="list has-submenu " :class="{'active' : $page.url.startsWith('/user-home/profile')}">
-            <span> Edit Profile </span>
-            <ul class="sub-menu">
-                <li>
-                    <Link :href="route('user.profile.change.password')" :class="{'active' : $page.url === ('/user-home/profile/change-password')}">
-                        Change Password
-                    </Link>
-                </li>
-            </ul>
+        <li class="list" v-if="isEmployee">
+            <Link :href="route('user.profile.change.password')">
+                <span>Change Password</span>
+            </Link>
         </li>
         <li class="list logoutbtn">
             <Link :href="route('logout')" method="post"  as="button" >
