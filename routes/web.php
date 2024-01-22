@@ -16,7 +16,7 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
-    return redirect()->route('admin.login');
+    return redirect()->route('login');
 });
 
 /*==============================================
