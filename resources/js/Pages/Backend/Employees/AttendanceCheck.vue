@@ -21,7 +21,7 @@
                                     <div class="single-dashboard-input">
                                         <div class="single-info-input margin-top-30">
                                             <label class="info-title"> Select Month </label>
-                                            <Datepicker v-model="employeeData.startDate"/>
+                                            <VueDatePicker v-model="employeeData.startDate"/>
                                             <span>any date you select in this calendar, system will get data for the selected date month</span>
                                         </div>
                                     </div>
@@ -76,8 +76,6 @@
                     </template>
                 </Calendar>
             </div>
-
-
             </div>
         </div>
     </div>
@@ -93,12 +91,14 @@ import ValidationErrors from "@/Components/ValidationErrors.vue";
 import Swal from "sweetalert2";
 import { ref } from '@vue/runtime-core';
 import axios from 'axios';
+import VueDatePicker from "@vuepic/vue-datepicker";
 
 
 export default {
     name: "AttendanceCheck",
     layout: AdminMaster,
     components: {
+        VueDatePicker,
         BsSelect,
         BsButton,
         Datepicker,

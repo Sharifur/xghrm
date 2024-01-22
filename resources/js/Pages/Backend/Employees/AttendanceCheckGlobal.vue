@@ -15,7 +15,7 @@
                                         <div class="single-dashboard-input">
                                             <div class="single-info-input margin-top-30">
                                                 <label class="info-title"> Select Month </label>
-                                                <Datepicker v-model="employeeData.startDate"/>
+                                                <VueDatePicker v-model="employeeData.startDate"/>
                                                 <span>any date you select in this calendar, system will get data for the selected date month</span>
                                             </div>
                                         </div>
@@ -86,6 +86,7 @@
     import { ref } from '@vue/runtime-core';
     import axios from 'axios';
     import Select from "@/Components/BsForm/Select.vue";
+    import VueDatePicker from "@vuepic/vue-datepicker";
 
     export default {
         name: "AttendanceCheck",
@@ -97,7 +98,8 @@
             ValidationErrors,
             Link,
             Head,
-            Select
+            Select,
+            VueDatePicker
         },
         setup(){
             const holidayCount = ref(0);
