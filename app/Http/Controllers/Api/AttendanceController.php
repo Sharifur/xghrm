@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Services\UserServices;
+use App\Http\Traits\AttendanceHelper;
 use App\Mail\BasicMail;
 use App\Models\AdvanceSalary;
 use App\Models\AttendanceLog;
@@ -20,9 +21,10 @@ use Illuminate\Support\Str;
 
 class AttendanceController extends Controller
 {
+    use AttendanceHelper;
 
     public function atteandacne(Request $request){
-        $userInfo = User::find(\auth("sanctum")->id());
+        $userInfo = User::with('employee')->find(\auth("sanctum")->id());
 
         if (is_null($userInfo)){
             return response()->json([
@@ -31,7 +33,9 @@ class AttendanceController extends Controller
             ],422);
         }
 
-        $logQeuery =  AttendanceLog::query()->where(['employee_id' => $userInfo?->employee?->id]);
+
+        $logQeuery =  AttendanceLog::query()
+            ->where(['employee_id' => $userInfo?->employee?->id]);
         if (!empty($request->startDate)){
             $logQeuery->whereDate('date_time','>',Carbon::parse($request->startDate));
         }
@@ -47,40 +51,9 @@ class AttendanceController extends Controller
             $logQeuery->whereIn("type",["holiday","C/In","C/Out","leave","sick-leave","work-from-home"]);
         }
 
+        $logs = $logQeuery->where("status",1)->orderBy("date_time")->get();
 
-
-        $logs = $logQeuery->where("status",1)->orderBy("date_time",'desc')->get();
-
-        $logsInfo = [];
-
-        foreach($logs as $log){
-            $parsed_date = Carbon::parse($log->date_time)->format("d-m-Y");
-            if (isset($logsInfo[$parsed_date])){
-                //alreayd have this day index
-                if ($log->type == "C/Out"){
-                    //added Out_time
-                    $logsInfo[$parsed_date][str_replace("c/","",strtolower($log->type))."_time"] =
-                        $log->type === "holiday" ? " ": Carbon::parse($log->date_time)->format('g:i A');
-
-                    //todo if in time available then calculate total office hour
-                    if (isset($logsInfo[$parsed_date]["in_time"])){
-                        $dt_str = $parsed_date." ".$logsInfo[$parsed_date]["in_time"];
-                        $check_intime = Carbon::parse($dt_str);
-                        $logsInfo[$parsed_date]["working_hour"] = $check_intime->diff(Carbon::parse($log->date_time))->format("%H:%I:%S");
-                    }
-                }
-                $logsInfo[$parsed_date]["working_nature"] = $this->workNature($log->type);
-            }else{
-                //added in_time
-                $logsInfo[$parsed_date] = [
-                    str_replace("c/","",strtolower($log->type))."_time" =>
-                        $log->type === "holiday" ? " ": Carbon::parse($log->date_time)->format('g:i A'),
-                    "working_nature" => $this->workNature($log->type)
-
-                ];
-            }
-            //if found cout/cin then show total office hour
-        }
+        $logsInfo = array_reverse($this->logAsArray($logs));
 
         $holidayCount = $logs->where('type','holiday')->count();
         $leaveCount = $logs->where('type','leave')->count();
@@ -103,15 +76,6 @@ class AttendanceController extends Controller
             'paidLeaveCount' => $paidLeaveCount ?? 0,
             'workFormHome' => $workFormHome ?? 0,
         ]);
-    }
-
-    private function workNature($type){
-        return match ($type){
-            "holiday" => "Holiday",
-            "C/In", "C/Out" => "Office",
-            "leave","sick-leave", => "Leave",
-            "work-from-home" => "Remote"
-        };
     }
 
     public function atteandacneCreate(Request $request){

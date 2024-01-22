@@ -12,7 +12,8 @@ class AttendanceLog extends Model
 
     protected $casts = [
         'employee_id' => 'integer',
-        'status' => 'integer'
+        'status' => 'integer',
+        'date_time' => 'datetime'
     ];
 
     public function employee(){
