@@ -5,21 +5,6 @@
                 <i class="fas fa-bars"></i> Dashboard
             </Link>
         </li>
-<!--        <li class="list has-submenu " :class="{'active' : $page.url.startsWith('/admin-home/products/')}">-->
-<!--            <span> Products </span>-->
-<!--            <ul class="sub-menu">-->
-<!--                <li>-->
-<!--                    <Link :href="route('admin.products.all')" :class="{'active' : $page.url === ('/admin-home/products/all')}">-->
-<!--                        All-->
-<!--                    </Link>-->
-<!--                </li>-->
-<!--                <li>-->
-<!--                    <Link :href="route('admin.products.new')" :class="{'active' : $page.url === ('/admin-home/products/new')}">-->
-<!--                        Add New-->
-<!--                    </Link>-->
-<!--                </li>-->
-<!--            </ul>-->
-<!--        </li>-->
         <li class="list" v-if="isEmployee">
             <Link :href="route('user.attendance.index')">
                 <span>Attendance Check</span>
@@ -27,7 +12,7 @@
         </li>
         <li class="list" v-if="isEmployee">
             <Link :href="route('logout')">
-               <span> Leaves</span>
+               <span>Leaves</span>
             </Link>
         </li>
         <li class="list" v-if="isEmployee">
@@ -41,11 +26,6 @@
                 <li>
                     <Link :href="route('user.profile.change.password')" :class="{'active' : $page.url === ('/user-home/profile/change-password')}">
                         Change Password
-                    </Link>
-                </li>
-                <li>
-                    <Link :href="route('user.profile.change.info')" :class="{'active' : $page.url === ('/user-home/profile/change-info')}">
-                        Change Profile Info
                     </Link>
                 </li>
             </ul>

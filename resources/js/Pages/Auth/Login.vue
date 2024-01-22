@@ -9,9 +9,9 @@
             <div class="square" style="--i:4;"></div>
             <div class="square" style="--i:5;"></div>
 
-            <div class="container">
+            <div class="login_form_container">
                 <div class="form">
-                    <h2>Welcome, Login To the XGENIOUS CRM</h2>
+                    <h2>Welcome, Login To the XGENIOUS HRM</h2>
 
                     <BreezeValidationErrors class="mb-4"/>
                     <form @submit.prevent="submit">
@@ -49,6 +49,7 @@
 import {Head, Link} from '@inertiajs/inertia-vue3';
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
 import BreezeCheckbox from '@/Components/Checkbox.vue'
+import "../../../scss/loginscreen.scss"
 
 export default {
     name: "UserLogin",

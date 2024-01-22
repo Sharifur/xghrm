@@ -13,6 +13,6 @@ Route::group(['prefix' => 'user-home','middleware' => 'auth:web'],function (){
     });
     Route::group(['prefix' => 'attendance'],function (){
         Route::get('/',[\App\Http\Controllers\User\AttendanceCheckController::class,'index'])->name('user.attendance.index');
-        Route::post('/',[\App\Http\Controllers\User\AttendanceCheckController::class,'check']);
+        Route::post('/',[\App\Http\Controllers\User\AttendanceCheckController::class,'check'])->name('user.attendance.check');
     });
 });
