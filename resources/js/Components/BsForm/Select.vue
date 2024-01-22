@@ -23,7 +23,7 @@ export default {
         title: String,
         inputClass: {
             type: String,
-            default: null
+            default: 'unknown'
         },
         info: String
     },
