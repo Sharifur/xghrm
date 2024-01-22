@@ -104,7 +104,7 @@ section {
     z-index: 2;
 }
 
-.container {
+.login_form_container {
     position: relative;
     padding: 50px;
     width: 600px;
@@ -118,7 +118,7 @@ section {
     box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
 }
 
-.container::after {
+.login_form_container::after {
     content: "";
     position: absolute;
     top: 5px;
@@ -141,7 +141,8 @@ section {
     letter-spacing: 2px;
     margin-bottom: 30px;
     text-align: center;
-    font-size: 50px;
+    font-weight: 600;
+    font-size: 40px;
     line-height: 54px;
 }
 
@@ -259,7 +260,7 @@ section {
 
 
 @media  only screen and (max-width: 450px) {
-    .container {
+    .login_form_container {
         max-width: 100%;
         width: 100%;
         padding: 60px 30px 40px 30px;

@@ -1,6 +1,5 @@
 <template>
     <Head title="Admin Log in" />
-
     <section>
         <div class="box">
 
@@ -11,9 +10,9 @@
             <div class="square" style="--i:4;"></div>
             <div class="square" style="--i:5;"></div>
 
-            <div class="container">
+            <div class="login_form_container">
                 <div class="form">
-                    <h2>Welcome, Login To the XGENIOUS CRM</h2>
+                    <h2>Welcome, Login To the XGENIOUS HRM</h2>
 
                     <BreezeValidationErrors class="mb-4"/>
                     <form @submit.prevent="submit">
@@ -54,6 +53,7 @@ import BreezeInput from '@/Components/Input.vue'
 import BreezeLabel from '@/Components/Label.vue'
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue'
 import { Head, Link } from '@inertiajs/inertia-vue3';
+import "../../../scss/loginscreen.scss"
 
 export default {
     components: {

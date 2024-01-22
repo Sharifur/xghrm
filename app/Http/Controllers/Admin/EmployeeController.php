@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EmployeeRequest;
+use App\Http\Traits\AttendanceHelper;
 use App\Models\AttendanceLog;
 use App\Models\Attendance;
 use App\Models\Employee;
@@ -18,6 +19,8 @@ use function GuzzleHttp\Promise\all;
 
 class EmployeeController extends Controller
 {
+    use AttendanceHelper;
+
     public function new(){
         $category_list = EmployeeCategory::where('status',1)->get()->map(function ($item){
             return ['value' => $item->id,'label' => $item->title];
@@ -254,15 +257,6 @@ class EmployeeController extends Controller
             'type' => $type
         ],200);
     }
-    private function workNature($type){
-        return match ($type){
-            "holiday" => "Holiday",
-            "work-from-home" => "Remote",
-            "C/In", "C/Out" => "Office",
-            "leave",
-            "sick-leave","paid-leave" => "Leave",
-            default => " "
-        };
-    }
+
 
 }

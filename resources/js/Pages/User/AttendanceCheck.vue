@@ -1,6 +1,6 @@
 <template>
-<Head title="Attendance Check "/>
-      <div class="row">
+    <Head title="Employee Attendance Check - Xgenious"/>
+    <div class="row">
         <div class="col-lg-12">
             <div class="dashboard-settings margin-top-40">
                 <div class="header-wrap d-flex justify-content-between">
@@ -12,17 +12,11 @@
                         <div class="dashboard-profile-flex">
                             <div class="dashboard-address-details">
                                 <form @submit.prevent>
-
                                     <div class="single-dashboard-input">
                                         <div class="single-info-input margin-top-30">
-                                            <label class="info-title"> Start Date </label>
+                                            <label class="info-title"> Select Month </label>
                                             <Datepicker v-model="employeeData.startDate"/>
-                                        </div>
-                                    </div>
-                                    <div class="single-dashboard-input">
-                                        <div class="single-info-input margin-top-30">
-                                            <label class="info-title"> End Date</label>
-                                            <Datepicker v-model="employeeData.endDate"/>
+                                            <span>any date you select in this calendar, system will get data for the selected date month</span>
                                         </div>
                                     </div>
                                     <div class="btn-wrapper margin-top-35">
@@ -34,43 +28,42 @@
                     </div>
                 </div>
 
-            <div class="cleardar-wrapper" v-if="attendanceShow">
-               <div class="head-rapw margin-top-40">
-                    <h4>Color Explanation</h4>
-                    <ul class="color-explanation">
-                        <li class="holiday">Holiday <span class="badge">{{holidayCount}}</span></li>
-                        <li class="leave">leave  <span class="badge">{{leaveCount}}</span></li>
-                        <li class="C/In">C/In  <span class="badge">{{inCount}}</span></li>
-                        <li class="C/Out">C/Out  <span class="badge">{{outCount}}</span></li>
-                        <li class="sick-leave">Sick Leave  <span class="badge">{{sickLeaveCount}}</span></li>
-                        <li class="paid-leave">Paid Leave  <span class="badge">{{paidLeaveCount}}</span></li>
-                        <li class="work-from-home">Work From Home  <span class="badge">{{workFromHomeCount}}</span></li>
-                    </ul>
-               </div>
-                <Calendar
-                    class="custom-calendar-outer-wrap"
-                    :masks="CalendarData().masks"
-                    :attributes="CalendarData().attributes"
-                    disable-page-swipe
-                    is-expanded
+                <div class="cleardar-wrapper" v-if="attendanceShow">
+                    <div class="head-rapw margin-top-40">
+                        <h4>Color Explanation</h4>
+                        <ul class="color-explanation">
+                            <li class="holiday">Holiday<span class="badge">{{holidayCount}}</span></li>
+                            <li class="leave">leave<span class="badge">{{leaveCount}}</span></li>
+                            <li class="C/In">OfficeDays<span class="badge">{{OfficeDays}}</span></li>
+                            <li class="sick-leave">Sick Leave<span class="badge">{{sickLeaveCount}}</span></li>
+                            <li class="paid-leave">Paid Leave<span class="badge">{{paidLeaveCount}}</span></li>
+                            <li class="work-from-home">Work From Home<span class="badge">{{workFormHome}}</span></li>
+                        </ul>
+                    </div>
+                    <Calendar
+                        class="custom-calendar-outer-wrap"
+                        :masks="CalendarData().masks"
+                        :attributes="CalendarData().attributes"
+                        disable-page-swipe
+                        is-expanded
                     >
-                    <template v-slot:day-content="{ day, attributes }">
-                        <div class="date-box-wrapper">
-                            <span class="day-label">{{ day.day }}</span>
-                            <div class="custom-data-wrapper">
-                                <p
-                                v-for="{key,customData} in attributes"
-                                :key="key"
-                                class="data-item"
-                                :class="customData.class"
-                                >
-                                {{ customData.title }}
-                                </p>
+                        <template v-slot:day-content="{ day, attributes }">
+                            <div class="date-box-wrapper">
+                                <span class="day-label">{{ day.day }}</span>
+                                <div class="custom-data-wrapper">
+                                    <p
+                                        v-for="{key,customData} in attributes"
+                                        :key="key"
+                                        class="data-item"
+                                        :class="customData.class"
+                                    >
+                                        {{ customData.title }}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    </template>
-                </Calendar>
-            </div>
+                        </template>
+                    </Calendar>
+                </div>
 
 
             </div>
@@ -80,6 +73,7 @@
 
 <script>
 import {Head,Link,useForm,usePage} from '@inertiajs/inertia-vue3';
+import AdminMaster from "@/Layouts/AdminMaster.vue";
 import BsSelect from "@/Components/BsForm/Select.vue";
 import BsButton from "@/Components/BsForm/Button.vue";
 import Datepicker from 'vue3-datepicker'
@@ -87,12 +81,11 @@ import ValidationErrors from "@/Components/ValidationErrors.vue";
 import Swal from "sweetalert2";
 import { ref } from '@vue/runtime-core';
 import axios from 'axios';
-import UserMaster from "@/Layouts/UserMaster.vue";
-
+import Select from "@/Components/BsForm/Select.vue";
 
 export default {
     name: "AttendanceCheck",
-    layout: UserMaster,
+    layout: AdminMaster,
     components: {
         BsSelect,
         BsButton,
@@ -100,70 +93,77 @@ export default {
         ValidationErrors,
         Link,
         Head,
+        Select
     },
     setup(){
         const holidayCount = ref(0);
         const leaveCount = ref(0);
-        const inCount = ref(0);
-        const outCount = ref(0);
+        const OfficeDays = ref(0);
         const sickLeaveCount = ref(0);
         const paidLeaveCount = ref(0);
-        const workFromHomeCount = ref(0);
+        const workFormHome = ref(0);
 
         const attendanceShow = ref(false);
         const CalendarAttributes = ref([]);
-        const employeeDetails = usePage().props.value.allEmployees;
+        const employeeList = usePage().props.value.allEmployees;
         const employeeData = useForm({
-            employee_id:employeeDetails.id ,
+            employee_id: null ,
             startDate: new Date(),
             endDate : new Date()
         });
-
 
 
         function getAttendanceDetails(){
             //submit form
 
             axios
-            .post(route('user.attendance.index'),{
-                ...employeeData
-            })
-            .then((response) => {
-                 if (Object.keys(response.data.logs).length > 1){
-                    let attenData = response.data.logs;
-                    let calendarData = [];
-                    attenData.forEach((value,index) => {
-                        calendarData.push({
-                            key: index,
-                            customData: {
-                                title: `${value.type}: ${new Date(value.date_time).toLocaleTimeString('en-US',{timeZone: 'Asia/Dhaka'})} `,
-                                class: value.type,
-                            },
-                            dates: new Date(value.date_time),
-                        })
-                    });
-                    CalendarAttributes.value = calendarData;
-                    attendanceShow.value = true;
-                    //todo set value of const
-                     holidayCount.value = response.data.holidayCount;
-                     leaveCount.value = response.data.leaveCount;
-                     inCount.value = response.data.inCount;
-                     outCount.value = response.data.outCount;
-                     sickLeaveCount.value = response.data.sickLeaveCount;
-                     paidLeaveCount.value = response.data.paidLeaveCount;
+                .post(route('user.attendance.check'),{
+                    ...employeeData
+                })
+                .then((response) => {
+                    let logs = response.data.logs;
+                    // console.log(Object.keys(logs).length);
+                    if (Object.keys(logs).length > 0){
+                        let attenData = logs;
+                        let calendarData = [];
+                        Object.keys(attenData).forEach(function(key) {
+                            let currentItem = attenData[key];
+                            Object.keys(currentItem).forEach((key) => {
+                                if(key === "dateTime"){
+                                    return;
+                                }
+                                calendarData.push({
+                                    key: key,
+                                    customData: {
+                                        title: `${key.replaceAll("_"," ")}: ${currentItem[key]}`,
+                                        class: key
+                                    },
+                                    dates: new Date(currentItem.dateTime),
+                                })
+                            });
+                        });
+                        CalendarAttributes.value = calendarData;
+                        attendanceShow.value = true;
+                        //todo set value of const
+                        holidayCount.value = response.data.holidayCount;
+                        leaveCount.value = response.data.leaveCount;
+                        OfficeDays.value = response.data.OfficeDays;
+                        sickLeaveCount.value = response.data.sickLeaveCount;
+                        paidLeaveCount.value = response.data.paidLeaveCount;
+                        workFormHome.value = response.data.workFormHome;
 
-                }else {
-                    Swal.fire('Error!','NO data found in selected Dates','warning');
-                }
-            })
-            .catch((error) => {
-                Swal.fire('Error!',error.message,'warning');
-            });
+                    }else {
+                        Swal.fire('Error!','No Data found for selected Dates','warning');
+                    }
+                })
+                .catch((error) => {
+                    Swal.fire('Error!',error.message,'warning');
+                });
         }
 
         const month = new Date().getMonth();
         const year = new Date().getFullYear();
-       function  CalendarData (){
+        function  CalendarData (){
 
             return {
                 masks: {
@@ -171,22 +171,22 @@ export default {
                 },
                 attributes :CalendarAttributes.value
             }
-       }
+        }
 
         return {
             employeeData,
             getAttendanceDetails,
-            employeeDetails,
+            employeeList,
             CalendarData,
             attendanceShow,
             CalendarAttributes,
             holidayCount ,
             leaveCount,
-            inCount,
-            outCount,
+            OfficeDays,
             sickLeaveCount,
             paidLeaveCount,
-            workFromHomeCount
+            workFormHome,
+
         }
     }
 }
