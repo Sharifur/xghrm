@@ -40,6 +40,7 @@
                             <li class="work-from-home">Work From Home<span class="badge">{{workFormHome}}</span></li>
                         </ul>
                     </div>
+
                     <Calendar
                         class="custom-calendar-outer-wrap"
                         :masks="CalendarData().masks"
@@ -73,7 +74,6 @@
 
 <script>
 import {Head,Link,useForm,usePage} from '@inertiajs/inertia-vue3';
-import AdminMaster from "@/Layouts/AdminMaster.vue";
 import BsSelect from "@/Components/BsForm/Select.vue";
 import BsButton from "@/Components/BsForm/Button.vue";
 import Datepicker from 'vue3-datepicker'
@@ -123,7 +123,7 @@ export default {
                 })
                 .then((response) => {
                     let logs = response.data.logs;
-                    // console.log(Object.keys(logs).length);
+
                     if (Object.keys(logs).length > 0){
                         let attenData = logs;
                         let calendarData = [];
@@ -134,12 +134,12 @@ export default {
                                     return;
                                 }
                                 calendarData.push({
-                                    key: key,
+                                    key: `${key}-${Math.random()}`,
                                     customData: {
                                         title: `${key.replaceAll("_"," ")}: ${currentItem[key]}`,
                                         class: key
                                     },
-                                    dates: new Date(currentItem.dateTime),
+                                    dates: new Date(currentItem.dateTime)
                                 })
                             });
                         });

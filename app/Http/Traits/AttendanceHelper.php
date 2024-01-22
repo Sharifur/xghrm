@@ -5,7 +5,7 @@ use Carbon\Carbon;
 
 trait AttendanceHelper
 {
-    public function logAsArray(\Illuminate\Database\Eloquent\Collection|array|\LaravelIdea\Helper\App\Models\_IH_AttendanceLog_C $logs)
+    public function logAsArray(\Illuminate\Database\Eloquent\Collection|array|\LaravelIdea\Helper\App\Models\_IH_AttendanceLog_C $logs,$dateTime=false)
     {
         $logsInfo = [];
         foreach($logs as $log){
@@ -31,7 +31,7 @@ trait AttendanceHelper
                     str_replace("c/","",strtolower($log->type))."_time" =>
                         $log->type === "holiday" ? " ": $log->date_time->format('g:i A'),
                     "working_nature" => $this->workNature($log->type),
-                    "dateTime" => $parsed_date
+                    "dateTime" => $dateTime ? $log->date_time : $parsed_date
 
                 ];
             }

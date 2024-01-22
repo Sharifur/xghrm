@@ -45,7 +45,7 @@ class AttendanceCheckController extends Controller
 
         $logs = $logQeuery->where("status",1)->orderBy("date_time")->get();
 
-        $logsInfo = $this->logAsArray($logs);
+        $logsInfo = $this->logAsArray(logs:$logs,dateTime:true);
 
 
 
