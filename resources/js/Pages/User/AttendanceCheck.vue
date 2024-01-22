@@ -82,10 +82,11 @@ import Swal from "sweetalert2";
 import { ref } from '@vue/runtime-core';
 import axios from 'axios';
 import Select from "@/Components/BsForm/Select.vue";
+import UserMaster from "@/Layouts/UserMaster.vue";
 
 export default {
     name: "AttendanceCheck",
-    layout: AdminMaster,
+    layout: UserMaster,
     components: {
         BsSelect,
         BsButton,
