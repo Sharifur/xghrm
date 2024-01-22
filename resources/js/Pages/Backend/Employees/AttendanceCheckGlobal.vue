@@ -137,7 +137,7 @@
                                      return;
                                  }
                                  calendarData.push({
-                                     key: key,
+                                     key: `${key}-${Math.random()}`,
                                      customData: {
                                          title: `${key.replaceAll("_"," ")}: ${currentItem[key]}`,
                                          class: key
