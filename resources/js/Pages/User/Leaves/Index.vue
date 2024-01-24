@@ -1,5 +1,5 @@
 <template>
-    <Head title="All Leaves"/>
+    <Head title="All Attendance Request"/>
     <div class="row">
         <div class="col-lg-12">
             <div class="dashboard-settings margin-top-40 margin-bottom-30">
