@@ -26,6 +26,7 @@ class Employee extends Model
         'att_id',
         'user_id',
         'zktecho_user_id',
+        'incrementMonth',
     ];
 
     public function category(){
@@ -45,6 +46,7 @@ class Employee extends Model
         'status' => 'integer',
         'imageId' => 'integer',
         'joinDate' => 'datetime',
+        'incrementMonth' => 'datetime',
         'dateOfBirth' => 'datetime'
     ];
 }

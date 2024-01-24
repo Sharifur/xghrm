@@ -33,6 +33,12 @@
                                             <Datepicker v-model="emplyeeFormdata.joinDate"/>
                                         </div>
                                     </div>
+                                    <div class="single-dashboard-input">
+                                        <div class="single-info-input margin-top-30">
+                                            <label class="info-title"> Increment Month* </label>
+                                            <Datepicker v-model="emplyeeFormdata.incrementMonth"/>
+                                        </div>
+                                    </div>
                                     <BsTextarea title="Address" v-model="emplyeeFormdata.address"/>
                                     <BsInput type="text" title="Attendance ID" v-model="emplyeeFormdata.att_id"/>
                                     <BsInput type="number" title="Emergency Number*" v-model="emplyeeFormdata.emergencyNumber"/>
@@ -93,6 +99,7 @@ export default {
             imageId:null,
             status:null,
             att_id:null,
+            incrementMonth: new Date(),
             joinDate: new Date(),
             dateOfBirth: new Date(),
         });
