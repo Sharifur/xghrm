@@ -12,7 +12,7 @@
         </li>
         <li class="list" v-if="isEmployee">
             <Link :href="route('user.leaves.index')">
-               <span>Leaves</span>
+               <span>Attendance Request</span>
             </Link>
         </li>
         <li class="list" v-if="isEmployee">
