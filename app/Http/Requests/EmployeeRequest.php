@@ -23,6 +23,7 @@ class EmployeeRequest extends FormRequest
             'joinDate' =>  'required',
             'dateOfBirth' =>  'required',
             'status' =>  'required|numeric',
+            'incrementMonth' =>  'required',
         ];
     }
 
