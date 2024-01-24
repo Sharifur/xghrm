@@ -4,9 +4,9 @@
         <div class="col-lg-12">
             <div class="dashboard-settings margin-top-40 margin-bottom-30">
                 <div class="header-wrap d-flex justify-content-between">
-                    <h2 class="dashboards-title margin-bottom-40">All Leaves</h2>
+                    <h2 class="dashboards-title margin-bottom-40">All Attendance Request</h2>
                     <div class="btn-wrapper">
-                         <BsModalButton target="addnewcategory" button-class="btn btn-info m-1" >Add New Leave</BsModalButton>
+                         <BsModalButton target="addnewcategory" button-class="btn btn-info m-1" >Add New Request</BsModalButton>
                     </div>
                 </div>
                 <div class="table-wrap table-responsive">
