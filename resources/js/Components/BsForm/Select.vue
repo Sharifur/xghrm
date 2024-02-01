@@ -4,7 +4,7 @@
             <label class="info-title">{{ title }} </label>
             <select class="form-control" :class="inputClass" v-bind:modelValue="modelValue" @change="$emit('update:modelValue', $event.target.value)">
                 <option value="">------</option>
-                <option v-for="option in options" :value="option.value" :selected="option.value === modelValue" >{{option.label}}</option>
+                <option v-for="option in options" :value="option.value" :selected="option.value == modelValue" >{{option.label}}</option>
             </select>
             <span v-show="info != ''">{{ info }}</span>
         </div>

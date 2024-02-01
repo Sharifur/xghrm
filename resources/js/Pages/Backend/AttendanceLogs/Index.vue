@@ -4,14 +4,22 @@
         <div class="col-lg-12">
             <div class="dashboard-settings margin-top-40 margin-bottom-30">
                 <div class="header-wrap d-flex justify-content-between">
-                    <h2 class="dashboards-title margin-bottom-40">All {{page_type}} Attendance Logs</h2>
-
+                    <h2 class="dashboards-title margin-bottom-40">All {{page_type === 'index' ?  '' : 'Pending'}} Attendance Logs</h2>
                     <div class="btn-wrapper">
                         <button  @click="approveAllLogs" class="btn btn-danger" >Approve All Pending Log</button>
                          <BsModalButton target="addnewcategory" button-class="btn btn-info m-1" >Add New Log</BsModalButton>
                     </div>
                 </div>
-<!--                <Select title="Filter Attendance" :options="filterOptions" v-model="filterData.filter" @change="applyFilter($event.target.value)"/>-->
+                <form method="get" @submit.prevent class="filter_form">
+                    <Select title="Employee" :options="employeesList()" v-model="filterData.employee"/>
+                    <Select title="Type" :options="attendanceTypes" v-model="filterData.type"/>
+                    <Select title="Status" :options="filterOptions" v-model="filterData.status"/>
+                    <div class="single-info-input margin-top-30">
+                        <label class="info-title">Date (Month)</label>
+                        <VueDatePicker v-model="filterData.date"/>
+                    </div>
+                    <BsButton button-text="Submit" button-type="submit" @click="filterFormSubmit" :disabled="filterData.processing"/>
+                </form>
                 <div class="table-wrap table-responsive mt-5">
                     <table class="table table-light">
                         <thead>
@@ -55,7 +63,6 @@
             <VueDatePicker v-model="newLogData.date_time"/>
         </div>
         <BsButton button-text="Submit" button-type="submit" @click="addAttendanceLogFormSubmit" :disabled="newLogData.processing"/>
-
     </form>
 </BsModal>
 
@@ -111,7 +118,10 @@ export default {
         ];
 
         const filterData = useForm({
-            filter: null
+            date: new Date(usePage().props.value.date == null ? new Date() : usePage().props.value.date ),
+            status: usePage().props.value.status,
+            type: usePage().props.value.type,
+            employee: usePage().props.value.employee,
         });
         const newLogData = useForm({
             employee_id: null,
@@ -181,6 +191,9 @@ export default {
                 }
             })
         }
+        function filterFormSubmit(){
+            filterData.get(route('admin.employee.attendance.logs'))
+        }
         function employeesList(){
             return usePage().props.value.employees
         }
@@ -217,7 +230,8 @@ export default {
             filterData,
             page_type,
             submitApproveData,
-            approveAllLogs
+            approveAllLogs,
+            filterFormSubmit
         }
     }
 }

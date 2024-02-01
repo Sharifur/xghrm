@@ -59,11 +59,13 @@ import BreezeValidationErrors from '@/Components/ValidationErrors.vue';
 import UserMaster from "@/Layouts/UserMaster.vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { addMonths, getMonth, getYear, subMonths } from 'date-fns';
+import Input from "@/Components/Input.vue";
 
 export default {
     name: "Index",
     layout: UserMaster,
     components:{
+        Input,
         Pagination,
         Link,
         usePage,

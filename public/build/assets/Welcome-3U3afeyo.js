@@ -1,1 +1,0 @@
-import{H as e,L as n,q as t,r as a,o as s}from"./app-bWgNDweR.js";import{_ as c}from"./_plugin-vue_export-helper-x3n3nnut.js";const r={components:{Head:e,Link:n},props:{canLogin:Boolean,canRegister:Boolean}};function p(_,m,i,l,d,f){const o=a("Head");return s(),t(o,{title:"Welcome"})}const H=c(r,[["render",p]]);export{H as default};

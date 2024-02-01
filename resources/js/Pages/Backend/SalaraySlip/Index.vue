@@ -9,7 +9,10 @@
                         <Link class="btn btn-info m-1" :href="route('admin.employee.salary.slip.create')">Add New</Link>
                     </div>
                 </div>
-
+                <form method="get" @submit.prevent class="filter_form mb-5">
+                    <Select title="Employee" :options="employeesList()" v-model="filterData.employee"/>
+                    <BsButton button-text="Submit" button-type="submit" @click="filterFormSubmit" :disabled="filterData.processing"/>
+                </form>
                 <div class="table-responsive">
                     <table class="table table-stripped">
                         <thead>
@@ -54,12 +57,15 @@ import Pagination from "@/Components/Pagination.vue";
 import AdminMaster from "@/Layouts/AdminMaster.vue";
 import Swal from "sweetalert2";
 import StatusShow from "@/Components/StatusShow.vue";
+import BsButton from "@/Components/BsForm/Button.vue";
+import Select from "@/Components/BsForm/Select.vue";
 
 
 export default {
     name: "Employee",
     layout: AdminMaster,
     components:{
+        Select, BsButton,
         StatusShow,
         Link,
         Pagination,
@@ -68,6 +74,16 @@ export default {
     setup(){
         function salaryList(){
             return usePage().props.value.allSalaries.data;
+        }
+
+        const filterData = useForm({
+            employee: usePage().props.value.employee,
+        });
+        function filterFormSubmit(){
+            filterData.get(route('admin.employee.salary.slip'));
+        }
+        function employeesList(){
+            return usePage().props.value.employees
         }
 
         function deleteItem(item){
@@ -104,7 +120,10 @@ export default {
         return {
             salaryListLinks,
             salaryList,
-            deleteItem
+            deleteItem,
+            filterData,
+            employeesList,
+            filterFormSubmit
         }
     }
 }
