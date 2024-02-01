@@ -26,7 +26,7 @@ class EmployeeSalarySlipController extends Controller
                 $item->year = Carbon::parse($item->month)->format('Y');
                 $item->created = Carbon::parse($item->created_at)->format('Y M d');
                 return $item;
-         });
+         })->withQueryString();
         $employees = Employee::where('status',1)->get()->map(function ($item){
             return ['label' => $item->name,'value' => $item->id];
         });
