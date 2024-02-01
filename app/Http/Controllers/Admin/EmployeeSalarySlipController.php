@@ -13,17 +13,28 @@ use App\Models\AttendanceLog;
 
 class EmployeeSalarySlipController extends Controller
 {
-    public function index(){
+    public function index(Request $request){
 
-        $allSalaries = SalarySlip::with('employee')->orderBy('created_at','desc')->paginate(10)->through(function($item){
-            $item->monthName = Carbon::parse($item->month)->format('M');
-            $item->year = Carbon::parse($item->month)->format('Y');
-            $item->created = Carbon::parse($item->created_at)->format('Y M d');
-            return $item;
+        $allSalariesQeuery = SalarySlip::query()->with('employee');
+        $allSalariesQeuery->when(!empty($request->employee),function ($q) use($request){
+            $q->where('employee_id',$request->employee);
+        });
+           $allSalaries = $allSalariesQeuery->orderBy('created_at','desc')
+            ->paginate(10)
+            ->through(function($item){
+                $item->monthName = Carbon::parse($item->month)->format('M');
+                $item->year = Carbon::parse($item->month)->format('Y');
+                $item->created = Carbon::parse($item->created_at)->format('Y M d');
+                return $item;
          });
+        $employees = Employee::where('status',1)->get()->map(function ($item){
+            return ['label' => $item->name,'value' => $item->id];
+        });
 
          return Inertia::render('Backend/SalaraySlip/Index',[
              'allSalaries' => $allSalaries,
+             'employees' => $employees,
+             'employee' => $request->employee,
          ]);
     }
 

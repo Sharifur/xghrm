@@ -33,12 +33,32 @@ class AttendanceLogsController extends Controller
     }
 
     public function index(Request $request){
+
+
+        //add filter option based on user selected param
+
         $attendance_logsQuery = AttendanceLog::query();
 
-        if (!empty($request->get("filter"))){
-            $attendance_logsQuery->where("status",$request->get("filter"));
-        }
-        $attendance_logs  = $attendance_logsQuery->with('employee')->orderBy('id','desc')->paginate(10)->withQueryString();
+        $attendance_logsQuery->when(!empty($request->employee),function ($q) use($request){
+            $q->where('employee_id',$request->employee);
+        });
+
+        $attendance_logsQuery->when(!empty($request->status),function ($q) use($request){
+            $q->where('status',$request->status);
+        });
+        $attendance_logsQuery->when(!empty($request->type),function ($q) use($request){
+            $q->where('type',$request->type);
+        });
+        $attendance_logsQuery->when(!empty($request->date),function ($q) use($request){
+            $q->whereMonth('date_time',Carbon::parse($request->date)->month);
+            $q->whereYear('date_time',Carbon::parse($request->date)->year);
+        });
+
+        $attendance_logs  = $attendance_logsQuery
+            ->with('employee')
+            ->orderBy('id','desc')
+            ->paginate(10)
+            ->withQueryString();
 
         $employees = Employee::where('status',1)->get()->map(function ($item){
             return ['label' => $item->name,'value' => $item->id];
@@ -47,6 +67,10 @@ class AttendanceLogsController extends Controller
             'attendance_logs' => $attendance_logs,
             'employees' => $employees,
             'page_type' => 'index',
+            'status' =>$request->status,
+            'employee' => $request->employee,
+            'type' => $request->type,
+            'date' => $request->date,
         ]);
     }
     public function delete(Request $request){

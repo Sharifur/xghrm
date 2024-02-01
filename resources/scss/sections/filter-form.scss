@@ -1,0 +1,8 @@
+.filter_form {
+    display: flex;
+    gap: 10px;
+    align-items: end;
+    .single-info-input {
+        min-width: 200px;
+    }
+}

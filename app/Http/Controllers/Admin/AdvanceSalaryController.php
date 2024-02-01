@@ -16,16 +16,30 @@ use Inertia\Inertia;
 
 class AdvanceSalaryController extends Controller
 {
-    public function index(){
-        $allSalaries = AdvanceSalary::with('employee')->orderBy('created_at','desc')->paginate(10)->through(function($item){
+    public function index(Request $request){
+
+        $allSalariesQuery = AdvanceSalary::query();
+        $allSalariesQuery->when(!empty($request->employee),function ($q) use($request){
+            $q->where('employee_id',$request->employee);
+        });
+
+        $allSalaries = $allSalariesQuery->with('employee')
+            ->orderBy('created_at','desc')
+            ->paginate(10)->through(function($item){
            $item->monthName = Carbon::parse($item->month)->format('M');
            $item->year = Carbon::parse($item->month)->format('Y');
            $item->created = Carbon::parse($item->created_at)->format('Y M d');
            return $item;
+        })->withQueryString();
+
+        $employees = Employee::where('status',1)->get()->map(function ($item){
+            return ['label' => $item->name,'value' => $item->id];
         });
 
         return Inertia::render('Backend/AdvanceSalary/Index',[
             'allSalaries' => $allSalaries,
+            'employees' => $employees,
+            'employee' => $request->employee,
         ]);
     }
     public function create(){

@@ -1,5 +1,5 @@
 <template>
-    <Head title="All Leaves"/>
+    <Head title="All Attendance Request"/>
     <div class="row">
         <div class="col-lg-12">
             <div class="dashboard-settings margin-top-40 margin-bottom-30">
@@ -59,11 +59,13 @@ import BreezeValidationErrors from '@/Components/ValidationErrors.vue';
 import UserMaster from "@/Layouts/UserMaster.vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { addMonths, getMonth, getYear, subMonths } from 'date-fns';
+import Input from "@/Components/Input.vue";
 
 export default {
     name: "Index",
     layout: UserMaster,
     components:{
+        Input,
         Pagination,
         Link,
         usePage,
