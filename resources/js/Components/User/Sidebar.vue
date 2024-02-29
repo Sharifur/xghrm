@@ -25,6 +25,11 @@
                 <span>Change Password</span>
             </Link>
         </li>
+        <li class="list" v-if="isEmployee">
+            <Link :href="route('user.profile.payment.info')">
+                <span>Payment Info</span>
+            </Link>
+        </li>
         <li class="list logoutbtn">
             <Link :href="route('logout')" method="post"  as="button" >
                 <i class="las la-sign-out-alt"></i> Log Out

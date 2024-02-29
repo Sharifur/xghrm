@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,6 +14,19 @@ class UserDashboardController extends Controller
         return Inertia::render('User/UserDashboard',[
 
         ]);
+    }
+
+    public function update_payment_info(Request $request){
+        if (strtolower($request->method()) === 'post'){
+            $request->validate([
+                'paymentInfo' => 'required|max:500'
+            ]);
+            Employee::where('user_id',auth('web')->id())->update([
+                'paymentInfo' => $request->paymentInfo
+            ]);
+            return back();
+        }
+        return Inertia::render('User/PaymentInfo');
     }
 
     public function change_password(){

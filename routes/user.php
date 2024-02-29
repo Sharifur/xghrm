@@ -6,6 +6,7 @@ Route::group(['prefix' => 'user-home','middleware' => 'auth:web'],function (){
     Route::group(['prefix' => 'profile'],function (){
         Route::get('/change-password',[\App\Http\Controllers\User\UserDashboardController::class,'change_password'])->name('user.profile.change.password');
         Route::post('/change-password',[\App\Http\Controllers\User\UserDashboardController::class,'update_change_password']);
+        Route::match(['get','post'],'/payment-info',[\App\Http\Controllers\User\UserDashboardController::class,'update_payment_info'])->name('user.profile.payment.info');
         Route::get('/change-info',[\App\Http\Controllers\User\UserDashboardController::class,'change_info'])->name('user.profile.change.info');
         Route::post('/change-info',[\App\Http\Controllers\User\UserDashboardController::class,'update_change_info']);
 
