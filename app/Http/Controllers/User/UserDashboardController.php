@@ -11,9 +11,7 @@ use Inertia\Inertia;
 class UserDashboardController extends Controller
 {
     public function index(){
-        return Inertia::render('User/UserDashboard',[
-
-        ]);
+        return Inertia::render('User/UserDashboard');
     }
 
     public function update_payment_info(Request $request){
