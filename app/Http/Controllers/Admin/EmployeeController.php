@@ -136,7 +136,7 @@ class EmployeeController extends Controller
         ->with('attendanceLog',function($q){
             $q->whereYear('date_time',Carbon::today())->WhereIn('type',['leave','sick-leave','paid-leave']);
         })
-        ->orderBy('id','desc')
+        ->orderBy('status','desc')
         ->paginate(10);
         //Attendance
         //todo:: calculate total leave in this year
