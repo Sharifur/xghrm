@@ -165,7 +165,7 @@ class EmployeeController extends Controller
     public function details($id,Request $request){
         $details =  Employee::with('category')->find($id);
         $details->designation = optional($details->category)->title;
-        //todo
+
         $logs =  AttendanceLog::query()
             ->where(['employee_id' => $id])
             ->where("status",1)
@@ -205,7 +205,7 @@ class EmployeeController extends Controller
                 //if found cout/cin then show total office hour
             }
 
-            //todo:: need to work here
+        //todo:: need to work here
         $holidayCount = $logs->where('type','holiday')->count();
         $leaveCount = $logs->where('type','leave')->count();
         $sickLeaveCount = $logs->where('type','sick-leave')->count();
@@ -219,7 +219,10 @@ class EmployeeController extends Controller
         }
 
         //advance salary this month
-        $AdvanceSalary = AdvanceSalary::where(['employee_id' => $id])->whereMonth("month",Carbon::parse($request->month))->get()->pluck("amount")->sum();
+        $AdvanceSalary = AdvanceSalary::where(['employee_id' => $id])
+            ->whereMonth("month",Carbon::parse($request->month))
+            ->whereYear('month',Carbon::now()->year)
+            ->get()->pluck("amount")->sum();
 
         return response([
             'details' => $details,
