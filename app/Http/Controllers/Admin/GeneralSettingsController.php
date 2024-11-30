@@ -37,6 +37,7 @@ class GeneralSettingsController extends Controller
     public function syncData(){
         $zkHelper = ZktecoHelper::init();
         $getData = $zkHelper->getData();
+//        dd($getData);
         $getUsers =  $zkHelper->users();
 //        dd($getUsers,$getData);
         $allEmployee = Employee::where('status',1)->get();
