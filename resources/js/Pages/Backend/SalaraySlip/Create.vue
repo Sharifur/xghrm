@@ -260,7 +260,7 @@ export default {
                 //add lunch meal rate
                 salarySlipData.extraEarningFields.push({
                     'description' : `${responseData.attenadnceCount} Days Lunch`,
-                    'amount' : parseInt(responseData.attenadnceCount) * 35
+                    'amount' : parseInt(responseData.attenadnceCount) * 50
                 });
 
                 //add sick leave

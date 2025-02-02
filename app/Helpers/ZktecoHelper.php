@@ -26,9 +26,11 @@ class ZktecoHelper
         if (!is_null($this->connection)) {
             return $this->connection;
         }
-        $con = new ZKTeco('192.168.0.103', '4370');
+//        $con = new ZKTeco('192.168.0.106', '4370');
+//        $con = new ZKTeco('192.168.0.106', '4370');
 //        $con = new ZKTeco('103.195.1.237', '4370');
-//        $con = new ZKTeco('192.168.0.100', '4370');
+//        $con = new ZKTeco('103.195.1.237', '4370');
+        $con = new ZKTeco('192.168.0.101', '4370'); //this is working fine
         $con->connect();
         return $this->connection = $con;
     }
