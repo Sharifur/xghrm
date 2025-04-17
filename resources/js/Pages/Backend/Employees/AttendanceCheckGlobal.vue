@@ -4,7 +4,7 @@
             <div class="col-lg-12">
                 <div class="dashboard-settings margin-top-40">
                     <div class="header-wrap d-flex justify-content-between">
-                        <h2 class="dashboards-title">Attendance Check</h2>
+                        <h2 class="dashboards-title">Attendance Check test</h2>
                     </div>
                     <div class="edit-profile">
                         <div class="profile-info-dashboard">
@@ -42,6 +42,10 @@
                             <li class="sick-leave">Sick Leave<span class="badge">{{sickLeaveCount}}</span></li>
                             <li class="paid-leave">Paid Leave<span class="badge">{{paidLeaveCount}}</span></li>
                             <li class="work-from-home">Work From Home<span class="badge">{{workFormHome}}</span></li>
+                            <li class="avgOfficeWorkingHours">Avg Office Working Hours<span class="badge">{{avgOfficeWorkingHours}} hr</span></li>
+                            <li class="daysWithCompleteData">Days With Complete Data<span class="badge">{{daysWithCompleteData}} days</span></li>
+                            <li class="daysWithCompleteData">Late Arrival Count<span class="badge">{{lateArrivalCount}} days</span></li>
+                            <li class="officeWorkingDays">Office Working Days<span class="badge">{{officeWorkingDays}} days</span></li>
                         </ul>
                    </div>
                     <Calendar
@@ -108,6 +112,14 @@
             const sickLeaveCount = ref(0);
             const paidLeaveCount = ref(0);
             const workFormHome = ref(0);
+            const avgOfficeWorkingHours = ref(0);
+            const daysWithCompleteData = ref(0);
+            const lateArrivalCount = ref(0);
+            const officeWorkingDays = ref(0);
+            //avgOfficeWorkingHours
+            //daysWithCompleteData
+            //lateArrivalCount
+            //officeWorkingDays
 
             const attendanceShow = ref(false);
             const CalendarAttributes = ref([]);
@@ -158,6 +170,11 @@
                          paidLeaveCount.value = response.data.paidLeaveCount;
                          workFormHome.value = response.data.workFormHome;
 
+                         avgOfficeWorkingHours.value = response.data.avgOfficeWorkingHours;
+                         daysWithCompleteData.value = response.data.daysWithCompleteData;
+                         lateArrivalCount.value = response.data.lateArrivalCount;
+                         officeWorkingDays.value = response.data.officeWorkingDays;
+
                     }else {
                         Swal.fire('Error!','NO Data found for selected Dates','warning');
                     }
@@ -192,7 +209,10 @@
                 sickLeaveCount,
                 paidLeaveCount,
                 workFormHome,
-
+                officeWorkingDays,
+                avgOfficeWorkingHours,
+                daysWithCompleteData,
+                lateArrivalCount
             }
         }
     }
