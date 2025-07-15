@@ -57,6 +57,22 @@ return [
             '1668x2388' => '/images/icons/splash-1668x2388.png',
             '2048x2732' => '/images/icons/splash-2048x2732.png',
         ],
+        'screenshots' => [
+            [
+                'src' => '/images/screenshots/mobile-home.png',
+                'sizes' => '390x844',
+                'type' => 'image/png',
+                'form_factor' => 'narrow',
+                'label' => 'Home Screen - Mobile'
+            ],
+            [
+                'src' => '/images/screenshots/desktop-dashboard.png',
+                'sizes' => '1280x800',
+                'type' => 'image/png',
+                'form_factor' => 'wide',
+                'label' => 'Dashboard - Desktop'
+            ],
+        ],
         'shortcuts' => [
 //            [
 //                'name' => 'Shortcut Link 1',
