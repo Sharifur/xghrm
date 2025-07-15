@@ -7,7 +7,7 @@
         <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
-
+        @laravelPWA
 
             <link rel="stylesheet" href="{{ mix('css/app.css') }}">
             <link rel="stylesheet" href="{{asset('css/bootstrap.min.css')}}">
