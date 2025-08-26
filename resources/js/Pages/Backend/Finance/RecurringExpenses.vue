@@ -478,26 +478,37 @@ export default {
         const monthlyTotal = computed(() => {
             return expenses.value
                 .filter(expense => expense.frequency === 'monthly')
-                .reduce((total, expense) => total + (expense.default_amount || 0), 0);
+                .reduce((total, expense) => {
+                    const amount = parseFloat(expense.default_amount) || 0;
+                    return total + amount;
+                }, 0);
         });
 
         const weeklyTotal = computed(() => {
             return expenses.value
                 .filter(expense => expense.frequency === 'weekly')
-                .reduce((total, expense) => total + (expense.default_amount || 0), 0);
+                .reduce((total, expense) => {
+                    const amount = parseFloat(expense.default_amount) || 0;
+                    return total + amount;
+                }, 0);
         });
 
         const yearlyTotal = computed(() => {
             return expenses.value
                 .filter(expense => expense.frequency === 'yearly')
-                .reduce((total, expense) => total + (expense.default_amount || 0), 0);
+                .reduce((total, expense) => {
+                    const amount = parseFloat(expense.default_amount) || 0;
+                    return total + amount;
+                }, 0);
         });
 
         const formatNumber = (num) => {
+            const number = parseFloat(num) || 0;
+            if (isNaN(number)) return '0.00';
             return new Intl.NumberFormat('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
-            }).format(num || 0);
+            }).format(number);
         };
 
         const formatFrequency = (frequency) => {
