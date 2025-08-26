@@ -164,7 +164,7 @@
 
                 <!-- Equity List -->
                 <div class="row">
-                    <div v-for="equityItem in equity" :key="equityItem.id" class="col-lg-4 col-md-6 mb-4">
+                    <div v-for="equityItem in sortedEquity" :key="equityItem.id" class="col-lg-4 col-md-6 mb-4">
                         <div class="equity-card">
                             <div class="equity-header">
                                 <div class="equity-icon">
@@ -185,9 +185,9 @@
                                 <div class="equity-amount">
                                     <small class="text-muted">Default Value</small>
                                     <div class="amount">
-                                        {{ equityItem.currency === 'USD' ? '$' : '৳' }}{{ formatNumber(equityItem.default_amount) }}
+                                        ৳{{ formatNumber(equityItem.currency === 'USD' ? equityItem.default_amount * USD_TO_BDT_RATE : equityItem.default_amount) }}
                                         <small v-if="equityItem.currency === 'USD'" class="d-block mt-1 text-muted" style="font-size: 0.75rem;">
-                                            (৳{{ formatNumber(equityItem.default_amount * 120) }} BDT)
+                                            (${{ formatNumber(equityItem.default_amount) }} USD)
                                         </small>
                                     </div>
                                 </div>
@@ -242,7 +242,7 @@
                                         <div v-if="form.currency === 'USD'" class="form-text text-info">
                                             <small>
                                                 <i class="fas fa-exchange-alt me-1"></i>
-                                                Converted: ৳{{ formatNumber(Math.abs(form.default_amount) * 120) }} BDT (1 USD = 120 BDT)
+                                                Converted: ৳{{ formatNumber(Math.abs(form.default_amount) * USD_TO_BDT_RATE) }} BDT (1 USD = {{ USD_TO_BDT_RATE }} BDT)
                                             </small>
                                         </div>
                                         <div v-else class="form-text text-muted">
@@ -308,7 +308,7 @@
 <script>
 import AdminMaster from "@/Layouts/AdminMaster.vue";
 import { Head } from '@inertiajs/inertia-vue3';
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed, watch } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
@@ -327,6 +327,11 @@ export default {
         const saving = ref(false);
         const equity = ref([...props.equity]);
 
+        // Sort equity by ID descending (newest first)
+        const sortedEquity = computed(() => {
+            return equity.value.sort((a, b) => b.id - a.id);
+        });
+
         const form = reactive({
             name: '',
             description: '',
@@ -334,6 +339,25 @@ export default {
             icon: 'fas fa-chart-line',
             tooltip: '',
             currency: 'BDT'
+        });
+
+        // Currency conversion constants
+        const USD_TO_BDT_RATE = 120;
+        const previousCurrency = ref('BDT');
+
+        // Watch for currency changes and convert amount automatically
+        watch(() => form.currency, (newCurrency) => {
+            const oldCurrency = previousCurrency.value;
+            if (oldCurrency && form.default_amount !== 0 && oldCurrency !== newCurrency) {
+                if (oldCurrency === 'BDT' && newCurrency === 'USD') {
+                    // Convert from BDT to USD
+                    form.default_amount = Number((form.default_amount / USD_TO_BDT_RATE).toFixed(2));
+                } else if (oldCurrency === 'USD' && newCurrency === 'BDT') {
+                    // Convert from USD to BDT
+                    form.default_amount = Number((form.default_amount * USD_TO_BDT_RATE).toFixed(2));
+                }
+            }
+            previousCurrency.value = newCurrency;
         });
 
         const formatNumber = (num) => {
@@ -350,6 +374,7 @@ export default {
             form.icon = 'fas fa-chart-line';
             form.tooltip = '';
             form.currency = 'BDT';
+            previousCurrency.value = 'BDT'; // Reset previous currency tracking
         };
 
         const editEquity = (equityItem) => {
@@ -360,6 +385,7 @@ export default {
             form.icon = equityItem.icon;
             form.tooltip = equityItem.tooltip;
             form.currency = equityItem.currency || 'BDT';
+            previousCurrency.value = equityItem.currency || 'BDT'; // Set previous currency to current equity currency
         };
 
         const closeModal = () => {
@@ -451,10 +477,12 @@ export default {
 
         return {
             equity,
+            sortedEquity,
             showAddModal,
             editingEquity,
             saving,
             form,
+            USD_TO_BDT_RATE,
             formatNumber,
             editEquity,
             closeModal,

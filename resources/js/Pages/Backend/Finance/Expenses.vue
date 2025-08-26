@@ -11,7 +11,7 @@
                             One-time Expenses
                         </h4>
                         <div class="btn-group">
-                            <button @click="showAddModal = true" class="btn btn-warning">
+                            <button @click="openAddModal" class="btn btn-warning">
                                 <i class="fas fa-plus"></i> Add Expense
                             </button>
                             <button v-if="selectedExpenses.length > 0" @click="deleteSelectedExpenses" class="btn btn-danger">
@@ -146,10 +146,7 @@
                                         </td>
                                         <td>
                                             <span class="badge bg-warning text-dark">
-                                                {{ expense.currency === 'USD' ? '$' : '৳' }}{{ formatNumber(expense.amount) }}
-                                                <small v-if="expense.currency === 'USD'" class="d-block mt-1 text-muted">
-                                                    (৳{{ formatNumber(expense.amount * 120) }} BDT)
-                                                </small>
+                                                ৳{{ formatNumber(expense.amount) }}
                                             </span>
                                         </td>
                                         <td>{{ expense.description || '-' }}</td>
@@ -221,11 +218,8 @@
                                                     
                                                     <div class="expense-amount">
                                                         <span class="badge bg-warning text-dark fs-6">
-                                                            {{ expense.currency === 'USD' ? '$' : '৳' }}{{ formatNumber(expense.amount) }}
+                                                            ৳{{ formatNumber(expense.amount) }}
                                                         </span>
-                                                        <small class="d-block text-muted mt-1" v-if="expense.currency === 'USD'">
-                                                            ≈ ৳{{ formatNumber(expense.amount * 120) }} BDT
-                                                        </small>
                                                     </div>
                                                     
                                                     <div v-if="expense.notes" class="mt-2">
@@ -335,7 +329,7 @@
                                         <div v-if="form.currency === 'USD'" class="form-text text-info">
                                             <small>
                                                 <i class="fas fa-exchange-alt me-1"></i>
-                                                Converted: ৳{{ formatNumber(form.amount * 120) }} BDT (1 USD = 120 BDT)
+                                                Converted: ৳{{ formatNumber(form.amount * USD_TO_BDT_RATE) }} BDT (1 USD = {{ USD_TO_BDT_RATE }} BDT)
                                             </small>
                                         </div>
                                     </div>
@@ -412,7 +406,7 @@
 <script>
 import AdminMaster from "@/Layouts/AdminMaster.vue";
 import { Head } from '@inertiajs/inertia-vue3';
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, watch } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
@@ -447,13 +441,33 @@ export default {
             notes: ''
         });
 
+        // Currency conversion constants
+        const USD_TO_BDT_RATE = 120;
+        const previousCurrency = ref('BDT');
+
+        // Watch for currency changes and convert amount automatically
+        watch(() => form.currency, (newCurrency) => {
+            const oldCurrency = previousCurrency.value;
+            if (oldCurrency && form.amount > 0 && oldCurrency !== newCurrency) {
+                if (oldCurrency === 'BDT' && newCurrency === 'USD') {
+                    // Convert from BDT to USD
+                    form.amount = Number((form.amount / USD_TO_BDT_RATE).toFixed(2));
+                } else if (oldCurrency === 'USD' && newCurrency === 'BDT') {
+                    // Convert from USD to BDT
+                    form.amount = Number((form.amount * USD_TO_BDT_RATE).toFixed(2));
+                }
+            }
+            previousCurrency.value = newCurrency;
+        });
+
         // Computed properties for pagination
         const totalPages = computed(() => Math.ceil(expenses.value.length / itemsPerPage.value));
         
         const paginatedExpenses = computed(() => {
+            const sortedExpenses = expenses.value.sort((a, b) => b.id - a.id); // Sort by ID descending (newest first)
             const start = (currentPage.value - 1) * itemsPerPage.value;
             const end = start + itemsPerPage.value;
-            return expenses.value.slice(start, end);
+            return sortedExpenses.slice(start, end);
         });
         
         const visiblePages = computed(() => {
@@ -518,6 +532,12 @@ export default {
             form.category = '';
             form.icon = 'fas fa-receipt';
             form.notes = '';
+            previousCurrency.value = 'BDT'; // Reset previous currency tracking
+        };
+
+        const openAddModal = () => {
+            resetForm(); // Ensure form is properly reset
+            showAddModal.value = true;
         };
 
         const editExpense = (expense) => {
@@ -530,6 +550,7 @@ export default {
             form.category = expense.category;
             form.icon = expense.icon;
             form.notes = expense.notes;
+            previousCurrency.value = expense.currency || 'BDT'; // Set previous currency to current expense currency
         };
 
         const closeModal = () => {
@@ -547,7 +568,14 @@ export default {
                 
                 const method = editingExpense.value ? 'put' : 'post';
                 
-                const response = await axios[method](url, form);
+                // Convert USD to BDT before saving to database
+                const saveData = { ...form };
+                if (form.currency === 'USD') {
+                    saveData.amount = form.amount * USD_TO_BDT_RATE;
+                    saveData.currency = 'BDT';
+                }
+                
+                const response = await axios[method](url, saveData);
 
                 if (response.data.success) {
                     if (editingExpense.value) {
@@ -651,12 +679,12 @@ export default {
             );
             
             const totalBDT = selectedExpensesData.reduce((sum, expense) => {
-                const amount = expense.currency === 'USD' ? expense.amount * 120 : expense.amount;
+                const amount = expense.amount;
                 return sum + amount;
             }, 0);
 
             const expenseList = selectedExpensesData.slice(0, 5).map(expense => 
-                `• ${expense.name} (${expense.category}): ${expense.currency === 'USD' ? '$' : '৳'}${formatNumber(expense.amount)}`
+                `• ${expense.name} (${expense.category}): ৳${formatNumber(expense.amount)}`
             ).join('<br>');
             
             const moreText = selectedExpensesData.length > 5 ? `<br>...and ${selectedExpensesData.length - 5} more expenses` : '';
@@ -724,12 +752,12 @@ export default {
         const clearAllExpenses = async () => {
             const totalExpenses = expenses.value.length;
             const totalBDT = expenses.value.reduce((sum, expense) => {
-                const amount = expense.currency === 'USD' ? expense.amount * 120 : expense.amount;
+                const amount = expense.amount;
                 return sum + amount;
             }, 0);
 
             const expenseList = expenses.value.slice(0, 5).map(expense => 
-                `• ${expense.name} (${expense.category}): ${expense.currency === 'USD' ? '$' : '৳'}${formatNumber(expense.amount)}`
+                `• ${expense.name} (${expense.category}): ৳${formatNumber(expense.amount)}`
             ).join('<br>');
             
             const moreText = expenses.value.length > 5 ? `<br>...and ${expenses.value.length - 5} more expenses` : '';
@@ -788,7 +816,7 @@ export default {
         const exportExpenses = async () => {
             const csvHeader = 'Date,Name,Category,Amount,Currency,BDT Equivalent,Description,Notes\n';
             const csvRows = expenses.value.map(expense => {
-                const bdtAmount = expense.currency === 'USD' ? expense.amount * 120 : expense.amount;
+                const bdtAmount = expense.amount;
                 return [
                     expense.expense_date,
                     `"${expense.name}"`,
@@ -831,8 +859,10 @@ export default {
             editingExpense,
             saving,
             form,
+            USD_TO_BDT_RATE,
             formatNumber,
             formatDate,
+            openAddModal,
             editExpense,
             closeModal,
             saveExpense,
