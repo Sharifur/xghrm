@@ -490,6 +490,9 @@ export default {
     font-size: 0.9rem;
     margin-bottom: 1rem;
     min-height: 2.7rem;
+    white-space: pre-line;
+    word-wrap: break-word;
+    line-height: 1.5;
 }
 
 .asset-amount {

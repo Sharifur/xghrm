@@ -1,3 +1,5 @@
+@use "variables" as *;
+
 @mixin gradient-border-with-radius($left, $right) {
     background-image: linear-gradient(white, white), radial-gradient(circle at top left, $left, $right);
     background-origin: border-box;

@@ -155,8 +155,8 @@
                                     <div class="trend-chart">
                                         <div v-for="(month, index) in trendData" :key="index" class="trend-month">
                                             <div class="trend-bars">
-                                                <div class="trend-bar revenue-bar" :style="`height: ${(month.revenue / maxAmount) * 100}%`" :title="`Revenue: ৳${formatNumber(month.revenue)}`"></div>
-                                                <div class="trend-bar expense-bar" :style="`height: ${(month.expenses / maxAmount) * 100}%`" :title="`Expenses: ৳${formatNumber(month.expenses)}`"></div>
+                                                <div class="trend-bar revenue-bar" :style="`height: ${maxAmount > 0 ? (month.revenue / maxAmount) * 100 : 0}%`" :title="`Revenue: ৳${formatNumber(month.revenue)}`"></div>
+                                                <div class="trend-bar expense-bar" :style="`height: ${maxAmount > 0 ? (month.expenses / maxAmount) * 100 : 0}%`" :title="`Expenses: ৳${formatNumber(month.expenses)}`"></div>
                                             </div>
                                             <div class="trend-label">{{ month.name }}</div>
                                         </div>
@@ -321,10 +321,10 @@
                                         </div>
                                         <div class="budget-progress">
                                             <div class="progress">
-                                                <div class="progress-bar" :class="getBudgetProgressClass(budget)" :style="`width: ${Math.min((budget.used / budget.total) * 100, 100)}%`"></div>
+                                                <div class="progress-bar" :class="getBudgetProgressClass(budget)" :style="`width: ${budget.total > 0 ? Math.min((budget.used / budget.total) * 100, 100) : 0}%`"></div>
                                             </div>
                                             <div class="budget-status">
-                                                <small class="percentage">{{ Math.round((budget.used / budget.total) * 100) }}% used</small>
+                                                <small class="percentage">{{ budget.total > 0 ? Math.round((budget.used / budget.total) * 100) : 0 }}% used</small>
                                                 <small class="remaining" :class="budget.remaining < 0 ? 'text-danger' : 'text-success'">
                                                     ৳{{ formatNumber(Math.abs(budget.remaining)) }} {{ budget.remaining < 0 ? 'over' : 'remaining' }}
                                                 </small>
@@ -546,6 +546,7 @@ export default {
         };
 
         const getBudgetProgressClass = (budget) => {
+            if (!budget.total || budget.total <= 0) return 'bg-secondary';
             const percentage = (budget.used / budget.total) * 100;
             if (percentage >= 100) return 'bg-danger';
             if (percentage >= 80) return 'bg-warning';
@@ -674,7 +675,7 @@ export default {
                             <p><strong>Revenue:</strong> ৳${formatNumber(dashboardData.value.totalRevenue)}</p>
                             <p><strong>Expenses:</strong> ৳${formatNumber(dashboardData.value.totalExpenses)}</p>
                             <p><strong>Net Profit:</strong> ৳${formatNumber(dashboardData.value.netProfit)}</p>
-                            <p><strong>Profit Margin:</strong> ${((dashboardData.value.netProfit / dashboardData.value.totalRevenue) * 100).toFixed(1)}%</p>
+                            <p><strong>Profit Margin:</strong> ${dashboardData.value.totalRevenue > 0 ? ((dashboardData.value.netProfit / dashboardData.value.totalRevenue) * 100).toFixed(1) : '0.0'}%</p>
                         </div>
                     `,
                     icon: 'info',
@@ -1016,7 +1017,7 @@ export default {
             csvContent += "Expense Categories Breakdown\n";
             csvContent += "Category,Amount (BDT),Percentage,Currency\n";
             expenseCategories.value.forEach(category => {
-                const percentage = ((category.amount / dashboardData.value.totalExpenses) * 100).toFixed(1);
+                const percentage = dashboardData.value.totalExpenses > 0 ? ((category.amount / dashboardData.value.totalExpenses) * 100).toFixed(1) : '0.0';
                 csvContent += `${category.name},${category.amount},${percentage}%,BDT\n`;
             });
             
@@ -1057,7 +1058,7 @@ export default {
         };
 
         const createFinancialSummaryCSVContent = () => {
-            const profitMargin = ((dashboardData.value.netProfit / dashboardData.value.totalRevenue) * 100).toFixed(1);
+            const profitMargin = dashboardData.value.totalRevenue > 0 ? ((dashboardData.value.netProfit / dashboardData.value.totalRevenue) * 100).toFixed(1) : '0.0';
             const roi = calculateROI().toFixed(1);
             
             let csvContent = "Report,Financial Summary Report\n";
@@ -1076,7 +1077,7 @@ export default {
             csvContent += `Profit Margin,${profitMargin},%\n`;
             csvContent += `Return on Investment (ROI),${roi},%\n`;
             csvContent += `Revenue Growth Rate,${Math.abs(dashboardData.value.revenueChange)},%\n`;
-            csvContent += `Expense Efficiency,${((dashboardData.value.totalExpenses / dashboardData.value.totalRevenue) * 100).toFixed(1)},% of revenue\n`;
+            csvContent += `Expense Efficiency,${dashboardData.value.totalRevenue > 0 ? ((dashboardData.value.totalExpenses / dashboardData.value.totalRevenue) * 100).toFixed(1) : '0.0'},% of revenue\n`;
             csvContent += `Cash Flow Status,${dashboardData.value.netProfit >= 0 ? 'Positive' : 'Negative'},Status\n`;
             
             return csvContent;
@@ -1239,7 +1240,7 @@ export default {
                             <div class="category-item">
                                 <div>
                                     <div class="category-name">${category.name}</div>
-                                    <div class="category-percentage">${((category.amount / dashboardData.value.totalExpenses) * 100).toFixed(1)}% of total expenses</div>
+                                    <div class="category-percentage">${dashboardData.value.totalExpenses > 0 ? ((category.amount / dashboardData.value.totalExpenses) * 100).toFixed(1) : '0.0'}% of total expenses</div>
                                 </div>
                                 <div class="category-amount">৳${formatNumber(category.amount)}</div>
                             </div>
@@ -1357,7 +1358,7 @@ export default {
         };
 
         const createFinancialSummaryHTML = () => {
-            const profitMargin = ((dashboardData.value.netProfit / dashboardData.value.totalRevenue) * 100).toFixed(1);
+            const profitMargin = dashboardData.value.totalRevenue > 0 ? ((dashboardData.value.netProfit / dashboardData.value.totalRevenue) * 100).toFixed(1) : '0.0';
             const roi = calculateROI().toFixed(1);
             
             return `
@@ -1430,7 +1431,7 @@ export default {
                         </div>
                         <div class="performance-item">
                             <span>Expense Efficiency</span>
-                            <span>${((dashboardData.value.totalExpenses / dashboardData.value.totalRevenue) * 100).toFixed(1)}% of revenue</span>
+                            <span>${dashboardData.value.totalRevenue > 0 ? ((dashboardData.value.totalExpenses / dashboardData.value.totalRevenue) * 100).toFixed(1) : '0.0'}% of revenue</span>
                         </div>
                         <div class="performance-item">
                             <span>Cash Flow Status</span>

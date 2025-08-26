@@ -12,15 +12,17 @@
                 <div class="table-responsive">
                     <table class="table table-stripped">
                         <thead>
-                        <th>Id</th>
-                        <th>Title</th>
-                        <th>Category</th>
-                        <th>Join Date</th>
-                        <th>Salary</th>
-                        <th>Total Leave ( {{ new Date().getFullYear() }} )</th>
-                        <th>Payment Info</th>
-                        <th>Status</th>
-                        <th>Action</th>
+                        <tr>
+                            <th>Id</th>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Join Date</th>
+                            <th>Salary</th>
+                            <th>Total Leave ( {{ new Date().getFullYear() }} )</th>
+                            <th>Payment Info</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
                         </thead>
                         <tbody>
                         <tr v-for="employee in employeeList()" v-bind:key="employee.id">

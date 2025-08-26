@@ -909,7 +909,7 @@ class FinanceController extends Controller
 
         $netProfit = $totalRevenue - $totalExpenses;
         $pendingRevenue = $totalRevenue * 0.15; // Assume 15% pending
-        $pendingCount = max(1, intval($pendingRevenue / ($totalRevenue / 10)));
+        $pendingCount = $totalRevenue > 0 ? max(1, intval($pendingRevenue / ($totalRevenue / 10))) : 1;
 
         // Calculate monthly recurring revenue (from recurring liabilities as income proxy)
         $monthlyRecurringRevenue = $recurringExpenses * 2; // Assume 2x recurring expenses as recurring revenue
@@ -1020,7 +1020,7 @@ class FinanceController extends Controller
         
         // Budget alerts
         foreach ($budgetStatus as $budget) {
-            $percentage = ($budget['used'] / $budget['total']) * 100;
+            $percentage = $budget['total'] > 0 ? ($budget['used'] / $budget['total']) * 100 : 0;
             if ($percentage >= 100) {
                 $financialAlerts[] = [
                     'id' => 'budget_' . \Str::slug($budget['name']),

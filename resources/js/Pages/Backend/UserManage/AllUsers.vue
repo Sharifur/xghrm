@@ -12,10 +12,12 @@
                 <div class="table-responsive">
                     <table class="table table-stripped">
                         <thead>
-                        <th>Id</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Action</th>
+                        <tr>
+                            <th>Id</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Action</th>
+                        </tr>
                         </thead>
                         <tbody>
                         <tr v-for="user in usersList()">
