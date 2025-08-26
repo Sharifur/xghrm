@@ -1965,6 +1965,7 @@ export default {
     gap: 0.5rem;
 }
 
+/* Enhanced Mobile and Tablet Responsive Styles */
 @media (max-width: 768px) {
     .metric-icon {
         position: static;
@@ -1985,6 +1986,127 @@ export default {
     
     .trend-bar {
         width: 12px;
+    }
+    
+    .card-header .d-flex {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start !important;
+    }
+    
+    .card-header h4 {
+        font-size: 1.1rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        width: 100%;
+        gap: 8px;
+    }
+    
+    .btn-group .btn {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 8px;
+        font-size: 0.85rem;
+    }
+    
+    .metric-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .metric-value {
+        font-size: 1.5rem;
+    }
+    
+    .quick-stats .stat-item {
+        padding: 0.5rem;
+        gap: 0.5rem;
+    }
+    
+    .stat-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+    
+    .recent-transactions .transaction-item {
+        padding: 0.5rem;
+        gap: 0.5rem;
+    }
+    
+    .transaction-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 0.8rem;
+    }
+    
+    .budget-overview .budget-item {
+        gap: 0.5rem;
+    }
+    
+    .modal-content {
+        margin: 10px;
+        width: calc(100% - 20px);
+        max-height: calc(100vh - 20px);
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .form-check-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+/* Tablet Responsive Styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .btn-group {
+        gap: 8px;
+    }
+    
+    .metric-value {
+        font-size: 1.6rem;
+    }
+    
+    .modal-content {
+        max-width: 85%;
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    .card-header h4 {
+        font-size: 1rem;
+        line-height: 1.3;
+    }
+    
+    .btn {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.6rem;
+    }
+    
+    .metric-card {
+        padding: 1rem;
+    }
+    
+    .metric-value {
+        font-size: 1.3rem;
+    }
+    
+    .metric-label {
+        font-size: 0.8rem;
+    }
+    
+    .alert {
+        font-size: 0.85rem;
+        padding: 0.75rem;
+    }
+    
+    .form-control, .form-select {
+        font-size: 16px; /* Prevents zoom on iOS */
     }
 }
 </style>

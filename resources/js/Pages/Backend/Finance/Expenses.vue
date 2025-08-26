@@ -10,17 +10,39 @@
                             <i class="fas fa-receipt me-2"></i>
                             One-time Expenses
                         </h4>
-                        <button @click="showAddModal = true" class="btn btn-warning">
-                            <i class="fas fa-plus"></i> Add Expense
-                        </button>
+                        <div class="btn-group">
+                            <button @click="showAddModal = true" class="btn btn-warning">
+                                <i class="fas fa-plus"></i> Add Expense
+                            </button>
+                            <button v-if="selectedExpenses.length > 0" @click="deleteSelectedExpenses" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete Selected ({{ selectedExpenses.length }})
+                            </button>
+                            <button v-if="expenses.length > 0" @click="exportExpenses" class="btn btn-outline-success">
+                                <i class="fas fa-download"></i> Export CSV
+                            </button>
+                            <button v-if="expenses.length > 0" @click="clearAllExpenses" class="btn btn-outline-danger">
+                                <i class="fas fa-trash-alt"></i> Clear All
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="entrepreneur-guide mb-4">
-                            <h6 class="text-primary mb-3">
-                                <i class="fas fa-lightbulb me-2"></i>
-                                Solo Entrepreneur Expense Management Guide
+                            <h6 class="text-primary mb-0">
+                                <button 
+                                    class="btn btn-link text-primary p-0 text-decoration-none w-100 text-start" 
+                                    type="button" 
+                                    data-bs-toggle="collapse" 
+                                    data-bs-target="#expenseGuide" 
+                                    aria-expanded="false" 
+                                    aria-controls="expenseGuide"
+                                >
+                                    <i class="fas fa-lightbulb me-2"></i>
+                                    Solo Entrepreneur Expense Management Guide
+                                    <i class="fas fa-chevron-down float-end mt-1"></i>
+                                </button>
                             </h6>
-                            <div class="row">
+                            <div id="expenseGuide" class="collapse mt-3">
+                                <div class="row">
                                 <div class="col-md-6">
                                     <div class="guide-section">
                                         <h6 class="text-success">What are One-time Expenses?</h6>
@@ -51,6 +73,7 @@
                                 <i class="fas fa-info-circle me-2"></i>
                                 <strong>Pro Tip:</strong> Set aside 20-30% of your revenue for business expenses. Track everything - even small purchases add up!
                             </div>
+                            </div>
                         </div>
                         <p class="text-muted">
                             Record all your one-time business expenses here. Use different currencies (USD for software, BDT for local expenses) 
@@ -61,14 +84,33 @@
 
                 <!-- Expenses List -->
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Expense Records</h5>
+                        <div class="d-flex align-items-center gap-3">
+                            <div v-if="expenses.length > 0" class="form-check">
+                                <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    :checked="isAllSelected" 
+                                    @change="toggleSelectAll"
+                                    id="selectAll"
+                                >
+                                <label class="form-check-label" for="selectAll">
+                                    Select All
+                                </label>
+                            </div>
+                            <span class="text-muted">{{ paginatedExpenses.length }} of {{ expenses.length }} items</span>
+                        </div>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive">
+                        <!-- Desktop Table View -->
+                        <div class="table-responsive d-none d-md-block">
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
+                                        <th width="40">
+                                            <i class="fas fa-check-square text-muted"></i>
+                                        </th>
                                         <th>Date</th>
                                         <th>Name</th>
                                         <th>Category</th>
@@ -79,7 +121,18 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="expense in expenses" :key="expense.id">
+                                    <tr v-for="expense in paginatedExpenses" :key="expense.id">
+                                        <td>
+                                            <div class="form-check">
+                                                <input 
+                                                    class="form-check-input" 
+                                                    type="checkbox" 
+                                                    :value="expense.id" 
+                                                    v-model="selectedExpenses"
+                                                    :id="`expense-${expense.id}`"
+                                                >
+                                            </div>
+                                        </td>
                                         <td>
                                             <span class="badge bg-light text-dark">
                                                 {{ formatDate(expense.expense_date) }}
@@ -115,12 +168,117 @@
                                         </td>
                                     </tr>
                                     <tr v-if="expenses.length === 0">
-                                        <td colspan="7" class="text-center text-muted">
+                                        <td colspan="8" class="text-center text-muted">
                                             No expenses found. Click "Add Expense" to record your first expense.
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- Mobile Card View -->
+                        <div class="d-md-none">
+                            <div v-if="expenses.length === 0" class="text-center text-muted py-5">
+                                <i class="fas fa-receipt fa-3x mb-3"></i>
+                                <p>No expenses found.<br>Click "Add Expense" to record your first expense.</p>
+                            </div>
+                            <div v-for="expense in paginatedExpenses" :key="expense.id" class="mobile-expense-card mb-3">
+                                <div class="card border-start border-warning border-3">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-start gap-3">
+                                            <!-- Left side: Checkbox -->
+                                            <div class="form-check">
+                                                <input 
+                                                    class="form-check-input mobile-checkbox" 
+                                                    type="checkbox" 
+                                                    :value="expense.id" 
+                                                    v-model="selectedExpenses"
+                                                    :id="`mobile-expense-${expense.id}`"
+                                                >
+                                            </div>
+                                            
+                                            <!-- Center: Expense Info -->
+                                            <div class="expense-info flex-grow-1">
+                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                    <div class="d-flex align-items-center">
+                                                        <i :class="expense.icon || 'fas fa-receipt'" class="text-primary me-2 fs-5"></i>
+                                                        <h6 class="mb-0 expense-name fw-bold">{{ expense.name }}</h6>
+                                                    </div>
+                                                    <span class="badge bg-light text-dark">
+                                                        {{ formatDate(expense.expense_date) }}
+                                                    </span>
+                                                </div>
+                                                
+                                                <div class="expense-details">
+                                                    <div class="mb-2">
+                                                        <span class="badge bg-secondary me-2">{{ expense.category }}</span>
+                                                    </div>
+                                                    
+                                                    <p class="text-muted mb-2 small" v-if="expense.description">
+                                                        <i class="fas fa-info-circle me-1"></i>
+                                                        {{ expense.description }}
+                                                    </p>
+                                                    
+                                                    <div class="expense-amount">
+                                                        <span class="badge bg-warning text-dark fs-6">
+                                                            {{ expense.currency === 'USD' ? '$' : '৳' }}{{ formatNumber(expense.amount) }}
+                                                        </span>
+                                                        <small class="d-block text-muted mt-1" v-if="expense.currency === 'USD'">
+                                                            ≈ ৳{{ formatNumber(expense.amount * 120) }} BDT
+                                                        </small>
+                                                    </div>
+                                                    
+                                                    <div v-if="expense.notes" class="mt-2">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-sticky-note me-1"></i>
+                                                            {{ expense.notes }}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Right side: Action buttons -->
+                                            <div class="expense-actions d-flex flex-column gap-2">
+                                                <button @click="editExpense(expense)" class="btn btn-outline-primary btn-sm mobile-btn">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button @click="deleteExpense(expense.id)" class="btn btn-outline-danger btn-sm mobile-btn">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div v-if="expenses.length > itemsPerPage" class="d-flex justify-content-between align-items-center mt-4">
+                            <div class="text-muted">
+                                Showing {{ ((currentPage - 1) * itemsPerPage) + 1 }} to {{ Math.min(currentPage * itemsPerPage, expenses.length) }} of {{ expenses.length }} entries
+                            </div>
+                            <nav aria-label="Expenses pagination">
+                                <ul class="pagination pagination-sm mb-0">
+                                    <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                                        <button class="page-link" @click="changePage(currentPage - 1)" :disabled="currentPage === 1">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                    </li>
+                                    <li 
+                                        v-for="page in visiblePages" 
+                                        :key="page" 
+                                        class="page-item" 
+                                        :class="{ active: page === currentPage }"
+                                    >
+                                        <button class="page-link" @click="changePage(page)">{{ page }}</button>
+                                    </li>
+                                    <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                                        <button class="page-link" @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </li>
+                                </ul>
+                            </nav>
                         </div>
                     </div>
                 </div>
@@ -254,7 +412,7 @@
 <script>
 import AdminMaster from "@/Layouts/AdminMaster.vue";
 import { Head } from '@inertiajs/inertia-vue3';
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
@@ -272,6 +430,11 @@ export default {
         const editingExpense = ref(null);
         const saving = ref(false);
         const expenses = ref([...props.expenses]);
+        
+        // Pagination and selection
+        const selectedExpenses = ref([]);
+        const currentPage = ref(1);
+        const itemsPerPage = ref(10);
 
         const form = reactive({
             name: '',
@@ -282,6 +445,53 @@ export default {
             category: '',
             icon: 'fas fa-receipt',
             notes: ''
+        });
+
+        // Computed properties for pagination
+        const totalPages = computed(() => Math.ceil(expenses.value.length / itemsPerPage.value));
+        
+        const paginatedExpenses = computed(() => {
+            const start = (currentPage.value - 1) * itemsPerPage.value;
+            const end = start + itemsPerPage.value;
+            return expenses.value.slice(start, end);
+        });
+        
+        const visiblePages = computed(() => {
+            const total = totalPages.value;
+            const current = currentPage.value;
+            const pages = [];
+            
+            if (total <= 7) {
+                // Show all pages if total is 7 or less
+                for (let i = 1; i <= total; i++) {
+                    pages.push(i);
+                }
+            } else {
+                // Show first page, current page range, and last page
+                if (current <= 4) {
+                    for (let i = 1; i <= 5; i++) pages.push(i);
+                    pages.push('...');
+                    pages.push(total);
+                } else if (current >= total - 3) {
+                    pages.push(1);
+                    pages.push('...');
+                    for (let i = total - 4; i <= total; i++) pages.push(i);
+                } else {
+                    pages.push(1);
+                    pages.push('...');
+                    for (let i = current - 1; i <= current + 1; i++) pages.push(i);
+                    pages.push('...');
+                    pages.push(total);
+                }
+            }
+            
+            return pages.filter(page => page !== '...' || pages.indexOf(page) !== pages.lastIndexOf(page));
+        });
+
+        // Selection computed properties
+        const isAllSelected = computed(() => {
+            return paginatedExpenses.value.length > 0 && 
+                   paginatedExpenses.value.every(expense => selectedExpenses.value.includes(expense.id));
         });
 
         const formatNumber = (num) => {
@@ -409,6 +619,212 @@ export default {
             }
         };
 
+        // Pagination functions
+        const changePage = (page) => {
+            if (page >= 1 && page <= totalPages.value && page !== '...') {
+                currentPage.value = page;
+                selectedExpenses.value = []; // Clear selection when changing pages
+            }
+        };
+
+        // Selection functions
+        const toggleSelectAll = () => {
+            if (isAllSelected.value) {
+                // Deselect all current page items
+                const currentPageIds = paginatedExpenses.value.map(expense => expense.id);
+                selectedExpenses.value = selectedExpenses.value.filter(id => !currentPageIds.includes(id));
+            } else {
+                // Select all current page items
+                const currentPageIds = paginatedExpenses.value.map(expense => expense.id);
+                const newSelections = currentPageIds.filter(id => !selectedExpenses.value.includes(id));
+                selectedExpenses.value.push(...newSelections);
+            }
+        };
+
+        // Bulk delete function
+        const deleteSelectedExpenses = async () => {
+            if (selectedExpenses.value.length === 0) return;
+
+            const selectedCount = selectedExpenses.value.length;
+            const selectedExpensesData = expenses.value.filter(expense => 
+                selectedExpenses.value.includes(expense.id)
+            );
+            
+            const totalBDT = selectedExpensesData.reduce((sum, expense) => {
+                const amount = expense.currency === 'USD' ? expense.amount * 120 : expense.amount;
+                return sum + amount;
+            }, 0);
+
+            const expenseList = selectedExpensesData.slice(0, 5).map(expense => 
+                `• ${expense.name} (${expense.category}): ${expense.currency === 'USD' ? '$' : '৳'}${formatNumber(expense.amount)}`
+            ).join('<br>');
+            
+            const moreText = selectedExpensesData.length > 5 ? `<br>...and ${selectedExpensesData.length - 5} more expenses` : '';
+
+            const result = await Swal.fire({
+                title: `Delete ${selectedCount} Selected Expenses?`,
+                html: `<div class="text-left">
+                    <p>This will permanently remove <strong>${selectedCount}</strong> selected expenses:</p>
+                    <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; font-size: 14px;">
+                        ${expenseList}
+                        ${moreText}
+                    </div>
+                    <p><strong>Total Value:</strong> ৳${formatNumber(totalBDT)}</p>
+                    <p class="text-danger mb-0"><i class="fas fa-exclamation-triangle"></i> This action cannot be undone!</p>
+                </div>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74a3b',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: `Yes, delete ${selectedCount} expenses!`,
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            });
+
+            if (!result.isConfirmed) return;
+
+            try {
+                // Delete selected expenses one by one
+                const deletePromises = selectedExpenses.value.map(expenseId => 
+                    axios.delete(route('admin.finance.expenses.delete', expenseId))
+                );
+                
+                await Promise.all(deletePromises);
+                
+                // Remove from local array
+                expenses.value = expenses.value.filter(expense => 
+                    !selectedExpenses.value.includes(expense.id)
+                );
+                
+                // Clear selection and adjust pagination if necessary
+                selectedExpenses.value = [];
+                if (currentPage.value > totalPages.value && totalPages.value > 0) {
+                    currentPage.value = totalPages.value;
+                }
+                
+                Swal.fire({
+                    title: 'Expenses Deleted!',
+                    text: `Successfully removed ${selectedCount} expenses.`,
+                    icon: 'success',
+                    confirmButtonColor: '#f6c23e',
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            } catch (error) {
+                console.error('Bulk delete failed:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to delete some expenses. Please try again.',
+                    icon: 'error',
+                    confirmButtonColor: '#e74a3b'
+                });
+            }
+        };
+
+        const clearAllExpenses = async () => {
+            const totalExpenses = expenses.value.length;
+            const totalBDT = expenses.value.reduce((sum, expense) => {
+                const amount = expense.currency === 'USD' ? expense.amount * 120 : expense.amount;
+                return sum + amount;
+            }, 0);
+
+            const expenseList = expenses.value.slice(0, 5).map(expense => 
+                `• ${expense.name} (${expense.category}): ${expense.currency === 'USD' ? '$' : '৳'}${formatNumber(expense.amount)}`
+            ).join('<br>');
+            
+            const moreText = expenses.value.length > 5 ? `<br>...and ${expenses.value.length - 5} more expenses` : '';
+
+            const result = await Swal.fire({
+                title: 'Clear All One-Time Expenses?',
+                html: `<div class="text-left">
+                    <p>This will permanently remove <strong>${totalExpenses}</strong> one-time expenses:</p>
+                    <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; font-size: 14px;">
+                        ${expenseList}
+                        ${moreText}
+                    </div>
+                    <p><strong>Total Value:</strong> ৳${formatNumber(totalBDT)}</p>
+                    <p class="text-danger mb-0"><i class="fas fa-exclamation-triangle"></i> This action cannot be undone!</p>
+                </div>`,
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonColor: '#e74a3b',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, clear all expenses!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            });
+
+            if (!result.isConfirmed) return;
+
+            try {
+                // Since we don't have a bulk delete endpoint, delete them one by one
+                const deletePromises = expenses.value.map(expense => 
+                    axios.delete(route('admin.finance.expenses.delete', expense.id))
+                );
+                
+                await Promise.all(deletePromises);
+                
+                expenses.value.splice(0);
+                
+                Swal.fire({
+                    title: 'All Expenses Cleared!',
+                    text: `Successfully removed ${totalExpenses} one-time expenses.`,
+                    icon: 'success',
+                    confirmButtonColor: '#f6c23e',
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            } catch (error) {
+                console.error('Bulk delete failed:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to clear some expenses. Please try again.',
+                    icon: 'error',
+                    confirmButtonColor: '#e74a3b'
+                });
+            }
+        };
+
+        const exportExpenses = async () => {
+            const csvHeader = 'Date,Name,Category,Amount,Currency,BDT Equivalent,Description,Notes\n';
+            const csvRows = expenses.value.map(expense => {
+                const bdtAmount = expense.currency === 'USD' ? expense.amount * 120 : expense.amount;
+                return [
+                    expense.expense_date,
+                    `"${expense.name}"`,
+                    `"${expense.category}"`,
+                    expense.amount,
+                    expense.currency,
+                    bdtAmount.toFixed(2),
+                    `"${expense.description || ''}"`,
+                    `"${expense.notes || ''}"`
+                ].join(',');
+            }).join('\n');
+
+            const csvContent = csvHeader + csvRows;
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `One-Time-Expenses-${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                Swal.fire({
+                    title: 'Export Complete!',
+                    text: 'One-time expenses have been exported to CSV.',
+                    icon: 'success',
+                    confirmButtonColor: '#f6c23e',
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            }
+        };
+
         return {
             expenses,
             showAddModal,
@@ -420,7 +836,21 @@ export default {
             editExpense,
             closeModal,
             saveExpense,
-            deleteExpense
+            deleteExpense,
+            clearAllExpenses,
+            exportExpenses,
+            // Pagination
+            selectedExpenses,
+            currentPage,
+            itemsPerPage,
+            totalPages,
+            paginatedExpenses,
+            visiblePages,
+            changePage,
+            // Selection
+            isAllSelected,
+            toggleSelectAll,
+            deleteSelectedExpenses
         };
     }
 }
@@ -510,13 +940,278 @@ export default {
     margin-right: 0.25rem;
 }
 
+/* Mobile Card Styles */
+.mobile-expense-card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: all 0.15s ease-in-out;
+}
+
+.mobile-expense-card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.mobile-checkbox {
+    transform: scale(1.3);
+    margin-top: 2px;
+}
+
+.mobile-btn {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.75rem;
+    min-width: 20px;
+    min-height: 20px;
+    border-radius: 0.25rem;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-btn i {
+    font-size: 0.7rem;
+}
+
+.expense-name {
+    color: #2c3e50;
+    font-size: 1rem;
+}
+
+.expense-amount .badge {
+    font-size: 0.875rem;
+    padding: 0.5em 0.75em;
+}
+
+/* Touch-friendly interactions */
+.mobile-expense-card .card-body {
+    cursor: pointer;
+    user-select: none;
+}
+
+.mobile-expense-card .expense-actions {
+    flex-shrink: 0;
+}
+
+/* Touch and PWA Optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .mobile-btn:hover {
+        transform: none;
+    }
+    
+    .mobile-btn:active {
+        transform: scale(0.95);
+        transition: transform 0.1s;
+    }
+    
+    .mobile-expense-card:hover {
+        transform: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .mobile-expense-card:active {
+        transform: translateY(1px);
+    }
+}
+
+/* PWA and Touch Device Optimizations */
+* {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    -webkit-touch-callout: none;
+}
+
+.mobile-btn, .pagination .page-link, .form-check-input {
+    touch-action: manipulation;
+}
+
+/* Desktop button styles */
+@media (min-width: 768px) {
+    .btn-sm {
+        min-width: 30px;
+        min-height: 30px;
+        padding: 0.25rem 0.5rem;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn-sm i {
+        font-size: 0.8rem;
+    }
+}
+
+/* Mobile button styles */
+@media (max-width: 767px) {
+    .btn-sm {
+        min-width: 20px;
+        min-height: 20px;
+        padding: 0.2rem 0.3rem;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn-sm i {
+        font-size: 0.7rem;
+    }
+}
+
+.pagination .page-link {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-check-input {
+    min-width: 20px;
+    min-height: 20px;
+}
+
+/* Enhanced Mobile and Tablet Responsive Styles */
 @media (max-width: 768px) {
-    .modal-content {
-        width: 95%;
+    .card-header .d-flex {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start !important;
+    }
+    
+    .card-header h4 {
+        font-size: 1.1rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        width: 100%;
+        gap: 8px;
+    }
+    
+    .btn-group .btn {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 8px;
+        font-size: 0.85rem;
     }
     
     .table-responsive {
-        font-size: 0.875rem;
+        font-size: 0.8rem;
+    }
+    
+    .table th, .table td {
+        padding: 0.4rem 0.2rem;
+        vertical-align: middle;
+    }
+    
+    .badge {
+        font-size: 0.6rem;
+        padding: 0.3em 0.4em;
+    }
+    
+    .form-check-input {
+        transform: scale(1.1);
+    }
+    
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .pagination .page-link {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.5rem;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .modal-content {
+        margin: 10px;
+        width: calc(100% - 20px);
+        max-height: calc(100vh - 20px);
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .entrepreneur-guide {
+        margin-bottom: 1rem !important;
+    }
+    
+    .entrepreneur-guide .row {
+        margin: 0;
+    }
+    
+    .entrepreneur-guide .col-md-6 {
+        padding: 0.5rem;
+    }
+}
+
+/* Tablet Responsive Styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .btn-group {
+        gap: 8px;
+    }
+    
+    .table th, .table td {
+        padding: 0.6rem 0.4rem;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+    }
+    
+    .modal-content {
+        max-width: 85%;
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    .card-header h4 {
+        font-size: 1rem;
+        line-height: 1.3;
+    }
+    
+    .table th:first-child,
+    .table td:first-child {
+        width: 25px;
+        padding: 0.2rem 0.1rem;
+    }
+    
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+        min-width: 90px;
+    }
+    
+    .btn {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.6rem;
+    }
+    
+    .form-control, .form-select {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    .pagination .page-item {
+        margin: 1px;
+    }
+    
+    .alert {
+        font-size: 0.85rem;
+        padding: 0.75rem;
+    }
+    
+    .entrepreneur-guide .col-md-6 {
+        margin-bottom: 1rem;
     }
 }
 </style>

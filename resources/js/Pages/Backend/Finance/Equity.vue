@@ -26,11 +26,22 @@
                 <div class="card mb-4 entrepreneur-guide">
                     <div class="card-header bg-info-light">
                         <h6 class="text-info mb-0">
-                            <i class="fas fa-lightbulb me-2"></i>
-                            Single Company Owner Equity Guide
+                            <button 
+                                class="btn btn-link text-info p-0 text-decoration-none w-100 text-start" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#equityGuide" 
+                                aria-expanded="false" 
+                                aria-controls="equityGuide"
+                            >
+                                <i class="fas fa-lightbulb me-2"></i>
+                                Single Company Owner Equity Guide
+                                <i class="fas fa-chevron-down float-end mt-1"></i>
+                            </button>
                         </h6>
                     </div>
-                    <div class="card-body">
+                    <div id="equityGuide" class="collapse">
+                        <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
                                 <h6 class="text-primary mb-3">
@@ -146,6 +157,7 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
                         </div>
                     </div>
                 </div>
