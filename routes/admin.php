@@ -107,6 +107,47 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
 
 
     /*=================================
+        FINANCE ROUTES
+    ==================================*/
+    Route::group(['prefix' => 'finance'],function (){
+        Route::get('/dashboard',[\App\Http\Controllers\Admin\FinanceController::class,'dashboard'])->name('admin.finance.dashboard');
+        Route::get('/balance-sheet',[\App\Http\Controllers\Admin\FinanceController::class,'balanceSheet'])->name('admin.finance.balance.sheet');
+        Route::post('/balance-sheet/save',[\App\Http\Controllers\Admin\FinanceController::class,'saveBalanceSheet'])->name('admin.finance.balance.sheet.save');
+        Route::get('/balance-sheet/load/{date}',[\App\Http\Controllers\Admin\FinanceController::class,'loadBalanceSheet'])->name('admin.finance.balance.sheet.load');
+        Route::get('/balance-sheet/export/{date}',[\App\Http\Controllers\Admin\FinanceController::class,'exportBalanceSheet'])->name('admin.finance.balance.sheet.export');
+        Route::get('/balance-sheet/forecast/{date}',[\App\Http\Controllers\Admin\FinanceController::class,'generateForecast'])->name('admin.finance.balance.sheet.forecast');
+        Route::post('/balance-sheet/apply-forecast',[\App\Http\Controllers\Admin\FinanceController::class,'applyForecast'])->name('admin.finance.balance.sheet.apply.forecast');
+        
+        // Recurring Expenses Management
+        Route::get('/recurring-expenses',[\App\Http\Controllers\Admin\FinanceController::class,'recurringExpenses'])->name('admin.finance.recurring.expenses');
+        Route::post('/recurring-expenses/store',[\App\Http\Controllers\Admin\FinanceController::class,'storeRecurringExpense'])->name('admin.finance.recurring.expenses.store');
+        Route::put('/recurring-expenses/{id}',[\App\Http\Controllers\Admin\FinanceController::class,'updateRecurringExpense'])->name('admin.finance.recurring.expenses.update');
+        Route::delete('/recurring-expenses/{id}',[\App\Http\Controllers\Admin\FinanceController::class,'deleteRecurringExpense'])->name('admin.finance.recurring.expenses.delete');
+        
+        // Assets Management
+        Route::get('/assets',[\App\Http\Controllers\Admin\FinanceController::class,'assets'])->name('admin.finance.assets');
+        Route::post('/assets/store',[\App\Http\Controllers\Admin\FinanceController::class,'storeAsset'])->name('admin.finance.assets.store');
+        Route::put('/assets/{id}',[\App\Http\Controllers\Admin\FinanceController::class,'updateAsset'])->name('admin.finance.assets.update');
+        Route::delete('/assets/{id}',[\App\Http\Controllers\Admin\FinanceController::class,'deleteAsset'])->name('admin.finance.assets.delete');
+        
+        // Equity Management
+        Route::get('/equity',[\App\Http\Controllers\Admin\FinanceController::class,'equity'])->name('admin.finance.equity');
+        Route::post('/equity/store',[\App\Http\Controllers\Admin\FinanceController::class,'storeEquity'])->name('admin.finance.equity.store');
+        Route::put('/equity/{id}',[\App\Http\Controllers\Admin\FinanceController::class,'updateEquity'])->name('admin.finance.equity.update');
+        Route::delete('/equity/{id}',[\App\Http\Controllers\Admin\FinanceController::class,'deleteEquity'])->name('admin.finance.equity.delete');
+        
+        // One-time Expenses
+        Route::get('/expenses',[\App\Http\Controllers\Admin\FinanceController::class,'expenses'])->name('admin.finance.expenses');
+        Route::post('/expenses/store',[\App\Http\Controllers\Admin\FinanceController::class,'storeExpense'])->name('admin.finance.expenses.store');
+        Route::put('/expenses/{id}',[\App\Http\Controllers\Admin\FinanceController::class,'updateExpense'])->name('admin.finance.expenses.update');
+        Route::delete('/expenses/{id}',[\App\Http\Controllers\Admin\FinanceController::class,'deleteExpense'])->name('admin.finance.expenses.delete');
+        
+        Route::get('/budgets',[\App\Http\Controllers\Admin\FinanceController::class,'budgets'])->name('admin.finance.budgets');
+        Route::get('/reports',[\App\Http\Controllers\Admin\FinanceController::class,'reports'])->name('admin.finance.reports');
+        Route::get('/documentation',[\App\Http\Controllers\Admin\FinanceController::class,'documentation'])->name('admin.finance.documentation');
+    });
+
+    /*=================================
         LEAVES ROUTES
     ==================================*/
     Route::group(['prefix' => 'leaves'],function (){
