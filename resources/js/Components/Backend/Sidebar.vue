@@ -109,6 +109,11 @@
                         Revenue Tracking
                     </Link>
                 </li>
+                <li>
+                    <Link :href="route('admin.finance.documentation')" :class="{'active' : $page.url.startsWith('/admin-home/finance/documentation')}">
+                        <i class="fas fa-book me-1"></i> Documentation
+                    </Link>
+                </li>
             </ul>
         </li>
 

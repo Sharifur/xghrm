@@ -144,6 +144,7 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
         
         Route::get('/budgets',[\App\Http\Controllers\Admin\FinanceController::class,'budgets'])->name('admin.finance.budgets');
         Route::get('/reports',[\App\Http\Controllers\Admin\FinanceController::class,'reports'])->name('admin.finance.reports');
+        Route::get('/documentation',[\App\Http\Controllers\Admin\FinanceController::class,'documentation'])->name('admin.finance.documentation');
     });
 
     /*=================================

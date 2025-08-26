@@ -841,4 +841,9 @@ class FinanceController extends Controller
             'net_position' => $totalAssets - ($oneTimeExpenses + $recurringExpenses) + $totalEquity
         ];
     }
+
+    public function documentation()
+    {
+        return Inertia::render('Backend/Finance/Documentation');
+    }
 }
