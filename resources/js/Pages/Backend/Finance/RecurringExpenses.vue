@@ -33,6 +33,52 @@
                     </div>
                 </div>
 
+                <!-- Statistics Boxes -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card border-primary">
+                            <div class="card-body text-center">
+                                <div class="d-flex align-items-center justify-content-center mb-2">
+                                    <i class="fas fa-calendar-day text-primary fs-3 me-2"></i>
+                                    <div>
+                                        <h6 class="text-muted mb-0">Monthly Total</h6>
+                                        <h4 class="text-primary mb-0">৳{{ formatNumber(monthlyTotal) }}</h4>
+                                    </div>
+                                </div>
+                                <small class="text-muted">Total monthly recurring costs</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-success">
+                            <div class="card-body text-center">
+                                <div class="d-flex align-items-center justify-content-center mb-2">
+                                    <i class="fas fa-calendar-week text-success fs-3 me-2"></i>
+                                    <div>
+                                        <h6 class="text-muted mb-0">Weekly Total</h6>
+                                        <h4 class="text-success mb-0">৳{{ formatNumber(weeklyTotal) }}</h4>
+                                    </div>
+                                </div>
+                                <small class="text-muted">Total weekly recurring costs</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-danger">
+                            <div class="card-body text-center">
+                                <div class="d-flex align-items-center justify-content-center mb-2">
+                                    <i class="fas fa-calendar-alt text-danger fs-3 me-2"></i>
+                                    <div>
+                                        <h6 class="text-muted mb-0">Yearly Total</h6>
+                                        <h4 class="text-danger mb-0">৳{{ formatNumber(yearlyTotal) }}</h4>
+                                    </div>
+                                </div>
+                                <small class="text-muted">Total yearly recurring costs</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Expenses List -->
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -426,6 +472,25 @@ export default {
         const isAllSelected = computed(() => {
             return paginatedExpenses.value.length > 0 && 
                    paginatedExpenses.value.every(expense => selectedExpenses.value.includes(expense.id));
+        });
+
+        // Statistics computed properties
+        const monthlyTotal = computed(() => {
+            return expenses.value
+                .filter(expense => expense.frequency === 'monthly')
+                .reduce((total, expense) => total + (expense.default_amount || 0), 0);
+        });
+
+        const weeklyTotal = computed(() => {
+            return expenses.value
+                .filter(expense => expense.frequency === 'weekly')
+                .reduce((total, expense) => total + (expense.default_amount || 0), 0);
+        });
+
+        const yearlyTotal = computed(() => {
+            return expenses.value
+                .filter(expense => expense.frequency === 'yearly')
+                .reduce((total, expense) => total + (expense.default_amount || 0), 0);
         });
 
         const formatNumber = (num) => {
@@ -823,7 +888,11 @@ export default {
             // Selection
             isAllSelected,
             toggleSelectAll,
-            deleteSelectedExpenses
+            deleteSelectedExpenses,
+            // Statistics
+            monthlyTotal,
+            weeklyTotal,
+            yearlyTotal
         };
     }
 }

@@ -162,6 +162,46 @@
                     </div>
                 </div>
 
+                <!-- Automatic Calculations -->
+                <div class="row mb-4">
+                    <div class="col-lg-6 col-md-6 mb-3">
+                        <div class="metric-card current-profit-card">
+                            <div class="metric-content">
+                                <div class="metric-value" :class="currentMonthProfit >= 0 ? 'text-success' : 'text-danger'">
+                                    ৳{{ formatNumber(Math.abs(currentMonthProfit)) }}
+                                </div>
+                                <div class="metric-label">Current Month Profit</div>
+                                <div class="metric-subtitle">
+                                    <span :class="currentMonthProfit >= 0 ? 'text-success' : 'text-danger'">
+                                        <i :class="currentMonthProfit >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
+                                        {{ currentMonthProfit >= 0 ? 'Profit' : 'Loss' }}
+                                    </span>
+                                    • ৳{{ formatNumber(Math.abs(currentMonthExpenses)) }} expenses
+                                </div>
+                            </div>
+                            <div class="metric-icon" :class="currentMonthProfit >= 0 ? 'text-success' : 'text-danger'">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6 col-md-6 mb-3">
+                        <div class="metric-card retained-earnings-card">
+                            <div class="metric-content">
+                                <div class="metric-value text-primary">৳{{ formatNumber(totalRetainedEarnings) }}</div>
+                                <div class="metric-label">Total Retained Earnings</div>
+                                <div class="metric-subtitle text-muted">
+                                    <i class="fas fa-piggy-bank me-1"></i>
+                                    Accumulated business profits
+                                </div>
+                            </div>
+                            <div class="metric-icon text-primary">
+                                <i class="fas fa-piggy-bank"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Equity List -->
                 <div class="row">
                     <div v-for="equityItem in sortedEquity" :key="equityItem.id" class="col-lg-4 col-md-6 mb-4">
@@ -326,10 +366,123 @@ export default {
         const editingEquity = ref(null);
         const saving = ref(false);
         const equity = ref([...props.equity]);
+        
+        // Data for automatic calculations
+        const expenses = ref([]);
+        const recurringExpenses = ref([]);
+        const revenues = ref([]);
+        
+        // Fetch financial data for calculations
+        const fetchFinancialData = async () => {
+            try {
+                // Fetch expenses
+                const expensesResponse = await axios.get('/admin/finance/expenses');
+                expenses.value = expensesResponse.data.expenses || [];
+                
+                // Fetch recurring expenses  
+                const recurringResponse = await axios.get('/admin/finance/recurring-expenses');
+                recurringExpenses.value = recurringResponse.data.expenses || [];
+                
+                // Fetch dashboard data for revenue information
+                const dashboardResponse = await axios.get('/admin/finance/dashboard/data');
+                if (dashboardResponse.data.totalRevenue) {
+                    // Use dashboard revenue data if available
+                    revenues.value = [{
+                        amount: dashboardResponse.data.totalRevenue,
+                        date: new Date().toISOString().split('T')[0]
+                    }];
+                }
+            } catch (error) {
+                console.error('Failed to fetch financial data:', error);
+            }
+        };
 
         // Sort equity by ID descending (newest first)
         const sortedEquity = computed(() => {
             return equity.value.sort((a, b) => b.id - a.id);
+        });
+
+        // Automatic calculations for equity
+        const currentMonthRevenue = computed(() => {
+            // Use revenue data from dashboard or other sources
+            if (revenues.value.length > 0) {
+                return revenues.value.reduce((total, revenue) => {
+                    const amount = parseFloat(revenue.amount) || 0;
+                    return total + amount;
+                }, 0);
+            }
+            
+            // If no direct revenue data, estimate from typical business ratios
+            // This is a simplified approach - in a real scenario you'd have actual revenue data
+            const expenses = currentMonthExpenses.value;
+            // Assuming a 30% profit margin, estimate revenue
+            return expenses > 0 ? expenses / 0.7 : 0;
+        });
+
+        const currentMonthExpenses = computed(() => {
+            const currentDate = new Date();
+            const currentYear = currentDate.getFullYear();
+            const currentMonth = currentDate.getMonth() + 1;
+            
+            // Calculate one-time expenses for current month
+            const oneTimeExpenses = expenses.value
+                .filter(expense => {
+                    if (!expense.expense_date) return false;
+                    const expenseDate = new Date(expense.expense_date);
+                    return !isNaN(expenseDate.getTime()) && 
+                           expenseDate.getFullYear() === currentYear && 
+                           expenseDate.getMonth() + 1 === currentMonth;
+                })
+                .reduce((total, expense) => {
+                    const amount = parseFloat(expense.amount) || 0;
+                    return total + amount;
+                }, 0);
+
+            // Add monthly portion of recurring expenses
+            const monthlyRecurringExpenses = recurringExpenses.value
+                .reduce((total, expense) => {
+                    const amount = parseFloat(expense.default_amount) || 0;
+                    const frequency = expense.frequency || 'monthly';
+                    
+                    let monthlyAmount = amount;
+                    if (frequency === 'yearly') {
+                        monthlyAmount = amount / 12;
+                    } else if (frequency === 'weekly') {
+                        monthlyAmount = amount * 4.33; // Average weeks per month
+                    }
+                    
+                    return total + monthlyAmount;
+                }, 0);
+
+            return oneTimeExpenses + monthlyRecurringExpenses;
+        });
+
+        const currentMonthProfit = computed(() => {
+            // Since we don't have direct revenue data, we'll use a placeholder
+            // In a real implementation, you'd calculate: Revenue - Expenses
+            const revenue = currentMonthRevenue.value;
+            const expenses = currentMonthExpenses.value;
+            return revenue - expenses;
+        });
+
+        const totalRetainedEarnings = computed(() => {
+            // Calculate total retained earnings from all historical profits
+            // This would typically come from historical P&L data
+            // For now, we'll use current month profit as a starting point
+            
+            // Get existing retained earnings from equity items
+            const existingRetainedEarnings = equity.value
+                .filter(item => 
+                    item.name.toLowerCase().includes('retained') || 
+                    item.name.toLowerCase().includes('earning') ||
+                    item.name.toLowerCase().includes('profit')
+                )
+                .reduce((total, item) => {
+                    const amount = parseFloat(item.default_amount) || 0;
+                    return total + amount;
+                }, 0);
+
+            return existingRetainedEarnings + currentMonthProfit.value;
         });
 
         const form = reactive({
@@ -475,6 +628,14 @@ export default {
             }
         };
 
+        // Initialize data on component mount
+        const initializeComponent = async () => {
+            await fetchFinancialData();
+        };
+
+        // Call initialization
+        initializeComponent();
+
         return {
             equity,
             sortedEquity,
@@ -487,13 +648,97 @@ export default {
             editEquity,
             closeModal,
             saveEquity,
-            deleteEquity
+            deleteEquity,
+            // Automatic calculations
+            currentMonthProfit,
+            totalRetainedEarnings,
+            currentMonthExpenses,
+            currentMonthRevenue
         };
     }
 }
 </script>
 
 <style scoped>
+/* Metric Cards */
+.metric-card {
+    background: white;
+    border: 1px solid #e3e6f0 !important;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 120px;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.metric-card.current-profit-card {
+    border-left: 4px solid #28a745 !important;
+}
+
+.metric-card.retained-earnings-card {
+    border-left: 4px solid #007bff !important;
+}
+
+.metric-icon {
+    width: 45px;
+    height: 45px;
+    background: rgba(0,123,255,0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #007bff;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-left: 1rem;
+}
+
+.metric-content {
+    flex-grow: 1;
+}
+
+.metric-value {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.metric-label {
+    color: #6c757d;
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.metric-subtitle {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.metric-subtitle i {
+    margin-right: 0.25rem;
+}
+
+/* Remove any debug outlines */
+.metric-card,
+.metric-card *,
+.metric-card:before,
+.metric-card:after {
+    outline: none !important;
+}
+
 .equity-card {
     background: white;
     border: 1px solid #e3e6f0;

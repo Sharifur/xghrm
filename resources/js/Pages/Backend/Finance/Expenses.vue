@@ -82,6 +82,53 @@
                     </div>
                 </div>
 
+                <!-- Monthly Statistics -->
+                <div class="row mb-4">
+                    <div class="col-lg-4 col-md-4 mb-3">
+                        <div class="metric-card current-month-card">
+                            <div class="metric-content">
+                                <div class="metric-value">৳{{ formatNumber(currentMonthTotal) }}</div>
+                                <div class="metric-label">Current Month Expenses</div>
+                                <div class="metric-subtitle">{{ getCurrentMonthName() }}</div>
+                            </div>
+                            <div class="metric-icon">
+                                <i class="fas fa-calendar-day"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-4 mb-3">
+                        <div class="metric-card previous-month-card">
+                            <div class="metric-content">
+                                <div class="metric-value">৳{{ formatNumber(previousMonthTotal) }}</div>
+                                <div class="metric-label">Previous Month Expenses</div>
+                                <div class="metric-subtitle">{{ getPreviousMonthName() }}</div>
+                            </div>
+                            <div class="metric-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-4 mb-3">
+                        <div class="metric-card comparison-card">
+                            <div class="metric-content">
+                                <div class="metric-value" :class="expenseChangePercentage >= 0 ? 'text-danger' : 'text-success'">
+                                    {{ expenseChangePercentage >= 0 ? '+' : '' }}{{ expenseChangePercentage.toFixed(1) }}%
+                                </div>
+                                <div class="metric-label">Month-over-Month Change</div>
+                                <div class="metric-subtitle" :class="expenseChangePercentage >= 0 ? 'text-danger' : 'text-success'">
+                                    <i :class="expenseChangePercentage >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
+                                    {{ expenseChangePercentage >= 0 ? 'Increased' : 'Decreased' }} by ৳{{ formatNumber(Math.abs(expenseChangeAmount)) }}
+                                </div>
+                            </div>
+                            <div class="metric-icon" :class="expenseChangePercentage >= 0 ? 'text-danger' : 'text-success'">
+                                <i :class="expenseChangePercentage >= 0 ? 'fas fa-trending-up' : 'fas fa-trending-down'"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Expenses List -->
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -508,11 +555,95 @@ export default {
                    paginatedExpenses.value.every(expense => selectedExpenses.value.includes(expense.id));
         });
 
+        // Monthly statistics computed properties
+        const currentMonthTotal = computed(() => {
+            const currentDate = new Date();
+            const currentYear = currentDate.getFullYear();
+            const currentMonth = currentDate.getMonth() + 1;
+            
+            const total = expenses.value
+                .filter(expense => {
+                    if (!expense.expense_date) return false;
+                    const expenseDate = new Date(expense.expense_date);
+                    return !isNaN(expenseDate.getTime()) && 
+                           expenseDate.getFullYear() === currentYear && 
+                           expenseDate.getMonth() + 1 === currentMonth;
+                })
+                .reduce((total, expense) => {
+                    const amount = parseFloat(expense.amount) || 0;
+                    return total + amount;
+                }, 0);
+            
+            return isNaN(total) ? 0 : total;
+        });
+
+        const previousMonthTotal = computed(() => {
+            const currentDate = new Date();
+            const previousMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1);
+            const previousYear = previousMonth.getFullYear();
+            const previousMonthNum = previousMonth.getMonth() + 1;
+            
+            const total = expenses.value
+                .filter(expense => {
+                    if (!expense.expense_date) return false;
+                    const expenseDate = new Date(expense.expense_date);
+                    return !isNaN(expenseDate.getTime()) && 
+                           expenseDate.getFullYear() === previousYear && 
+                           expenseDate.getMonth() + 1 === previousMonthNum;
+                })
+                .reduce((total, expense) => {
+                    const amount = parseFloat(expense.amount) || 0;
+                    return total + amount;
+                }, 0);
+            
+            return isNaN(total) ? 0 : total;
+        });
+
+        const expenseChangeAmount = computed(() => {
+            const current = currentMonthTotal.value || 0;
+            const previous = previousMonthTotal.value || 0;
+            const change = current - previous;
+            return isNaN(change) ? 0 : change;
+        });
+
+        const expenseChangePercentage = computed(() => {
+            const current = currentMonthTotal.value || 0;
+            const previous = previousMonthTotal.value || 0;
+            
+            if (previous === 0) {
+                return current > 0 ? 100 : 0;
+            }
+            
+            const percentage = ((current - previous) / previous) * 100;
+            return isNaN(percentage) ? 0 : percentage;
+        });
+
         const formatNumber = (num) => {
+            // Handle NaN, null, undefined, and non-numeric values
+            if (num === null || num === undefined || isNaN(num)) {
+                return '0.00';
+            }
+            
+            const numValue = parseFloat(num);
+            if (isNaN(numValue)) {
+                return '0.00';
+            }
+            
             return new Intl.NumberFormat('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
-            }).format(num || 0);
+            }).format(numValue);
+        };
+
+        const getCurrentMonthName = () => {
+            const currentDate = new Date();
+            return currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        };
+
+        const getPreviousMonthName = () => {
+            const currentDate = new Date();
+            const previousMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1);
+            return previousMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
         };
 
         const formatDate = (dateString) => {
@@ -880,13 +1011,103 @@ export default {
             // Selection
             isAllSelected,
             toggleSelectAll,
-            deleteSelectedExpenses
+            deleteSelectedExpenses,
+            // Monthly Statistics
+            currentMonthTotal,
+            previousMonthTotal,
+            expenseChangeAmount,
+            expenseChangePercentage,
+            getCurrentMonthName,
+            getPreviousMonthName
         };
     }
 }
 </script>
 
 <style scoped>
+/* Metric Cards */
+.metric-card {
+    background: white;
+    border: 1px solid #e3e6f0 !important;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 120px;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.metric-card.current-month-card {
+    border-left: 4px solid #007bff !important;
+}
+
+.metric-card.previous-month-card {
+    border-left: 4px solid #6c757d !important;
+}
+
+.metric-card.comparison-card {
+    border-left: 4px solid #28a745 !important;
+}
+
+.metric-icon {
+    width: 45px;
+    height: 45px;
+    background: rgba(0,123,255,0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #007bff;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-left: 1rem;
+}
+
+.metric-content {
+    flex-grow: 1;
+}
+
+.metric-value {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.metric-label {
+    color: #6c757d;
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.metric-subtitle {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.metric-subtitle i {
+    margin-right: 0.25rem;
+}
+
+/* Remove any debug outlines */
+.metric-card,
+.metric-card *,
+.metric-card:before,
+.metric-card:after {
+    outline: none !important;
+}
+
 .modal-overlay {
     position: fixed;
     top: 0;
