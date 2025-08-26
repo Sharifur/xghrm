@@ -48,11 +48,22 @@
                 <div class="card mb-4 entrepreneur-guide">
                     <div class="card-header bg-success-light">
                         <h6 class="text-success mb-0">
-                            <i class="fas fa-lightbulb me-2"></i>
-                            Solo Entrepreneur Revenue & Client Management Guide
+                            <button 
+                                class="btn btn-link text-success p-0 text-decoration-none w-100 text-start" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#revenueGuide" 
+                                aria-expanded="false" 
+                                aria-controls="revenueGuide"
+                            >
+                                <i class="fas fa-lightbulb me-2"></i>
+                                Solo Entrepreneur Revenue & Client Management Guide
+                                <i class="fas fa-chevron-down float-end mt-1"></i>
+                            </button>
                         </h6>
                     </div>
-                    <div class="card-body">
+                    <div id="revenueGuide" class="collapse">
+                        <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
                                 <h6 class="text-primary mb-3">
@@ -157,6 +168,7 @@
                                     </ul>
                                 </div>
                             </div>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -285,11 +297,21 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header">
+                            <div class="card-header d-flex justify-content-between align-items-center">
                                 <h6 class="mb-0">
                                     <i class="fas fa-clock me-2"></i>
                                     Pending Payments Forecast - Next 90 Days
                                 </h6>
+                                <div class="header-actions">
+                                    <button @click="clearAllPendingPayments" class="btn btn-outline-danger btn-sm me-2" :disabled="pendingPayments.length === 0">
+                                        <i class="fas fa-trash-alt me-1"></i>
+                                        Clear All
+                                    </button>
+                                    <button @click="exportPendingPayments" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-download me-1"></i>
+                                        Export CSV
+                                    </button>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <div class="row">
@@ -323,8 +345,11 @@
                                                 <button @click="markPaid(payment)" class="btn btn-sm btn-success me-2">
                                                     <i class="fas fa-check"></i> Mark Paid
                                                 </button>
-                                                <button @click="sendReminder(payment)" class="btn btn-sm btn-outline-primary">
+                                                <button @click="sendReminder(payment)" class="btn btn-sm btn-outline-primary me-2">
                                                     <i class="fas fa-bell"></i> Remind
+                                                </button>
+                                                <button @click="removePendingPayment(payment)" class="btn btn-sm btn-outline-danger" title="Remove this pending payment">
+                                                    <i class="fas fa-times"></i>
                                                 </button>
                                             </div>
                                         </div>
@@ -852,6 +877,151 @@ export default {
             console.log('Period changed to:', selectedPeriod.value);
         };
 
+        const removePendingPayment = async (payment) => {
+            const result = await Swal.fire({
+                title: 'Remove Pending Payment?',
+                text: `Remove pending payment of ৳${formatNumber(payment.amount)} from ${payment.client_name}?`,
+                html: `
+                    <div class="text-left">
+                        <p><strong>Client:</strong> ${payment.client_name}</p>
+                        <p><strong>Amount:</strong> ৳${formatNumber(payment.amount)}</p>
+                        <p><strong>Service:</strong> ${formatServiceType(payment.service_type)}</p>
+                        <p><strong>Expected Date:</strong> ${payment.expected_date}</p>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, remove it!'
+            });
+
+            if (result.isConfirmed) {
+                const revenueIndex = revenues.value.findIndex(r => r.id === payment.id);
+                if (revenueIndex !== -1) {
+                    revenues.value.splice(revenueIndex, 1);
+                    
+                    Swal.fire({
+                        title: 'Payment Removed!',
+                        text: 'Pending payment has been removed from forecast',
+                        icon: 'success',
+                        confirmButtonColor: '#28a745',
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                }
+            }
+        };
+
+        const clearAllPendingPayments = async () => {
+            if (pendingPayments.value.length === 0) {
+                Swal.fire({
+                    title: 'No Pending Payments',
+                    text: 'There are no pending payments to clear',
+                    icon: 'info',
+                    confirmButtonColor: '#007bff'
+                });
+                return;
+            }
+
+            const result = await Swal.fire({
+                title: 'Clear All Pending Payments?',
+                html: `
+                    <div class="text-left">
+                        <p>This will remove <strong>${pendingPayments.value.length}</strong> pending payments totaling <strong>৳${formatNumber(pendingRevenue.value)}</strong></p>
+                        <div class="mt-3">
+                            <h6>Payments to be removed:</h6>
+                            <ul class="list-unstyled">
+                                ${pendingPayments.value.map(p => `
+                                    <li class="mb-1">
+                                        <i class="fas fa-user me-1"></i> ${p.client_name} - 
+                                        <strong>৳${formatNumber(p.amount)}</strong>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                        <div class="alert alert-warning mt-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Warning:</strong> This action cannot be undone. All pending payment forecasts will be permanently removed.
+                        </div>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, clear all!',
+                cancelButtonText: 'Cancel',
+                width: '600px'
+            });
+
+            if (result.isConfirmed) {
+                const removedCount = pendingPayments.value.length;
+                const removedAmount = pendingRevenue.value;
+                
+                // Remove all pending and overdue revenues
+                revenues.value = revenues.value.filter(r => r.status !== 'pending' && r.status !== 'overdue');
+                
+                Swal.fire({
+                    title: 'All Pending Payments Cleared!',
+                    html: `
+                        <div class="text-center">
+                            <i class="fas fa-check-circle text-success mb-3" style="font-size: 3rem;"></i>
+                            <p><strong>${removedCount}</strong> pending payments removed</p>
+                            <p><strong>৳${formatNumber(removedAmount)}</strong> cleared from forecast</p>
+                            <div class="alert alert-success mt-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                You can now start fresh with your payment tracking!
+                            </div>
+                        </div>
+                    `,
+                    icon: null,
+                    confirmButtonColor: '#28a745',
+                    timer: 5000,
+                    timerProgressBar: true,
+                    width: '500px'
+                });
+            }
+        };
+
+        const exportPendingPayments = () => {
+            if (pendingPayments.value.length === 0) {
+                Swal.fire({
+                    title: 'No Data to Export',
+                    text: 'There are no pending payments to export',
+                    icon: 'info',
+                    confirmButtonColor: '#007bff'
+                });
+                return;
+            }
+
+            let csvContent = "Client,Service Type,Amount (BDT),Status,Expected Date,Invoice Date,Description,Notes\n";
+            
+            pendingPayments.value.forEach(payment => {
+                csvContent += `"${payment.client_name}","${formatServiceType(payment.service_type)}",${payment.amount},"${payment.status}","${payment.expected_date}","${formatDate(payment.invoice_date)}","${payment.description || ''}","${payment.notes || ''}"\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Pending-Payments-${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            Swal.fire({
+                title: 'Export Complete!',
+                text: `Pending payments exported to CSV file with ${pendingPayments.value.length} records`,
+                icon: 'success',
+                confirmButtonColor: '#007bff',
+                timer: 3000,
+                timerProgressBar: true
+            });
+        };
+
         // Initialize with sample data
         onMounted(() => {
             if (clients.value.length === 0) {
@@ -904,7 +1074,10 @@ export default {
             saveRevenue,
             markPaid,
             sendReminder,
-            updatePeriod
+            updatePeriod,
+            removePendingPayment,
+            clearAllPendingPayments,
+            exportPendingPayments
         };
     }
 }

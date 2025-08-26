@@ -16,9 +16,26 @@
                                 <option value="next">Next Quarter</option>
                                 <option value="annual">Annual View</option>
                             </select>
-                            <button @click="showCreateBudget = true" class="btn btn-primary">
+                            <button @click="showCreateBudget = true" class="btn btn-primary me-2">
                                 <i class="fas fa-plus"></i> Create Budget
                             </button>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-danger dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-trash-alt"></i> Manage
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><button class="dropdown-item text-danger" @click="clearAllBudgets" :disabled="budgets.length === 0">
+                                        <i class="fas fa-trash-alt me-2"></i>Clear All Budgets
+                                    </button></li>
+                                    <li><button class="dropdown-item" @click="exportBudgets" :disabled="budgets.length === 0">
+                                        <i class="fas fa-download me-2"></i>Export CSV
+                                    </button></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><button class="dropdown-item" @click="resetBudgetPeriod">
+                                        <i class="fas fa-sync-alt me-2"></i>Reset Current Period
+                                    </button></li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                     <div class="card-body">
@@ -44,11 +61,15 @@
                 <!-- Solo Entrepreneur Budget Management Guide -->
                 <div class="card mb-4 entrepreneur-guide">
                     <div class="card-header bg-warning-light">
-                        <h6 class="text-warning mb-0">
-                            <i class="fas fa-lightbulb me-2"></i>
-                            Solo Entrepreneur Budget & Forecasting Guide
-                        </h6>
+                        <button class="btn btn-link text-warning p-0 w-100 text-start" type="button" data-bs-toggle="collapse" data-bs-target="#budgetGuide" aria-expanded="false">
+                            <h6 class="mb-0">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                Solo Entrepreneur Budget & Forecasting Guide
+                                <i class="fas fa-chevron-down float-end mt-1"></i>
+                            </h6>
+                        </button>
                     </div>
+                    <div class="collapse" id="budgetGuide">
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
@@ -159,6 +180,7 @@
                                 </div>
                             </div>
                         </div>
+                        </div>
                     </div>
                 </div>
 
@@ -219,11 +241,14 @@
                                     <i :class="budget.icon || 'fas fa-chart-pie'"></i>
                                 </div>
                                 <div class="budget-actions">
-                                    <button @click="editBudget(budget)" class="btn btn-sm btn-outline-primary">
+                                    <button @click="editBudget(budget)" class="btn btn-sm btn-outline-primary" title="Edit Budget">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button @click="viewBudgetDetails(budget)" class="btn btn-sm btn-outline-info">
+                                    <button @click="viewBudgetDetails(budget)" class="btn btn-sm btn-outline-info" title="View Details">
                                         <i class="fas fa-chart-bar"></i>
+                                    </button>
+                                    <button @click="deleteBudget(budget)" class="btn btn-sm btn-outline-danger" title="Delete Budget">
+                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
@@ -570,6 +595,196 @@ export default {
             console.log('Period changed to:', selectedPeriod.value);
         };
 
+        const deleteBudget = async (budget) => {
+            const result = await Swal.fire({
+                title: 'Delete Budget?',
+                html: `
+                    <div class="text-left">
+                        <p>Are you sure you want to delete the budget for <strong>${budget.name}</strong>?</p>
+                        <div class="alert alert-warning mt-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Budget Details:</strong><br>
+                            Allocated: ৳${formatNumber(budget.allocated_amount)}<br>
+                            Used: ৳${formatNumber(budget.used_amount)}<br>
+                            Remaining: ৳${formatNumber(budget.remaining_amount)}
+                        </div>
+                        <p class="text-danger"><strong>This action cannot be undone!</strong></p>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!'
+            });
+
+            if (result.isConfirmed) {
+                const index = budgets.value.findIndex(b => b.id === budget.id);
+                if (index !== -1) {
+                    budgets.value.splice(index, 1);
+                    
+                    Swal.fire({
+                        title: 'Budget Deleted!',
+                        text: `${budget.name} budget has been removed`,
+                        icon: 'success',
+                        confirmButtonColor: '#28a745',
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                }
+            }
+        };
+
+        const clearAllBudgets = async () => {
+            if (budgets.value.length === 0) {
+                Swal.fire({
+                    title: 'No Budgets',
+                    text: 'There are no budgets to clear',
+                    icon: 'info',
+                    confirmButtonColor: '#007bff'
+                });
+                return;
+            }
+
+            const result = await Swal.fire({
+                title: 'Clear All Budgets?',
+                html: `
+                    <div class="text-left">
+                        <p>This will permanently delete <strong>${budgets.value.length}</strong> budget categories totaling <strong>৳${formatNumber(totalBudget.value)}</strong></p>
+                        <div class="mt-3">
+                            <h6>Budgets to be deleted:</h6>
+                            <ul class="list-unstyled">
+                                ${budgets.value.map(b => `
+                                    <li class="mb-1">
+                                        <i class="${b.icon || 'fas fa-chart-pie'} me-1"></i> ${b.name} - 
+                                        <strong>৳${formatNumber(b.allocated_amount)}</strong>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                        <div class="alert alert-danger mt-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Warning:</strong> All budget data and forecasting information will be permanently lost. This action cannot be undone!
+                        </div>
+                    </div>
+                `,
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, clear all budgets!',
+                cancelButtonText: 'Cancel',
+                width: '600px'
+            });
+
+            if (result.isConfirmed) {
+                const deletedCount = budgets.value.length;
+                const deletedAmount = totalBudget.value;
+                
+                budgets.value.splice(0);
+                
+                Swal.fire({
+                    title: 'All Budgets Cleared!',
+                    html: `
+                        <div class="text-center">
+                            <i class="fas fa-check-circle text-success mb-3" style="font-size: 3rem;"></i>
+                            <p><strong>${deletedCount}</strong> budgets deleted</p>
+                            <p><strong>৳${formatNumber(deletedAmount)}</strong> total budget cleared</p>
+                            <div class="alert alert-success mt-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                You can now create fresh budgets for your business planning!
+                            </div>
+                        </div>
+                    `,
+                    icon: null,
+                    confirmButtonColor: '#28a745',
+                    timer: 5000,
+                    timerProgressBar: true,
+                    width: '500px'
+                });
+            }
+        };
+
+        const exportBudgets = () => {
+            if (budgets.value.length === 0) {
+                Swal.fire({
+                    title: 'No Data to Export',
+                    text: 'There are no budgets to export',
+                    icon: 'info',
+                    confirmButtonColor: '#007bff'
+                });
+                return;
+            }
+
+            let csvContent = "Budget Name,Description,Allocated Amount (BDT),Used Amount (BDT),Remaining Amount (BDT),Usage %,Status,Next Quarter Forecast (BDT),Auto Forecast\n";
+            
+            budgets.value.forEach(budget => {
+                const usagePercent = ((budget.used_amount / budget.allocated_amount) * 100).toFixed(1);
+                csvContent += `"${budget.name}","${budget.description || ''}",${budget.allocated_amount},${budget.used_amount},${budget.remaining_amount},${usagePercent}%,"${getBudgetStatus(budget)}",${budget.forecast_next_quarter || ''},"${budget.auto_forecast ? 'Yes' : 'No'}"\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Budget-Summary-${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            Swal.fire({
+                title: 'Export Complete!',
+                text: `Budget data exported to CSV file with ${budgets.value.length} categories`,
+                icon: 'success',
+                confirmButtonColor: '#007bff',
+                timer: 3000,
+                timerProgressBar: true
+            });
+        };
+
+        const resetBudgetPeriod = async () => {
+            const result = await Swal.fire({
+                title: 'Reset Budget Period?',
+                html: `
+                    <div class="text-left">
+                        <p>This will reset the "used amount" for all budget categories to zero, keeping the allocated amounts intact.</p>
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>What happens:</strong><br>
+                            • All "used amount" values reset to ৳0<br>
+                            • Allocated amounts remain unchanged<br>
+                            • Progress bars restart at 0%<br>
+                            • Perfect for starting a new quarter
+                        </div>
+                        <p>Use this when starting a new budget period.</p>
+                    </div>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#007bff',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, reset period!'
+            });
+
+            if (result.isConfirmed) {
+                budgets.value.forEach(budget => {
+                    budget.used_amount = 0;
+                    budget.remaining_amount = budget.allocated_amount;
+                });
+                
+                Swal.fire({
+                    title: 'Budget Period Reset!',
+                    text: 'All budget categories have been reset for the new period',
+                    icon: 'success',
+                    confirmButtonColor: '#28a745',
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            }
+        };
+
         // Initialize with sample data if no budgets provided
         onMounted(() => {
             if (budgets.value.length === 0) {
@@ -632,7 +847,11 @@ export default {
             closeModal,
             saveBudget,
             viewBudgetDetails,
-            updatePeriod
+            updatePeriod,
+            deleteBudget,
+            clearAllBudgets,
+            exportBudgets,
+            resetBudgetPeriod
         };
     }
 }

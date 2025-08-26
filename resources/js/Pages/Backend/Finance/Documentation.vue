@@ -26,24 +26,29 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-3 mb-2">
+                            <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
                                 <a href="#initial-setup" class="btn btn-outline-primary btn-sm w-100">
                                     <i class="fas fa-play-circle"></i> Initial Setup
                                 </a>
                             </div>
-                            <div class="col-md-3 mb-2">
+                            <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
                                 <a href="#daily-tasks" class="btn btn-outline-info btn-sm w-100">
                                     <i class="fas fa-calendar-day"></i> Daily Tasks
                                 </a>
                             </div>
-                            <div class="col-md-3 mb-2">
+                            <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
                                 <a href="#monthly-process" class="btn btn-outline-success btn-sm w-100">
                                     <i class="fas fa-calendar-alt"></i> Monthly Process
                                 </a>
                             </div>
-                            <div class="col-md-3 mb-2">
+                            <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
                                 <a href="#best-practices" class="btn btn-outline-warning btn-sm w-100">
                                     <i class="fas fa-star"></i> Best Practices
+                                </a>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
+                                <a href="#quick-reference" class="btn btn-outline-dark btn-sm w-100">
+                                    <i class="fas fa-bookmark"></i> Quick Reference
                                 </a>
                             </div>
                         </div>
@@ -54,11 +59,22 @@
                 <div id="initial-setup" class="card mb-4">
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-rocket me-2"></i>
-                            Initial Setup Guide - Start Here!
+                            <button 
+                                class="btn btn-link text-white p-0 text-decoration-none w-100 text-start" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#setupGuide" 
+                                aria-expanded="false" 
+                                aria-controls="setupGuide"
+                            >
+                                <i class="fas fa-rocket me-2"></i>
+                                Initial Setup Guide - Start Here!
+                                <i class="fas fa-chevron-down float-end mt-1"></i>
+                            </button>
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div id="setupGuide" class="collapse">
+                        <div class="card-body">
                         <div class="setup-timeline">
                             <!-- Step 1: Foundation -->
                             <div class="timeline-item">
@@ -163,6 +179,7 @@
                                 </div>
                             </div>
                         </div>
+                        </div>
                     </div>
                 </div>
 
@@ -170,11 +187,22 @@
                 <div id="daily-tasks" class="card mb-4">
                     <div class="card-header bg-info text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-tasks me-2"></i>
-                            Daily Operations Guide
+                            <button 
+                                class="btn btn-link text-white p-0 text-decoration-none w-100 text-start" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#dailyGuide" 
+                                aria-expanded="false" 
+                                aria-controls="dailyGuide"
+                            >
+                                <i class="fas fa-tasks me-2"></i>
+                                Daily Operations Guide
+                                <i class="fas fa-chevron-down float-end mt-1"></i>
+                            </button>
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div id="dailyGuide" class="collapse">
+                        <div class="card-body">
                         <div class="row">
                             <div class="col-lg-6">
                                 <div class="daily-task-card">
@@ -256,6 +284,7 @@
                                 </div>
                             </div>
                         </div>
+                        </div>
                     </div>
                 </div>
 
@@ -263,11 +292,22 @@
                 <div id="monthly-process" class="card mb-4">
                     <div class="card-header bg-success text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-calendar-check me-2"></i>
-                            Monthly Review & Reporting Process
+                            <button 
+                                class="btn btn-link text-white p-0 text-decoration-none w-100 text-start" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#monthlyGuide" 
+                                aria-expanded="false" 
+                                aria-controls="monthlyGuide"
+                            >
+                                <i class="fas fa-calendar-check me-2"></i>
+                                Monthly Review & Reporting Process
+                                <i class="fas fa-chevron-down float-end mt-1"></i>
+                            </button>
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div id="monthlyGuide" class="collapse">
+                        <div class="card-body">
                         <div class="monthly-steps">
                             <!-- Week 1 -->
                             <div class="week-section">
@@ -356,6 +396,7 @@
                                 </div>
                             </div>
                         </div>
+                        </div>
                     </div>
                 </div>
 
@@ -363,11 +404,22 @@
                 <div id="best-practices" class="card mb-4">
                     <div class="card-header bg-warning">
                         <h5 class="mb-0">
-                            <i class="fas fa-star me-2"></i>
-                            Best Practices & Pro Tips
+                            <button 
+                                class="btn btn-link text-dark p-0 text-decoration-none w-100 text-start" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#practicesGuide" 
+                                aria-expanded="false" 
+                                aria-controls="practicesGuide"
+                            >
+                                <i class="fas fa-star me-2"></i>
+                                Best Practices & Pro Tips
+                                <i class="fas fa-chevron-down float-end mt-1"></i>
+                            </button>
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div id="practicesGuide" class="collapse">
+                        <div class="card-body">
                         <div class="row">
                             <div class="col-lg-6">
                                 <div class="practice-section">
@@ -483,6 +535,7 @@
                                 </div>
                             </div>
                         </div>
+                        </div>
                     </div>
                 </div>
 
@@ -490,11 +543,22 @@
                 <div class="card mb-4">
                     <div class="card-header bg-dark text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-bookmark me-2"></i>
-                            Quick Reference Guide
+                            <button 
+                                class="btn btn-link text-white p-0 text-decoration-none w-100 text-start" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#referenceGuide" 
+                                aria-expanded="false" 
+                                aria-controls="referenceGuide"
+                            >
+                                <i class="fas fa-bookmark me-2"></i>
+                                Quick Reference Guide
+                                <i class="fas fa-chevron-down float-end mt-1"></i>
+                            </button>
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div id="referenceGuide" class="collapse">
+                        <div class="card-body">
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="reference-card">
@@ -541,6 +605,7 @@
                             <i class="fas fa-lightbulb"></i>
                             <strong>Pro Tip:</strong> Set calendar reminders for month-end tasks. Consistency in financial tracking leads to better business insights and growth opportunities.
                         </div>
+                        </div>
                     </div>
                 </div>
 
@@ -584,16 +649,48 @@ export default {
     },
     setup() {
         onMounted(() => {
-            // Smooth scroll for anchor links
+            // Enhanced navigation for anchor links that opens collapsible sections
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
                     e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
+                    const targetId = this.getAttribute('href').substring(1);
+                    const target = document.querySelector('#' + targetId);
+                    
                     if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
+                        // Map section IDs to their collapse target IDs
+                        const collapseMap = {
+                            'initial-setup': 'setupGuide',
+                            'daily-tasks': 'dailyGuide',
+                            'monthly-process': 'monthlyGuide',
+                            'best-practices': 'practicesGuide',
+                            'quick-reference': 'referenceGuide'
+                        };
+                        
+                        // Check if this target has a corresponding collapsible section
+                        const collapseTargetId = collapseMap[targetId];
+                        if (collapseTargetId) {
+                            const collapseElement = document.querySelector('#' + collapseTargetId);
+                            if (collapseElement) {
+                                // Use Bootstrap's Collapse API to show the section
+                                const bsCollapse = new bootstrap.Collapse(collapseElement, {
+                                    show: true
+                                });
+                                
+                                // Wait for the collapse animation to complete, then scroll
+                                setTimeout(() => {
+                                    target.scrollIntoView({
+                                        behavior: 'smooth',
+                                        block: 'start'
+                                    });
+                                }, 350); // Bootstrap's collapse animation is ~350ms
+                            }
+                        } else {
+                            // For non-collapsible sections, just scroll normally
+                            target.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
                     }
                 });
             });
