@@ -173,6 +173,15 @@ export default {
     setup(){
         const page = usePage();
         
+        // Safe page URL getter
+        const getPageUrl = () => {
+            try {
+                return page?.url?.value || page?.url || '';
+            } catch (e) {
+                return '';
+            }
+        };
+        
         function activeSidebarMenu(){
             const dashboardMenuList = document.querySelectorAll('li.has-submenu');
             for(let i=0; i < dashboardMenuList.length; i++ ){
@@ -184,8 +193,8 @@ export default {
                     
                     // Check if this is the Finance menu and we're on a finance page
                     const span = this.querySelector('span');
-                    const currentUrl = window.location.pathname;
-                    const pageUrl = page.url;
+                    const currentUrl = window.location.pathname || '';
+                    const pageUrl = getPageUrl();
                     const isFinanceMenu = span && span.textContent.trim() === 'Finance';
                     const isOnFinancePage = currentUrl.includes('/finance/') || pageUrl.includes('/finance/') || 
                                           currentUrl.startsWith('/admin-home/finance/') || pageUrl.startsWith('/admin-home/finance/');
@@ -214,7 +223,7 @@ export default {
                 }
             });
             
-            const currentUrl = window.location.pathname;
+            const currentUrl = window.location.pathname || '';
             
             // Auto-expand finance menu if on any finance page
             if (currentUrl.startsWith('/admin-home/finance/') || currentUrl.includes('/finance/')) {
@@ -279,8 +288,8 @@ export default {
 
         function ensureFinanceMenuExpanded() {
             // Specific function to ensure Finance menu stays open
-            const currentUrl = window.location.pathname;
-            const pageUrl = page.url;
+            const currentUrl = window.location.pathname || '';
+            const pageUrl = getPageUrl();
             
             if (currentUrl.includes('/finance/') || pageUrl.includes('/finance/') || 
                 currentUrl.startsWith('/admin-home/finance/') || pageUrl.startsWith('/admin-home/finance/')) {
@@ -307,17 +316,20 @@ export default {
         });
 
         // Watch for page changes and update sidebar accordingly
-        watch(() => page.url, (newUrl) => {
-            // Use setTimeout to ensure DOM is updated
-            setTimeout(() => {
-                autoExpandActiveMenu();
-                ensureFinanceMenuExpanded(); // Additional finance menu check
-            }, 100);
-            
-            // Immediate check for finance pages with shorter timeout
-            setTimeout(() => {
-                ensureFinanceMenuExpanded();
-            }, 50);
+        watch(() => getPageUrl(), (newUrl) => {
+            // Only proceed if newUrl is a string
+            if (typeof newUrl === 'string' && newUrl) {
+                // Use setTimeout to ensure DOM is updated
+                setTimeout(() => {
+                    autoExpandActiveMenu();
+                    ensureFinanceMenuExpanded(); // Additional finance menu check
+                }, 100);
+                
+                // Immediate check for finance pages with shorter timeout
+                setTimeout(() => {
+                    ensureFinanceMenuExpanded();
+                }, 50);
+            }
         }, { immediate: true });
 
     }
