@@ -186,7 +186,7 @@
 
                 <!-- Budget Overview Cards -->
                 <div class="row mb-4">
-                    <div class="col-md-3">
+                    <div class="col-md-6 mb-3">
                         <div class="stat-card">
                             <div class="stat-icon bg-primary">
                                 <i class="fas fa-wallet"></i>
@@ -197,7 +197,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-6 mb-3">
                         <div class="stat-card">
                             <div class="stat-icon bg-success">
                                 <i class="fas fa-chart-line"></i>
@@ -208,7 +208,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-6 mb-3">
                         <div class="stat-card">
                             <div class="stat-icon bg-warning">
                                 <i class="fas fa-exclamation-triangle"></i>
@@ -219,7 +219,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-6 mb-3">
                         <div class="stat-card">
                             <div class="stat-icon bg-info">
                                 <i class="fas fa-calendar-alt"></i>

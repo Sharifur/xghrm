@@ -942,15 +942,18 @@ class FinanceController extends Controller
         }
 
         // Get expense categories breakdown
-        $expenseCategories = $currentMonthExpenses->groupBy('category')->map(function ($expenses, $category) {
-            $total = round($expenses->sum('bdt_amount'), 2);
-            return [
-                'name' => $category ?: 'Uncategorized',
-                'amount' => $total,
-                'icon' => $this->getCategoryIcon($category),
-                'color' => $this->getCategoryColor($category)
-            ];
-        })->sortByDesc('amount')->take(5)->values();
+        $expenseCategories = collect();
+        if ($currentMonthExpenses->count() > 0) {
+            $expenseCategories = $currentMonthExpenses->groupBy('category')->map(function ($expenses, $category) {
+                $total = round($expenses->sum('bdt_amount'), 2);
+                return [
+                    'name' => $category ?: 'Uncategorized',
+                    'amount' => $total,
+                    'icon' => $this->getCategoryIcon($category),
+                    'color' => $this->getCategoryColor($category)
+                ];
+            })->sortByDesc('amount')->take(5)->values();
+        }
 
         // Add recurring categories if they don't exist
         $recurringCategories = ExpenseCategory::where('is_recurring', true)

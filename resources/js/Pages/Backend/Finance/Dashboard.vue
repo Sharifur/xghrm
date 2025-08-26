@@ -51,11 +51,8 @@
                 <!-- Key Financial Metrics -->
                 <div class="row mb-4">
                     <!-- Total Revenue -->
-                    <div class="col-xl col-lg-4 col-md-6 mb-4">
-                        <div class="metric-card revenue-card">
-                            <div class="metric-icon">
-                                <i class="fas fa-money-bill-wave"></i>
-                            </div>
+                    <div class="col-lg-6 col-md-6 mb-3">
+                        <div class="metric-card revenue-card compact">
                             <div class="metric-content">
                                 <div class="metric-value">৳{{ formatNumber(dashboardData.totalRevenue) }}</div>
                                 <div class="metric-label">Total Revenue</div>
@@ -64,15 +61,15 @@
                                     {{ Math.abs(dashboardData.revenueChange) }}% from last month
                                 </div>
                             </div>
+                            <div class="metric-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
                         </div>
                     </div>
                     
                     <!-- Pending Payments -->
-                    <div class="col-xl col-lg-4 col-md-6 mb-4">
-                        <div class="metric-card pending-card">
-                            <div class="metric-icon">
-                                <i class="fas fa-hourglass-half"></i>
-                            </div>
+                    <div class="col-lg-6 col-md-6 mb-3">
+                        <div class="metric-card pending-card compact">
                             <div class="metric-content">
                                 <div class="metric-value">৳{{ formatNumber(dashboardData.pendingRevenue) }}</div>
                                 <div class="metric-label">Pending Payments</div>
@@ -80,15 +77,18 @@
                                     {{ dashboardData.pendingCount }} outstanding invoices
                                 </div>
                             </div>
+                            <div class="metric-icon">
+                                <i class="fas fa-hourglass-half"></i>
+                            </div>
                         </div>
                     </div>
-                    
+                </div>
+
+                <!-- Second Row -->
+                <div class="row mb-4">
                     <!-- Monthly Recurring Revenue -->
-                    <div class="col-xl col-lg-4 col-md-6 mb-4">
-                        <div class="metric-card recurring-card">
-                            <div class="metric-icon">
-                                <i class="fas fa-sync-alt"></i>
-                            </div>
+                    <div class="col-lg-6 col-md-6 mb-3">
+                        <div class="metric-card recurring-card compact">
                             <div class="metric-content">
                                 <div class="metric-value">৳{{ formatNumber(dashboardData.recurringRevenue || 0) }}</div>
                                 <div class="metric-label">Monthly Recurring Revenue</div>
@@ -96,15 +96,15 @@
                                     Predictable monthly income
                                 </div>
                             </div>
+                            <div class="metric-icon">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
                         </div>
                     </div>
                     
                     <!-- Next Month Forecast -->
-                    <div class="col-xl col-lg-4 col-md-6 mb-4">
-                        <div class="metric-card forecast-card">
-                            <div class="metric-icon">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
+                    <div class="col-lg-6 col-md-6 mb-3">
+                        <div class="metric-card forecast-card compact">
                             <div class="metric-content">
                                 <div class="metric-value">৳{{ formatNumber(dashboardData.nextMonthForecast || dashboardData.totalRevenue * 1.05) }}</div>
                                 <div class="metric-label">Next Month Forecast</div>
@@ -112,20 +112,23 @@
                                     <template v-if="dashboardData.totalRevenue > 0">
                                         {{ ((dashboardData.nextMonthForecast || dashboardData.totalRevenue * 1.05) > dashboardData.totalRevenue ? '+' : '') }}{{ (((dashboardData.nextMonthForecast || dashboardData.totalRevenue * 1.05) - dashboardData.totalRevenue) / dashboardData.totalRevenue * 100).toFixed(1) }}% projected
                                     </template>
-                                    <template v-else>
+                                    <template v-else">
                                         +5.0% projected growth
                                     </template>
                                 </div>
                             </div>
+                            <div class="metric-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
                         </div>
                     </div>
-                    
+                </div>
+
+                <!-- Net Profit Row -->
+                <div class="row mb-4">
                     <!-- Net Profit -->
-                    <div class="col-xl col-lg-4 col-md-6 mb-4">
-                        <div class="metric-card profit-card">
-                            <div class="metric-icon">
-                                <i class="fas fa-chart-pie"></i>
-                            </div>
+                    <div class="col-lg-6 col-md-6 mb-3 mx-auto">
+                        <div class="metric-card profit-card compact">
                             <div class="metric-content">
                                 <div class="metric-value" :class="dashboardData.netProfit >= 0 ? 'text-success' : 'text-danger'">
                                     ৳{{ formatNumber(dashboardData.netProfit) }}
@@ -134,6 +137,9 @@
                                 <div class="profit-margin">
                                     {{ dashboardData.totalRevenue > 0 ? ((dashboardData.netProfit / dashboardData.totalRevenue) * 100).toFixed(1) : '0.0' }}% margin
                                 </div>
+                            </div>
+                            <div class="metric-icon">
+                                <i class="fas fa-chart-pie"></i>
                             </div>
                         </div>
                     </div>
@@ -1508,13 +1514,24 @@ export default {
 /* Metric Cards */
 .metric-card {
     background: white;
-    border: 1px solid #e3e6f0;
+    border: 1px solid #e3e6f0 !important;
     border-radius: 0.5rem;
     padding: 1.5rem;
     height: 100%;
     position: relative;
     overflow: hidden;
     transition: all 0.3s ease;
+    box-sizing: border-box;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Compact Layout */
+.metric-card.compact {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 120px;
 }
 
 .metric-card:hover {
@@ -1522,28 +1539,45 @@ export default {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
+/* Remove any debug outlines */
+.metric-card,
+.metric-card *,
+.metric-card:before,
+.metric-card:after {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.metric-card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+}
+
+.metric-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
 .metric-card.revenue-card {
-    border-left: 4px solid #28a745;
+    border-left: 4px solid #28a745 !important;
 }
 
 .metric-card.expenses-card {
-    border-left: 4px solid #dc3545;
+    border-left: 4px solid #dc3545 !important;
 }
 
 .metric-card.profit-card {
-    border-left: 4px solid #17a2b8;
+    border-left: 4px solid #17a2b8 !important;
 }
 
 .metric-card.pending-card {
-    border-left: 4px solid #ffc107;
+    border-left: 4px solid #ffc107 !important;
 }
 
 .metric-card.recurring-card {
-    border-left: 4px solid #20c997;
+    border-left: 4px solid #20c997 !important;
 }
 
 .metric-card.forecast-card {
-    border-left: 4px solid #6f42c1;
+    border-left: 4px solid #6f42c1 !important;
 }
 
 .metric-icon {
@@ -1559,6 +1593,18 @@ export default {
     justify-content: center;
     color: #007bff;
     font-size: 1.5rem;
+}
+
+/* Compact icon positioning */
+.metric-card.compact .metric-icon {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin-left: 1rem;
+    width: 45px;
+    height: 45px;
+    font-size: 1.2rem;
+    flex-shrink: 0;
 }
 
 .metric-value {
@@ -1579,6 +1625,29 @@ export default {
     display: flex;
     align-items: center;
     gap: 0.25rem;
+}
+
+/* Compact layout adjustments */
+.metric-card.compact .metric-value {
+    font-size: 1.4rem;
+    margin-bottom: 0.25rem;
+}
+
+.metric-card.compact .metric-label {
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.metric-card.compact .metric-change,
+.metric-card.compact .pending-count,
+.metric-card.compact .recurring-count,
+.metric-card.compact .forecast-trend,
+.metric-card.compact .profit-margin {
+    font-size: 0.75rem;
+}
+
+.metric-card.compact .metric-content {
+    flex-grow: 1;
 }
 
 .metric-change.positive {
@@ -2053,6 +2122,21 @@ export default {
         margin-bottom: 1.5rem;
     }
     
+    .metric-card.compact {
+        min-height: 100px;
+        padding: 0.75rem;
+    }
+    
+    .metric-card.compact .metric-value {
+        font-size: 1.2rem;
+    }
+    
+    .metric-card.compact .metric-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+    
     .metric-value {
         font-size: 1.5rem;
     }
@@ -2128,6 +2212,25 @@ export default {
     
     .metric-card {
         padding: 1rem;
+    }
+    
+    .metric-card.compact {
+        min-height: 90px;
+        padding: 0.5rem;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .metric-card.compact .metric-icon {
+        margin-left: 0;
+        margin-bottom: 0.5rem;
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+    }
+    
+    .metric-card.compact .metric-value {
+        font-size: 1.1rem;
     }
     
     .metric-value {
