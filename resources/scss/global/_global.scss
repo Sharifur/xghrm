@@ -1,3 +1,6 @@
+@use "variables" as *;
+@use "mixins" as *;
+
 /*--------------------------------------------------------------
 # Normalize
 --------------------------------------------------------------*/
@@ -240,7 +243,7 @@ code {
         font-size: 20px;
         cursor: pointer;
         z-index: 99;
-        background: $white;
+        background: #fff;
         color: var(--main-color-one);
         display: flex;
         align-items: center;

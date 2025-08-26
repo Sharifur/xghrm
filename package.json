@@ -13,25 +13,25 @@
     },
     "devDependencies": {
         "@fortawesome/fontawesome-free": "^5.15.4",
-        "@inertiajs/inertia": "^0.10.1",
-        "@inertiajs/inertia-vue3": "^0.5.2",
-        "@inertiajs/progress": "^0.2.6",
+        "@inertiajs/inertia": "^0.11.1",
+        "@inertiajs/inertia-vue3": "^0.6.0",
+        "@inertiajs/progress": "^0.2.7",
         "@tailwindcss/forms": "^0.2.1",
         "@vitejs/plugin-vue": "^5.0.3",
         "@vue/compiler-sfc": "^3.0.5",
         "alpinejs": "^3.4.2",
         "autoprefixer": "^10.2.4",
-        "axios": "^0.21.4",
+        "axios": "^1.6.8",
         "laravel-vite-plugin": "^1.0.1",
         "lodash": "^4.17.19",
-        "postcss": "^8.3.11",
+        "postcss": "^8.4.31",
         "postcss-import": "^14.0.1",
         "postcss-loader": "^6.2.0",
-        "resolve-url-loader": "^4.0.0",
+        "resolve-url-loader": "^5.0.0",
         "sass": "^1.43.4",
         "sass-loader": "^12.3.0",
         "tailwindcss": "^2.1.2",
-        "vite": "^5.0.12",
+        "vite": "^5.4.9",
         "vue": "^3.0.5",
         "vue-loader": "^16.1.2"
     },
@@ -48,5 +48,9 @@
         "v-calendar": "^3.1.2",
         "vue-sweetalert2": "^5.0.2",
         "vue3-datepicker": "^0.2.5"
+    },
+    "overrides": {
+        "axios": "^1.6.8",
+        "esbuild": "^0.25.9"
     }
 }
