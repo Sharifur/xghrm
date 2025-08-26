@@ -50,62 +50,89 @@
 
                 <!-- Key Financial Metrics -->
                 <div class="row mb-4">
-                    <div class="col-xl-3 col-md-6 mb-4">
+                    <!-- Total Revenue -->
+                    <div class="col-xl col-lg-4 col-md-6 mb-4">
                         <div class="metric-card revenue-card">
                             <div class="metric-icon">
                                 <i class="fas fa-money-bill-wave"></i>
                             </div>
                             <div class="metric-content">
-                                <div class="metric-value">৳{{ formatNumber(financialData.totalRevenue) }}</div>
+                                <div class="metric-value">৳{{ formatNumber(dashboardData.totalRevenue) }}</div>
                                 <div class="metric-label">Total Revenue</div>
-                                <div class="metric-change" :class="financialData.revenueChange >= 0 ? 'positive' : 'negative'">
-                                    <i :class="financialData.revenueChange >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
-                                    {{ Math.abs(financialData.revenueChange) }}% from last month
+                                <div class="metric-change" :class="dashboardData.revenueChange >= 0 ? 'positive' : 'negative'">
+                                    <i :class="dashboardData.revenueChange >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
+                                    {{ Math.abs(dashboardData.revenueChange) }}% from last month
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="metric-card expenses-card">
-                            <div class="metric-icon">
-                                <i class="fas fa-receipt"></i>
-                            </div>
-                            <div class="metric-content">
-                                <div class="metric-value">৳{{ formatNumber(financialData.totalExpenses) }}</div>
-                                <div class="metric-label">Total Expenses</div>
-                                <div class="metric-change" :class="financialData.expenseChange >= 0 ? 'negative' : 'positive'">
-                                    <i :class="financialData.expenseChange >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
-                                    {{ Math.abs(financialData.expenseChange) }}% from last month
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="metric-card profit-card">
-                            <div class="metric-icon">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="metric-content">
-                                <div class="metric-value" :class="financialData.netProfit >= 0 ? 'text-success' : 'text-danger'">
-                                    ৳{{ formatNumber(financialData.netProfit) }}
-                                </div>
-                                <div class="metric-label">Net Profit</div>
-                                <div class="profit-margin">
-                                    {{ ((financialData.netProfit / financialData.totalRevenue) * 100).toFixed(1) }}% margin
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-4">
+                    
+                    <!-- Pending Payments -->
+                    <div class="col-xl col-lg-4 col-md-6 mb-4">
                         <div class="metric-card pending-card">
                             <div class="metric-icon">
                                 <i class="fas fa-hourglass-half"></i>
                             </div>
                             <div class="metric-content">
-                                <div class="metric-value">৳{{ formatNumber(financialData.pendingRevenue) }}</div>
+                                <div class="metric-value">৳{{ formatNumber(dashboardData.pendingRevenue) }}</div>
                                 <div class="metric-label">Pending Payments</div>
                                 <div class="pending-count">
-                                    {{ financialData.pendingCount }} outstanding invoices
+                                    {{ dashboardData.pendingCount }} outstanding invoices
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Monthly Recurring Revenue -->
+                    <div class="col-xl col-lg-4 col-md-6 mb-4">
+                        <div class="metric-card recurring-card">
+                            <div class="metric-icon">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                            <div class="metric-content">
+                                <div class="metric-value">৳{{ formatNumber(dashboardData.recurringRevenue || 0) }}</div>
+                                <div class="metric-label">Monthly Recurring Revenue</div>
+                                <div class="recurring-count">
+                                    Predictable monthly income
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Next Month Forecast -->
+                    <div class="col-xl col-lg-4 col-md-6 mb-4">
+                        <div class="metric-card forecast-card">
+                            <div class="metric-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="metric-content">
+                                <div class="metric-value">৳{{ formatNumber(dashboardData.nextMonthForecast || dashboardData.totalRevenue * 1.05) }}</div>
+                                <div class="metric-label">Next Month Forecast</div>
+                                <div class="forecast-trend">
+                                    <template v-if="dashboardData.totalRevenue > 0">
+                                        {{ ((dashboardData.nextMonthForecast || dashboardData.totalRevenue * 1.05) > dashboardData.totalRevenue ? '+' : '') }}{{ (((dashboardData.nextMonthForecast || dashboardData.totalRevenue * 1.05) - dashboardData.totalRevenue) / dashboardData.totalRevenue * 100).toFixed(1) }}% projected
+                                    </template>
+                                    <template v-else>
+                                        +5.0% projected growth
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Net Profit -->
+                    <div class="col-xl col-lg-4 col-md-6 mb-4">
+                        <div class="metric-card profit-card">
+                            <div class="metric-icon">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <div class="metric-content">
+                                <div class="metric-value" :class="dashboardData.netProfit >= 0 ? 'text-success' : 'text-danger'">
+                                    ৳{{ formatNumber(dashboardData.netProfit) }}
+                                </div>
+                                <div class="metric-label">Net Profit</div>
+                                <div class="profit-margin">
+                                    {{ dashboardData.totalRevenue > 0 ? ((dashboardData.netProfit / dashboardData.totalRevenue) * 100).toFixed(1) : '0.0' }}% margin
                                 </div>
                             </div>
                         </div>
@@ -165,7 +192,7 @@
                                             <i class="fas fa-coins"></i>
                                         </div>
                                         <div class="stat-details">
-                                            <div class="stat-value">৳{{ formatNumber(financialData.totalAssets) }}</div>
+                                            <div class="stat-value">৳{{ formatNumber(dashboardData.totalAssets) }}</div>
                                             <div class="stat-label">Total Assets</div>
                                         </div>
                                     </div>
@@ -174,7 +201,7 @@
                                             <i class="fas fa-credit-card"></i>
                                         </div>
                                         <div class="stat-details">
-                                            <div class="stat-value">৳{{ formatNumber(financialData.totalLiabilities) }}</div>
+                                            <div class="stat-value">৳{{ formatNumber(dashboardData.totalLiabilities) }}</div>
                                             <div class="stat-label">Total Liabilities</div>
                                         </div>
                                     </div>
@@ -183,7 +210,7 @@
                                             <i class="fas fa-chart-pie"></i>
                                         </div>
                                         <div class="stat-details">
-                                            <div class="stat-value">৳{{ formatNumber(financialData.totalEquity) }}</div>
+                                            <div class="stat-value">৳{{ formatNumber(dashboardData.totalEquity) }}</div>
                                             <div class="stat-label">Owner's Equity</div>
                                         </div>
                                     </div>
@@ -225,9 +252,9 @@
                                         </div>
                                         <div class="category-progress">
                                             <div class="progress">
-                                                <div class="progress-bar" :class="category.color" :style="`width: ${(category.amount / financialData.totalExpenses) * 100}%`"></div>
+                                                <div class="progress-bar" :class="category.color" :style="`width: ${dashboardData.totalExpenses > 0 ? (category.amount / dashboardData.totalExpenses) * 100 : 0}%`"></div>
                                             </div>
-                                            <small class="text-muted">{{ ((category.amount / financialData.totalExpenses) * 100).toFixed(1) }}%</small>
+                                            <small class="text-muted">{{ dashboardData.totalExpenses > 0 ? ((category.amount / dashboardData.totalExpenses) * 100).toFixed(1) : '0.0' }}%</small>
                                         </div>
                                     </div>
                                 </div>
@@ -433,25 +460,16 @@ export default {
         Head
     },
     props: {
-        financialSummary: Object
+        financialData: Object,
+        currentMonth: String
     },
     setup(props) {
-        const selectedMonth = ref(new Date().toISOString().slice(0, 7)); // YYYY-MM format
+        const selectedMonth = ref(props.currentMonth || new Date().toISOString().slice(0, 7)); // YYYY-MM format
         const showCustomReportModal = ref(false);
         const generatingReport = ref(false);
         
-        const financialData = ref({
-            totalRevenue: 125000,
-            totalExpenses: 78000,
-            netProfit: 47000,
-            pendingRevenue: 18500,
-            pendingCount: 7,
-            totalAssets: 185000,
-            totalLiabilities: 35000,
-            totalEquity: 150000,
-            revenueChange: 12.5,
-            expenseChange: -8.2
-        });
+        // Use real financial data from props
+        const dashboardData = ref(props.financialData || {});
 
         const customReport = reactive({
             type: 'expense',
@@ -476,75 +494,36 @@ export default {
             return months;
         });
 
-        const trendData = ref([
-            { name: 'Jul', revenue: 98000, expenses: 62000 },
-            { name: 'Aug', revenue: 115000, expenses: 69000 },
-            { name: 'Sep', revenue: 108000, expenses: 71000 },
-            { name: 'Oct', revenue: 122000, expenses: 74000 },
-            { name: 'Nov', revenue: 118000, expenses: 76000 },
-            { name: 'Dec', revenue: 125000, expenses: 78000 }
-        ]);
+        // Use real trend data from props
+        const trendData = ref(props.financialData?.trendData || []);
 
         const maxAmount = computed(() => {
             return Math.max(...trendData.value.flatMap(m => [m.revenue, m.expenses]));
         });
 
-        const expenseCategories = ref([
-            { name: 'Technology & Software', amount: 25000, icon: 'fas fa-laptop', color: 'bg-primary' },
-            { name: 'Marketing & Advertising', amount: 18000, icon: 'fas fa-bullhorn', color: 'bg-success' },
-            { name: 'Office & Operations', amount: 15000, icon: 'fas fa-building', color: 'bg-warning' },
-            { name: 'Professional Services', amount: 12000, icon: 'fas fa-handshake', color: 'bg-info' },
-            { name: 'Travel & Transportation', amount: 8000, icon: 'fas fa-car', color: 'bg-secondary' }
-        ]);
+        // Use real expense categories from props
+        const expenseCategories = ref(props.financialData?.expenseCategories || []);
 
-        const recentTransactions = ref([
-            { id: 1, description: 'Client Payment - Web Development', amount: 25000, type: 'income', icon: 'fas fa-arrow-down', date: new Date('2024-12-24') },
-            { id: 2, description: 'Adobe Creative Cloud Subscription', amount: 1200, type: 'expense', icon: 'fas fa-arrow-up', date: new Date('2024-12-23') },
-            { id: 3, description: 'Shopify App Revenue', amount: 5000, type: 'income', icon: 'fas fa-arrow-down', date: new Date('2024-12-22') },
-            { id: 4, description: 'Google Ads Campaign', amount: 3500, type: 'expense', icon: 'fas fa-arrow-up', date: new Date('2024-12-21') },
-            { id: 5, description: 'Webflow Template Sale', amount: 800, type: 'income', icon: 'fas fa-arrow-down', date: new Date('2024-12-20') }
-        ]);
+        // Use real recent transactions from props
+        const recentTransactions = ref(props.financialData?.recentTransactions || []);
 
-        const budgetStatus = ref([
-            { name: 'Technology & Software', used: 18500, total: 25000, remaining: 6500, icon: 'fas fa-laptop' },
-            { name: 'Marketing & Advertising', used: 22000, total: 20000, remaining: -2000, icon: 'fas fa-bullhorn' },
-            { name: 'Office & Operations', used: 12000, total: 15000, remaining: 3000, icon: 'fas fa-building' },
-            { name: 'Professional Services', used: 8500, total: 12000, remaining: 3500, icon: 'fas fa-handshake' }
-        ]);
+        // Use real budget status from props
+        const budgetStatus = ref(props.financialData?.budgetStatus || []);
 
-        const financialAlerts = ref([
-            {
-                id: 1,
-                type: 'warning',
-                title: 'Budget Exceeded',
-                message: 'Marketing budget is 110% used this month',
-                icon: 'fas fa-exclamation-triangle',
-                date: new Date()
-            },
-            {
-                id: 2,
-                type: 'info',
-                title: 'Overdue Payments',
-                message: '3 client payments are overdue (৳8,500)',
-                icon: 'fas fa-clock',
-                date: new Date()
-            },
-            {
-                id: 3,
-                type: 'success',
-                title: 'Revenue Target Met',
-                message: 'Monthly revenue target achieved!',
-                icon: 'fas fa-check-circle',
-                date: new Date()
-            }
-        ]);
+        // Use real financial alerts from props
+        const financialAlerts = ref(props.financialData?.financialAlerts || []);
 
         // Helper functions
         const formatNumber = (num) => {
+            if (!num && num !== 0) return '0';
+            
+            // Round to 2 decimal places first, then format as integer if it's a whole number
+            const rounded = Math.round((num + Number.EPSILON) * 100) / 100;
+            
             return new Intl.NumberFormat('en-US', {
                 minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(num || 0);
+                maximumFractionDigits: rounded % 1 === 0 ? 0 : 2
+            }).format(rounded);
         };
 
         const formatDate = (date) => {
@@ -563,7 +542,7 @@ export default {
         };
 
         const calculateROI = () => {
-            return (financialData.value.netProfit / financialData.value.totalEquity) * 100;
+            return dashboardData.value.totalEquity > 0 ? (dashboardData.value.netProfit / dashboardData.value.totalEquity) * 100 : 0;
         };
 
         const getBudgetProgressClass = (budget) => {
@@ -581,7 +560,7 @@ export default {
                     html: `
                         <div class="text-left">
                             <p><strong>Report Period:</strong> ${getCurrentMonthName()}</p>
-                            <p><strong>Total Expenses:</strong> ৳${formatNumber(financialData.value.totalExpenses)}</p>
+                            <p><strong>Total Expenses:</strong> ৳${formatNumber(dashboardData.value.totalExpenses)}</p>
                             <p><strong>Categories:</strong> ${expenseCategories.value.length} expense categories</p>
                         </div>
                     `,
@@ -636,9 +615,9 @@ export default {
                     html: `
                         <div class="text-left">
                             <p><strong>Report Period:</strong> ${getCurrentMonthName()}</p>
-                            <p><strong>Total Assets:</strong> ৳${formatNumber(financialData.value.totalAssets)}</p>
-                            <p><strong>Total Liabilities:</strong> ৳${formatNumber(financialData.value.totalLiabilities)}</p>
-                            <p><strong>Owner's Equity:</strong> ৳${formatNumber(financialData.value.totalEquity)}</p>
+                            <p><strong>Total Assets:</strong> ৳${formatNumber(dashboardData.value.totalAssets)}</p>
+                            <p><strong>Total Liabilities:</strong> ৳${formatNumber(dashboardData.value.totalLiabilities)}</p>
+                            <p><strong>Owner's Equity:</strong> ৳${formatNumber(dashboardData.value.totalEquity)}</p>
                         </div>
                     `,
                     icon: 'info',
@@ -692,10 +671,10 @@ export default {
                     html: `
                         <div class="text-left">
                             <p><strong>Report Period:</strong> ${getCurrentMonthName()}</p>
-                            <p><strong>Revenue:</strong> ৳${formatNumber(financialData.value.totalRevenue)}</p>
-                            <p><strong>Expenses:</strong> ৳${formatNumber(financialData.value.totalExpenses)}</p>
-                            <p><strong>Net Profit:</strong> ৳${formatNumber(financialData.value.netProfit)}</p>
-                            <p><strong>Profit Margin:</strong> ${((financialData.value.netProfit / financialData.value.totalRevenue) * 100).toFixed(1)}%</p>
+                            <p><strong>Revenue:</strong> ৳${formatNumber(dashboardData.value.totalRevenue)}</p>
+                            <p><strong>Expenses:</strong> ৳${formatNumber(dashboardData.value.totalExpenses)}</p>
+                            <p><strong>Net Profit:</strong> ৳${formatNumber(dashboardData.value.netProfit)}</p>
+                            <p><strong>Profit Margin:</strong> ${((dashboardData.value.netProfit / dashboardData.value.totalRevenue) * 100).toFixed(1)}%</p>
                         </div>
                     `,
                     icon: 'info',
@@ -814,9 +793,9 @@ export default {
             
             csvContent += "Revenue Summary\n";
             csvContent += "Item,Amount (BDT),Details,Currency\n";
-            csvContent += `Total Revenue,${financialData.value.totalRevenue},Revenue Growth: +${Math.abs(financialData.value.revenueChange)}%,BDT\n`;
-            csvContent += `Pending Revenue,${financialData.value.pendingRevenue},${financialData.value.pendingCount} outstanding invoices,BDT\n`;
-            csvContent += `Revenue Growth Rate,${Math.abs(financialData.value.revenueChange)},Compared to last month,%\n`;
+            csvContent += `Total Revenue,${dashboardData.value.totalRevenue},Revenue Growth: +${Math.abs(dashboardData.value.revenueChange)}%,BDT\n`;
+            csvContent += `Pending Revenue,${dashboardData.value.pendingRevenue},${dashboardData.value.pendingCount} outstanding invoices,BDT\n`;
+            csvContent += `Revenue Growth Rate,${Math.abs(dashboardData.value.revenueChange)},Compared to last month,%\n`;
             
             return csvContent;
         };
@@ -843,15 +822,15 @@ export default {
             
             csvContent += "Cash Inflows\n";
             csvContent += "Source,Amount (BDT),Currency\n";
-            csvContent += `Revenue Received,${financialData.value.totalRevenue},BDT\n`;
-            csvContent += `Other Income,${Math.round(financialData.value.totalRevenue * 0.05)},BDT\n\n`;
+            csvContent += `Revenue Received,${dashboardData.value.totalRevenue},BDT\n`;
+            csvContent += `Other Income,${Math.round(dashboardData.value.totalRevenue * 0.05)},BDT\n\n`;
             
             csvContent += "Cash Outflows\n";
             csvContent += "Category,Amount (BDT),Currency\n";
-            csvContent += `Operating Expenses,${financialData.value.totalExpenses},BDT\n`;
-            csvContent += `Tax Payments,${Math.round(financialData.value.totalRevenue * 0.15)},BDT\n\n`;
+            csvContent += `Operating Expenses,${dashboardData.value.totalExpenses},BDT\n`;
+            csvContent += `Tax Payments,${Math.round(dashboardData.value.totalRevenue * 0.15)},BDT\n\n`;
             
-            const netCashFlow = financialData.value.netProfit - (financialData.value.totalRevenue * 0.15);
+            const netCashFlow = dashboardData.value.netProfit - (dashboardData.value.totalRevenue * 0.15);
             csvContent += "Net Cash Flow\n";
             csvContent += "Item,Amount (BDT),Status,Currency\n";
             csvContent += `Net Cash Flow,${Math.round(netCashFlow)},${netCashFlow >= 0 ? 'Positive' : 'Negative'},BDT\n`;
@@ -889,15 +868,15 @@ export default {
                         <h3>Revenue Summary</h3>
                         <div class="summary-item">
                             <span>Total Revenue:</span>
-                            <span class="revenue-positive">৳${formatNumber(financialData.value.totalRevenue)}</span>
+                            <span class="revenue-positive">৳${formatNumber(dashboardData.value.totalRevenue)}</span>
                         </div>
                         <div class="summary-item">
                             <span>Pending Revenue:</span>
-                            <span>৳${formatNumber(financialData.value.pendingRevenue)}</span>
+                            <span>৳${formatNumber(dashboardData.value.pendingRevenue)}</span>
                         </div>
                         <div class="summary-item">
                             <span>Revenue Growth:</span>
-                            <span class="revenue-positive">+${Math.abs(financialData.value.revenueChange)}%</span>
+                            <span class="revenue-positive">+${Math.abs(dashboardData.value.revenueChange)}%</span>
                         </div>
                     </div>
                     <div class="footer">
@@ -985,11 +964,11 @@ export default {
                         <h3>Cash Inflows</h3>
                         <div class="cash-item">
                             <span>Revenue Received</span>
-                            <span class="cash-positive">+৳${formatNumber(financialData.value.totalRevenue)}</span>
+                            <span class="cash-positive">+৳${formatNumber(dashboardData.value.totalRevenue)}</span>
                         </div>
                         <div class="cash-item">
                             <span>Other Income</span>
-                            <span class="cash-positive">+৳${formatNumber(financialData.value.totalRevenue * 0.05)}</span>
+                            <span class="cash-positive">+৳${formatNumber(dashboardData.value.totalRevenue * 0.05)}</span>
                         </div>
                     </div>
 
@@ -997,19 +976,19 @@ export default {
                         <h3>Cash Outflows</h3>
                         <div class="cash-item">
                             <span>Operating Expenses</span>
-                            <span class="cash-negative">-৳${formatNumber(financialData.value.totalExpenses)}</span>
+                            <span class="cash-negative">-৳${formatNumber(dashboardData.value.totalExpenses)}</span>
                         </div>
                         <div class="cash-item">
                             <span>Tax Payments</span>
-                            <span class="cash-negative">-৳${formatNumber(financialData.value.totalRevenue * 0.15)}</span>
+                            <span class="cash-negative">-৳${formatNumber(dashboardData.value.totalRevenue * 0.15)}</span>
                         </div>
                     </div>
 
                     <div class="net-cash-flow">
                         <div class="cash-item">
                             <span>Net Cash Flow</span>
-                            <span class="${financialData.value.netProfit >= 0 ? 'cash-positive' : 'cash-negative'}">
-                                ${financialData.value.netProfit >= 0 ? '+' : ''}৳${formatNumber(financialData.value.netProfit - (financialData.value.totalRevenue * 0.15))}
+                            <span class="${dashboardData.value.netProfit >= 0 ? 'cash-positive' : 'cash-negative'}">
+                                ${dashboardData.value.netProfit >= 0 ? '+' : ''}৳${formatNumber(dashboardData.value.netProfit - (dashboardData.value.totalRevenue * 0.15))}
                             </span>
                         </div>
                     </div>
@@ -1030,14 +1009,14 @@ export default {
             
             csvContent += "Summary\n";
             csvContent += "Item,Amount (BDT),Currency\n";
-            csvContent += `Total Monthly Expenses,${financialData.value.totalExpenses},BDT\n`;
+            csvContent += `Total Monthly Expenses,${dashboardData.value.totalExpenses},BDT\n`;
             csvContent += `Number of Categories,${expenseCategories.value.length},Count\n`;
-            csvContent += `Average per Category,${Math.round(financialData.value.totalExpenses / expenseCategories.value.length)},BDT\n\n`;
+            csvContent += `Average per Category,${Math.round(dashboardData.value.totalExpenses / expenseCategories.value.length)},BDT\n\n`;
             
             csvContent += "Expense Categories Breakdown\n";
             csvContent += "Category,Amount (BDT),Percentage,Currency\n";
             expenseCategories.value.forEach(category => {
-                const percentage = ((category.amount / financialData.value.totalExpenses) * 100).toFixed(1);
+                const percentage = ((category.amount / dashboardData.value.totalExpenses) * 100).toFixed(1);
                 csvContent += `${category.name},${category.amount},${percentage}%,BDT\n`;
             });
             
@@ -1051,34 +1030,34 @@ export default {
             
             csvContent += "ASSETS\n";
             csvContent += "Item,Amount (BDT),Currency\n";
-            csvContent += `Cash and Cash Equivalents,${Math.round(financialData.value.totalAssets * 0.4)},BDT\n`;
-            csvContent += `Accounts Receivable,${financialData.value.pendingRevenue},BDT\n`;
-            csvContent += `Equipment and Assets,${Math.round(financialData.value.totalAssets * 0.6 - financialData.value.pendingRevenue)},BDT\n`;
-            csvContent += `TOTAL ASSETS,${financialData.value.totalAssets},BDT\n\n`;
+            csvContent += `Cash and Cash Equivalents,${Math.round(dashboardData.value.totalAssets * 0.4)},BDT\n`;
+            csvContent += `Accounts Receivable,${dashboardData.value.pendingRevenue},BDT\n`;
+            csvContent += `Equipment and Assets,${Math.round(dashboardData.value.totalAssets * 0.6 - dashboardData.value.pendingRevenue)},BDT\n`;
+            csvContent += `TOTAL ASSETS,${dashboardData.value.totalAssets},BDT\n\n`;
             
             csvContent += "LIABILITIES\n";
             csvContent += "Item,Amount (BDT),Currency\n";
-            csvContent += `Accounts Payable,${Math.round(financialData.value.totalLiabilities * 0.6)},BDT\n`;
-            csvContent += `Accrued Expenses,${Math.round(financialData.value.totalLiabilities * 0.4)},BDT\n`;
-            csvContent += `TOTAL LIABILITIES,${financialData.value.totalLiabilities},BDT\n\n`;
+            csvContent += `Accounts Payable,${Math.round(dashboardData.value.totalLiabilities * 0.6)},BDT\n`;
+            csvContent += `Accrued Expenses,${Math.round(dashboardData.value.totalLiabilities * 0.4)},BDT\n`;
+            csvContent += `TOTAL LIABILITIES,${dashboardData.value.totalLiabilities},BDT\n\n`;
             
             csvContent += "EQUITY\n";
             csvContent += "Item,Amount (BDT),Currency\n";
-            csvContent += `Owner's Capital,${Math.round(financialData.value.totalEquity * 0.7)},BDT\n`;
-            csvContent += `Retained Earnings,${Math.round(financialData.value.totalEquity * 0.3)},BDT\n`;
-            csvContent += `TOTAL EQUITY,${financialData.value.totalEquity},BDT\n\n`;
+            csvContent += `Owner's Capital,${Math.round(dashboardData.value.totalEquity * 0.7)},BDT\n`;
+            csvContent += `Retained Earnings,${Math.round(dashboardData.value.totalEquity * 0.3)},BDT\n`;
+            csvContent += `TOTAL EQUITY,${dashboardData.value.totalEquity},BDT\n\n`;
             
             csvContent += "Balance Equation\n";
             csvContent += "Item,Amount (BDT),Currency\n";
-            csvContent += `Assets,${financialData.value.totalAssets},BDT\n`;
-            csvContent += `Liabilities + Equity,${financialData.value.totalLiabilities + financialData.value.totalEquity},BDT\n`;
-            csvContent += `Balanced,${financialData.value.totalAssets === (financialData.value.totalLiabilities + financialData.value.totalEquity) ? 'Yes' : 'No'},Status\n`;
+            csvContent += `Assets,${dashboardData.value.totalAssets},BDT\n`;
+            csvContent += `Liabilities + Equity,${dashboardData.value.totalLiabilities + dashboardData.value.totalEquity},BDT\n`;
+            csvContent += `Balanced,${dashboardData.value.totalAssets === (dashboardData.value.totalLiabilities + dashboardData.value.totalEquity) ? 'Yes' : 'No'},Status\n`;
             
             return csvContent;
         };
 
         const createFinancialSummaryCSVContent = () => {
-            const profitMargin = ((financialData.value.netProfit / financialData.value.totalRevenue) * 100).toFixed(1);
+            const profitMargin = ((dashboardData.value.netProfit / dashboardData.value.totalRevenue) * 100).toFixed(1);
             const roi = calculateROI().toFixed(1);
             
             let csvContent = "Report,Financial Summary Report\n";
@@ -1087,18 +1066,18 @@ export default {
             
             csvContent += "Financial Summary\n";
             csvContent += "Item,Amount (BDT),Change,Currency\n";
-            csvContent += `Total Revenue,${financialData.value.totalRevenue},+${Math.abs(financialData.value.revenueChange)}%,BDT\n`;
-            csvContent += `Total Expenses,${financialData.value.totalExpenses},${financialData.value.expenseChange >= 0 ? '+' : ''}${financialData.value.expenseChange}%,BDT\n`;
-            csvContent += `Net Profit,${financialData.value.netProfit},${profitMargin}% margin,BDT\n`;
-            csvContent += `Pending Revenue,${financialData.value.pendingRevenue},${financialData.value.pendingCount} invoices,BDT\n\n`;
+            csvContent += `Total Revenue,${dashboardData.value.totalRevenue},+${Math.abs(dashboardData.value.revenueChange)}%,BDT\n`;
+            csvContent += `Total Expenses,${dashboardData.value.totalExpenses},${dashboardData.value.expenseChange >= 0 ? '+' : ''}${dashboardData.value.expenseChange}%,BDT\n`;
+            csvContent += `Net Profit,${dashboardData.value.netProfit},${profitMargin}% margin,BDT\n`;
+            csvContent += `Pending Revenue,${dashboardData.value.pendingRevenue},${dashboardData.value.pendingCount} invoices,BDT\n\n`;
             
             csvContent += "Key Performance Indicators\n";
             csvContent += "KPI,Value,Unit\n";
             csvContent += `Profit Margin,${profitMargin},%\n`;
             csvContent += `Return on Investment (ROI),${roi},%\n`;
-            csvContent += `Revenue Growth Rate,${Math.abs(financialData.value.revenueChange)},%\n`;
-            csvContent += `Expense Efficiency,${((financialData.value.totalExpenses / financialData.value.totalRevenue) * 100).toFixed(1)},% of revenue\n`;
-            csvContent += `Cash Flow Status,${financialData.value.netProfit >= 0 ? 'Positive' : 'Negative'},Status\n`;
+            csvContent += `Revenue Growth Rate,${Math.abs(dashboardData.value.revenueChange)},%\n`;
+            csvContent += `Expense Efficiency,${((dashboardData.value.totalExpenses / dashboardData.value.totalRevenue) * 100).toFixed(1)},% of revenue\n`;
+            csvContent += `Cash Flow Status,${dashboardData.value.netProfit >= 0 ? 'Positive' : 'Negative'},Status\n`;
             
             return csvContent;
         };
@@ -1121,18 +1100,60 @@ export default {
             showCustomReportModal.value = false;
         };
 
-        const loadMonthData = () => {
-            // In real implementation, this would fetch data for the selected month
-            console.log('Loading data for month:', selectedMonth.value);
-            
-            Swal.fire({
-                title: 'Data Loaded!',
-                text: `Financial data for ${getCurrentMonthName()} has been loaded.`,
-                icon: 'info',
-                confirmButtonColor: '#007bff',
-                timer: 2000,
-                timerProgressBar: true
-            });
+        const loadMonthData = async () => {
+            try {
+                // Show loading
+                Swal.fire({
+                    title: 'Loading Financial Data...',
+                    text: `Fetching data for ${getCurrentMonthName()}`,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Fetch dynamic data from server
+                const response = await fetch(`/admin-home/finance/dashboard/load/${selectedMonth.value}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Update all dashboard data
+                    dashboardData.value = result.financialData;
+                    trendData.value = result.financialData.trendData || [];
+                    expenseCategories.value = result.financialData.expenseCategories || [];
+                    recentTransactions.value = result.financialData.recentTransactions || [];
+                    budgetStatus.value = result.financialData.budgetStatus || [];
+                    financialAlerts.value = result.financialData.financialAlerts || [];
+
+                    Swal.fire({
+                        title: 'Data Loaded Successfully!',
+                        text: `Financial data for ${getCurrentMonthName()} has been updated.`,
+                        icon: 'success',
+                        confirmButtonColor: '#007bff',
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                } else {
+                    throw new Error('Failed to load financial data');
+                }
+            } catch (error) {
+                console.error('Error loading financial data:', error);
+                Swal.fire({
+                    title: 'Error Loading Data',
+                    text: 'Failed to load financial data. Please try again.',
+                    icon: 'error',
+                    confirmButtonColor: '#e74a3b'
+                });
+            }
         };
 
         // CSV Generation Functions
@@ -1196,7 +1217,7 @@ export default {
                         <h3>Expense Summary</h3>
                         <div class="summary-item">
                             <span>Total Monthly Expenses:</span>
-                            <span>৳${formatNumber(financialData.value.totalExpenses)}</span>
+                            <span>৳${formatNumber(dashboardData.value.totalExpenses)}</span>
                         </div>
                         <div class="summary-item">
                             <span>Number of Categories:</span>
@@ -1204,11 +1225,11 @@ export default {
                         </div>
                         <div class="summary-item">
                             <span>Average per Category:</span>
-                            <span>৳${formatNumber(financialData.value.totalExpenses / expenseCategories.value.length)}</span>
+                            <span>৳${formatNumber(dashboardData.value.totalExpenses / expenseCategories.value.length)}</span>
                         </div>
                         <div class="summary-item total">
                             <span>Net Impact on Cash Flow:</span>
-                            <span>-৳${formatNumber(financialData.value.totalExpenses)}</span>
+                            <span>-৳${formatNumber(dashboardData.value.totalExpenses)}</span>
                         </div>
                     </div>
 
@@ -1218,7 +1239,7 @@ export default {
                             <div class="category-item">
                                 <div>
                                     <div class="category-name">${category.name}</div>
-                                    <div class="category-percentage">${((category.amount / financialData.value.totalExpenses) * 100).toFixed(1)}% of total expenses</div>
+                                    <div class="category-percentage">${((category.amount / dashboardData.value.totalExpenses) * 100).toFixed(1)}% of total expenses</div>
                                 </div>
                                 <div class="category-amount">৳${formatNumber(category.amount)}</div>
                             </div>
@@ -1269,19 +1290,19 @@ export default {
                         <div class="section-title">ASSETS</div>
                         <div class="balance-item">
                             <span>Cash and Cash Equivalents</span>
-                            <span>৳${formatNumber(financialData.value.totalAssets * 0.4)}</span>
+                            <span>৳${formatNumber(dashboardData.value.totalAssets * 0.4)}</span>
                         </div>
                         <div class="balance-item">
                             <span>Accounts Receivable</span>
-                            <span>৳${formatNumber(financialData.value.pendingRevenue)}</span>
+                            <span>৳${formatNumber(dashboardData.value.pendingRevenue)}</span>
                         </div>
                         <div class="balance-item">
                             <span>Equipment and Assets</span>
-                            <span>৳${formatNumber(financialData.value.totalAssets * 0.6 - financialData.value.pendingRevenue)}</span>
+                            <span>৳${formatNumber(dashboardData.value.totalAssets * 0.6 - dashboardData.value.pendingRevenue)}</span>
                         </div>
                         <div class="balance-total">
                             <span>TOTAL ASSETS</span>
-                            <span>৳${formatNumber(financialData.value.totalAssets)}</span>
+                            <span>৳${formatNumber(dashboardData.value.totalAssets)}</span>
                         </div>
                     </div>
 
@@ -1289,15 +1310,15 @@ export default {
                         <div class="section-title">LIABILITIES</div>
                         <div class="balance-item">
                             <span>Accounts Payable</span>
-                            <span>৳${formatNumber(financialData.value.totalLiabilities * 0.6)}</span>
+                            <span>৳${formatNumber(dashboardData.value.totalLiabilities * 0.6)}</span>
                         </div>
                         <div class="balance-item">
                             <span>Accrued Expenses</span>
-                            <span>৳${formatNumber(financialData.value.totalLiabilities * 0.4)}</span>
+                            <span>৳${formatNumber(dashboardData.value.totalLiabilities * 0.4)}</span>
                         </div>
                         <div class="balance-total">
                             <span>TOTAL LIABILITIES</span>
-                            <span>৳${formatNumber(financialData.value.totalLiabilities)}</span>
+                            <span>৳${formatNumber(dashboardData.value.totalLiabilities)}</span>
                         </div>
                     </div>
 
@@ -1305,15 +1326,15 @@ export default {
                         <div class="section-title">EQUITY</div>
                         <div class="balance-item">
                             <span>Owner's Capital</span>
-                            <span>৳${formatNumber(financialData.value.totalEquity * 0.7)}</span>
+                            <span>৳${formatNumber(dashboardData.value.totalEquity * 0.7)}</span>
                         </div>
                         <div class="balance-item">
                             <span>Retained Earnings</span>
-                            <span>৳${formatNumber(financialData.value.totalEquity * 0.3)}</span>
+                            <span>৳${formatNumber(dashboardData.value.totalEquity * 0.3)}</span>
                         </div>
                         <div class="balance-total">
                             <span>TOTAL EQUITY</span>
-                            <span>৳${formatNumber(financialData.value.totalEquity)}</span>
+                            <span>৳${formatNumber(dashboardData.value.totalEquity)}</span>
                         </div>
                     </div>
 
@@ -1322,7 +1343,7 @@ export default {
                             Assets = Liabilities + Equity
                         </div>
                         <div style="margin-top: 10px; font-size: 16px;">
-                            ৳${formatNumber(financialData.value.totalAssets)} = ৳${formatNumber(financialData.value.totalLiabilities)} + ৳${formatNumber(financialData.value.totalEquity)}
+                            ৳${formatNumber(dashboardData.value.totalAssets)} = ৳${formatNumber(dashboardData.value.totalLiabilities)} + ৳${formatNumber(dashboardData.value.totalEquity)}
                         </div>
                     </div>
 
@@ -1336,7 +1357,7 @@ export default {
         };
 
         const createFinancialSummaryHTML = () => {
-            const profitMargin = ((financialData.value.netProfit / financialData.value.totalRevenue) * 100).toFixed(1);
+            const profitMargin = ((dashboardData.value.netProfit / dashboardData.value.totalRevenue) * 100).toFixed(1);
             const roi = calculateROI().toFixed(1);
             
             return `
@@ -1373,23 +1394,23 @@ export default {
                     <div class="summary-grid">
                         <div class="summary-card">
                             <div class="card-title">Total Revenue</div>
-                            <div class="card-value positive">৳${formatNumber(financialData.value.totalRevenue)}</div>
-                            <div class="card-change">+${Math.abs(financialData.value.revenueChange)}% from last month</div>
+                            <div class="card-value positive">৳${formatNumber(dashboardData.value.totalRevenue)}</div>
+                            <div class="card-change">+${Math.abs(dashboardData.value.revenueChange)}% from last month</div>
                         </div>
                         <div class="summary-card">
                             <div class="card-title">Total Expenses</div>
-                            <div class="card-value negative">৳${formatNumber(financialData.value.totalExpenses)}</div>
-                            <div class="card-change">${financialData.value.expenseChange >= 0 ? '+' : ''}${financialData.value.expenseChange}% from last month</div>
+                            <div class="card-value negative">৳${formatNumber(dashboardData.value.totalExpenses)}</div>
+                            <div class="card-change">${dashboardData.value.expenseChange >= 0 ? '+' : ''}${dashboardData.value.expenseChange}% from last month</div>
                         </div>
                         <div class="summary-card">
                             <div class="card-title">Net Profit</div>
-                            <div class="card-value ${financialData.value.netProfit >= 0 ? 'positive' : 'negative'}">৳${formatNumber(financialData.value.netProfit)}</div>
+                            <div class="card-value ${dashboardData.value.netProfit >= 0 ? 'positive' : 'negative'}">৳${formatNumber(dashboardData.value.netProfit)}</div>
                             <div class="card-change">Profit Margin: ${profitMargin}%</div>
                         </div>
                         <div class="summary-card">
                             <div class="card-title">Pending Revenue</div>
-                            <div class="card-value">৳${formatNumber(financialData.value.pendingRevenue)}</div>
-                            <div class="card-change">${financialData.value.pendingCount} outstanding invoices</div>
+                            <div class="card-value">৳${formatNumber(dashboardData.value.pendingRevenue)}</div>
+                            <div class="card-change">${dashboardData.value.pendingCount} outstanding invoices</div>
                         </div>
                     </div>
 
@@ -1405,15 +1426,15 @@ export default {
                         </div>
                         <div class="performance-item">
                             <span>Revenue Growth Rate</span>
-                            <span>+${Math.abs(financialData.value.revenueChange)}%</span>
+                            <span>+${Math.abs(dashboardData.value.revenueChange)}%</span>
                         </div>
                         <div class="performance-item">
                             <span>Expense Efficiency</span>
-                            <span>${((financialData.value.totalExpenses / financialData.value.totalRevenue) * 100).toFixed(1)}% of revenue</span>
+                            <span>${((dashboardData.value.totalExpenses / dashboardData.value.totalRevenue) * 100).toFixed(1)}% of revenue</span>
                         </div>
                         <div class="performance-item">
                             <span>Cash Flow Status</span>
-                            <span class="${financialData.value.netProfit >= 0 ? 'positive' : 'negative'}">${financialData.value.netProfit >= 0 ? 'Positive' : 'Negative'}</span>
+                            <span class="${dashboardData.value.netProfit >= 0 ? 'positive' : 'negative'}">${dashboardData.value.netProfit >= 0 ? 'Positive' : 'Negative'}</span>
                         </div>
                     </div>
 
@@ -1446,7 +1467,7 @@ export default {
             selectedMonth,
             showCustomReportModal,
             generatingReport,
-            financialData,
+            dashboardData,
             customReport,
             availableMonths,
             trendData,
@@ -1514,6 +1535,14 @@ export default {
 
 .metric-card.pending-card {
     border-left: 4px solid #ffc107;
+}
+
+.metric-card.recurring-card {
+    border-left: 4px solid #20c997;
+}
+
+.metric-card.forecast-card {
+    border-left: 4px solid #6f42c1;
 }
 
 .metric-icon {
@@ -1963,6 +1992,14 @@ export default {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+/* 5-column layout for larger screens */
+@media (min-width: 1200px) {
+    .col-xl {
+        flex: 0 0 20%;
+        max-width: 20%;
+    }
 }
 
 /* Enhanced Mobile and Tablet Responsive Styles */
