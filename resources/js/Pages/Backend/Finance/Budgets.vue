@@ -234,7 +234,7 @@
 
                 <!-- Budget Categories List -->
                 <div class="row">
-                    <div v-for="budget in budgets" :key="budget.id" class="col-lg-6 col-xl-4 mb-4">
+                    <div v-for="budget in sortedBudgets" :key="budget.id" class="col-lg-6 col-xl-4 mb-4">
                         <div class="budget-card" :class="getBudgetCardClass(budget)">
                             <div class="budget-header">
                                 <div class="budget-icon">
@@ -432,6 +432,11 @@ export default {
         const editingBudget = ref(null);
         const saving = ref(false);
         const budgets = ref([...props.budgets || []]);
+
+        // Sort budgets by ID descending (newest first)
+        const sortedBudgets = computed(() => {
+            return budgets.value.sort((a, b) => b.id - a.id);
+        });
 
         const budgetForm = reactive({
             name: '',
@@ -832,6 +837,7 @@ export default {
             editingBudget,
             saving,
             budgets,
+            sortedBudgets,
             budgetForm,
             totalBudget,
             currentQuarterSpent,
