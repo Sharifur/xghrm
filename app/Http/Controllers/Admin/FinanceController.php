@@ -19,7 +19,15 @@ class FinanceController extends Controller
 {
     public function dashboard()
     {
-        return Inertia::render('Backend/Finance/Dashboard');
+        $currentMonth = Carbon::now()->format('Y-m');
+        
+        // Get dynamic financial data for dashboard
+        $financialData = $this->getDashboardFinancialData($currentMonth);
+        
+        return Inertia::render('Backend/Finance/Dashboard', [
+            'financialData' => $financialData,
+            'currentMonth' => $currentMonth
+        ]);
     }
 
     public function balanceSheet()
@@ -842,8 +850,284 @@ class FinanceController extends Controller
         ];
     }
 
+    public function loadDashboardData($month)
+    {
+        $financialData = $this->getDashboardFinancialData($month);
+        
+        return response()->json([
+            'success' => true,
+            'financialData' => $financialData
+        ]);
+    }
+
     public function documentation()
     {
         return Inertia::render('Backend/Finance/Documentation');
+    }
+
+    private function getDashboardFinancialData($month)
+    {
+        $year = substr($month, 0, 4);
+        $monthNumber = substr($month, 5, 2);
+        $currentDate = Carbon::create($year, $monthNumber, 1);
+        $lastMonth = $currentDate->copy()->subMonth();
+
+        // Get current month expenses
+        $currentMonthExpenses = OneTimeExpense::whereYear('expense_date', $year)
+            ->whereMonth('expense_date', $monthNumber)
+            ->get();
+
+        $totalCurrentExpenses = $currentMonthExpenses->sum('bdt_amount');
+
+        // Get last month expenses for comparison
+        $lastMonthExpenses = OneTimeExpense::whereYear('expense_date', $lastMonth->year)
+            ->whereMonth('expense_date', $lastMonth->month)
+            ->sum('bdt_amount');
+
+        // Calculate expense change percentage
+        $expenseChange = $lastMonthExpenses > 0 ? 
+            (($totalCurrentExpenses - $lastMonthExpenses) / $lastMonthExpenses) * 100 : 0;
+
+        // Get recurring expenses (monthly liabilities)
+        $recurringExpenses = ExpenseCategory::where('is_recurring', true)
+            ->where('type', 'liability')
+            ->sum('default_amount');
+
+        // Total expenses including recurring
+        $totalExpenses = $totalCurrentExpenses + $recurringExpenses;
+
+        // Calculate assets, liabilities, and equity from balance sheet
+        $totalAssets = ExpenseCategory::where('type', 'asset')->sum('default_amount');
+        $totalLiabilities = ExpenseCategory::where('type', 'liability')->sum('default_amount') + $totalCurrentExpenses;
+        $totalEquity = ExpenseCategory::where('type', 'equity')->sum('default_amount');
+
+        // Mock revenue calculation (you can replace with real revenue source)
+        $totalRevenue = $totalExpenses * 1.6; // Assuming 60% profit margin
+        $lastMonthRevenue = $lastMonthExpenses > 0 ? $lastMonthExpenses * 1.6 : $totalRevenue * 0.9;
+        $revenueChange = $lastMonthRevenue > 0 ? 
+            (($totalRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100 : 15;
+
+        $netProfit = $totalRevenue - $totalExpenses;
+        $pendingRevenue = $totalRevenue * 0.15; // Assume 15% pending
+        $pendingCount = max(1, intval($pendingRevenue / ($totalRevenue / 10)));
+
+        // Calculate monthly recurring revenue (from recurring liabilities as income proxy)
+        $monthlyRecurringRevenue = $recurringExpenses * 2; // Assume 2x recurring expenses as recurring revenue
+        
+        // Calculate next month forecast (5% growth + seasonal adjustments)
+        $nextMonthForecast = $totalRevenue * 1.05;
+
+        // Get monthly trend data (last 6 months)
+        $trendData = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $trendMonth = $currentDate->copy()->subMonths($i);
+            $monthlyExpenses = OneTimeExpense::whereYear('expense_date', $trendMonth->year)
+                ->whereMonth('expense_date', $trendMonth->month)
+                ->sum('bdt_amount');
+            
+            $monthlyRevenue = $monthlyExpenses > 0 ? round($monthlyExpenses * 1.6, 2) : round($totalRevenue * 0.8, 2);
+
+            $trendData[] = [
+                'name' => $trendMonth->format('M'),
+                'revenue' => $monthlyRevenue,
+                'expenses' => round($monthlyExpenses + ($recurringExpenses * 0.8), 2) // Include portion of recurring
+            ];
+        }
+
+        // Get expense categories breakdown
+        $expenseCategories = $currentMonthExpenses->groupBy('category')->map(function ($expenses, $category) {
+            $total = round($expenses->sum('bdt_amount'), 2);
+            return [
+                'name' => $category ?: 'Uncategorized',
+                'amount' => $total,
+                'icon' => $this->getCategoryIcon($category),
+                'color' => $this->getCategoryColor($category)
+            ];
+        })->sortByDesc('amount')->take(5)->values();
+
+        // Add recurring categories if they don't exist
+        $recurringCategories = ExpenseCategory::where('is_recurring', true)
+            ->where('type', 'liability')
+            ->get()
+            ->map(function ($category) {
+                return [
+                    'name' => $category->name,
+                    'amount' => round($category->default_amount, 2),
+                    'icon' => $category->icon,
+                    'color' => $this->getCategoryColor($category->name)
+                ];
+            });
+
+        $expenseCategories = $expenseCategories->merge($recurringCategories)
+            ->sortByDesc('amount')
+            ->take(5)
+            ->values();
+
+        // Get recent transactions
+        $recentTransactions = $currentMonthExpenses->take(5)->map(function ($expense) {
+            return [
+                'id' => $expense->id,
+                'description' => $expense->name,
+                'amount' => round($expense->bdt_amount, 2),
+                'type' => 'expense',
+                'icon' => $expense->icon ?: 'fas fa-arrow-up',
+                'date' => $expense->expense_date,
+                'category' => $expense->category
+            ];
+        });
+
+        // Mock some income transactions for display
+        $mockIncomes = collect([
+            [
+                'id' => 'inc_1',
+                'description' => 'Service Revenue',
+                'amount' => round($totalRevenue * 0.4, 2),
+                'type' => 'income',
+                'icon' => 'fas fa-arrow-down',
+                'date' => $currentDate->format('Y-m-d')
+            ],
+            [
+                'id' => 'inc_2', 
+                'description' => 'Product Sales',
+                'amount' => round($totalRevenue * 0.3, 2),
+                'type' => 'income',
+                'icon' => 'fas fa-arrow-down',
+                'date' => $currentDate->subDays(2)->format('Y-m-d')
+            ]
+        ]);
+
+        $recentTransactions = $mockIncomes->merge($recentTransactions)
+            ->sortByDesc('date')
+            ->take(5)
+            ->values();
+
+        // Budget status calculation
+        $budgetStatus = $expenseCategories->map(function ($category) use ($totalExpenses) {
+            $budgetAmount = $category['amount'] * 1.2; // 20% buffer
+            $used = $category['amount'];
+            
+            return [
+                'name' => $category['name'],
+                'used' => $used,
+                'total' => $budgetAmount,
+                'remaining' => $budgetAmount - $used,
+                'icon' => $category['icon']
+            ];
+        });
+
+        // Financial alerts
+        $financialAlerts = [];
+        
+        // Budget alerts
+        foreach ($budgetStatus as $budget) {
+            $percentage = ($budget['used'] / $budget['total']) * 100;
+            if ($percentage >= 100) {
+                $financialAlerts[] = [
+                    'id' => 'budget_' . \Str::slug($budget['name']),
+                    'type' => 'warning',
+                    'title' => 'Budget Exceeded',
+                    'message' => $budget['name'] . ' budget is ' . round($percentage) . '% used',
+                    'icon' => 'fas fa-exclamation-triangle',
+                    'date' => now()
+                ];
+            }
+        }
+
+        // Revenue alerts
+        if ($revenueChange > 20) {
+            $financialAlerts[] = [
+                'id' => 'revenue_growth',
+                'type' => 'success',
+                'title' => 'Revenue Growth',
+                'message' => 'Monthly revenue increased by ' . round($revenueChange, 1) . '%',
+                'icon' => 'fas fa-check-circle',
+                'date' => now()
+            ];
+        }
+
+        // Expense alerts
+        if ($expenseChange > 15) {
+            $financialAlerts[] = [
+                'id' => 'expense_increase',
+                'type' => 'info',
+                'title' => 'Expense Increase',
+                'message' => 'Monthly expenses increased by ' . round($expenseChange, 1) . '%',
+                'icon' => 'fas fa-info-circle',
+                'date' => now()
+            ];
+        }
+
+        return [
+            'totalRevenue' => round($totalRevenue, 2),
+            'totalExpenses' => round($totalExpenses, 2),
+            'netProfit' => round($netProfit, 2),
+            'pendingRevenue' => round($pendingRevenue, 2),
+            'pendingCount' => $pendingCount,
+            'recurringRevenue' => round($monthlyRecurringRevenue, 2),
+            'nextMonthForecast' => round($nextMonthForecast, 2),
+            'totalAssets' => round($totalAssets, 2),
+            'totalLiabilities' => round($totalLiabilities, 2),
+            'totalEquity' => round($totalEquity, 2),
+            'revenueChange' => round($revenueChange, 2),
+            'expenseChange' => round($expenseChange, 2),
+            'trendData' => collect($trendData)->map(function ($item) {
+                return [
+                    'name' => $item['name'],
+                    'revenue' => round($item['revenue'], 2),
+                    'expenses' => round($item['expenses'], 2)
+                ];
+            })->toArray(),
+            'expenseCategories' => $expenseCategories,
+            'recentTransactions' => $recentTransactions->map(function ($transaction) {
+                $transaction['amount'] = round($transaction['amount'], 2);
+                return $transaction;
+            }),
+            'budgetStatus' => $budgetStatus->map(function ($budget) {
+                return [
+                    'name' => $budget['name'],
+                    'used' => round($budget['used'], 2),
+                    'total' => round($budget['total'], 2),
+                    'remaining' => round($budget['remaining'], 2),
+                    'icon' => $budget['icon']
+                ];
+            }),
+            'financialAlerts' => collect($financialAlerts)->take(3)->values()
+        ];
+    }
+
+    private function getCategoryIcon($category)
+    {
+        $icons = [
+            'Technology & Software' => 'fas fa-laptop',
+            'Marketing & Advertising' => 'fas fa-bullhorn', 
+            'Office & Operations' => 'fas fa-building',
+            'Professional Services' => 'fas fa-handshake',
+            'Travel & Transportation' => 'fas fa-car',
+            'Food & Dining' => 'fas fa-utensils',
+            'Utilities' => 'fas fa-bolt',
+            'Rent' => 'fas fa-home',
+            'Insurance' => 'fas fa-shield-alt',
+            'Supplies' => 'fas fa-box',
+        ];
+
+        return $icons[$category] ?? 'fas fa-receipt';
+    }
+
+    private function getCategoryColor($category)
+    {
+        $colors = [
+            'Technology & Software' => 'bg-primary',
+            'Marketing & Advertising' => 'bg-success',
+            'Office & Operations' => 'bg-warning',
+            'Professional Services' => 'bg-info',
+            'Travel & Transportation' => 'bg-secondary',
+            'Food & Dining' => 'bg-danger',
+            'Utilities' => 'bg-dark',
+            'Rent' => 'bg-primary',
+            'Insurance' => 'bg-success',
+            'Supplies' => 'bg-warning',
+        ];
+
+        return $colors[$category] ?? 'bg-info';
     }
 }

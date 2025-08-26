@@ -111,6 +111,7 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
     ==================================*/
     Route::group(['prefix' => 'finance'],function (){
         Route::get('/dashboard',[\App\Http\Controllers\Admin\FinanceController::class,'dashboard'])->name('admin.finance.dashboard');
+        Route::get('/dashboard/load/{month}',[\App\Http\Controllers\Admin\FinanceController::class,'loadDashboardData'])->name('admin.finance.dashboard.load');
         Route::get('/balance-sheet',[\App\Http\Controllers\Admin\FinanceController::class,'balanceSheet'])->name('admin.finance.balance.sheet');
         Route::post('/balance-sheet/save',[\App\Http\Controllers\Admin\FinanceController::class,'saveBalanceSheet'])->name('admin.finance.balance.sheet.save');
         Route::get('/balance-sheet/load/{date}',[\App\Http\Controllers\Admin\FinanceController::class,'loadBalanceSheet'])->name('admin.finance.balance.sheet.load');

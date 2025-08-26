@@ -1,0 +1,1 @@
+import{_ as o}from"./_plugin-vue_export-helper-DlAUqK2U.js";import{c as e,o as c}from"./app-AVexKMFx.js";const r={},t={src:"/images/fav-icon.png",alt:""};function n(s,a){return c(),e("img",t)}const m=o(r,[["render",n]]);export{m as B};
