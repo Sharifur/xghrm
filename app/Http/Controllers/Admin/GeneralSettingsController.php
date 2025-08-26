@@ -24,7 +24,7 @@ class GeneralSettingsController extends Controller
     public function databaseUpdate(){
         setEnvValue(['APP_ENV' => 'local']);
         Artisan::call('migrate', ['--force' => true ]);
-        Artisan::call('db:seed', ['--force' => true ]);
+//        Artisan::call('db:seed', ['--force' => true ]);
         Artisan::call('cache:clear');
         setEnvValue(['APP_ENV' => 'production']);
         return back();
