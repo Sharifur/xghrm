@@ -19,6 +19,8 @@ class BalanceSheetItem extends Model
         'tooltip',
         'is_custom',
         'is_recurring',
+        'frequency',
+        'original_amount',
         'average_amount',
         'sort_order'
     ];
@@ -26,6 +28,7 @@ class BalanceSheetItem extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'bdt_amount' => 'decimal:2',
+        'original_amount' => 'decimal:2',
         'average_amount' => 'decimal:2',
         'is_custom' => 'boolean',
         'is_recurring' => 'boolean',
@@ -63,18 +66,41 @@ class BalanceSheetItem extends Model
 
     public static function createFromCategory(ExpenseCategory $category, BalanceSheet $balanceSheet)
     {
+        // Calculate monthly amount based on frequency
+        $originalAmount = $category->default_amount ?? 0;
+        $frequency = $category->frequency ?? 'monthly';
+        $monthlyAmount = static::calculateMonthlyAmount($originalAmount, $frequency);
+        $monthlyBdtAmount = static::calculateMonthlyAmount($category->bdt_amount ?? $originalAmount, $frequency);
+        
         return static::create([
             'balance_sheet_id' => $balanceSheet->id,
             'type' => $category->type,
             'name' => $category->name,
-            'amount' => $category->default_amount ?? 0,
+            'amount' => $monthlyAmount,
             'currency' => $category->currency ?? 'BDT',
-            'bdt_amount' => $category->bdt_amount ?? ($category->default_amount ?? 0),
-            'tooltip' => $category->tooltip,
+            'bdt_amount' => $monthlyBdtAmount,
+            'original_amount' => $originalAmount,
+            'frequency' => $frequency,
+            'tooltip' => $category->tooltip . ($frequency !== 'monthly' ? " (Original: ৳" . number_format($originalAmount, 2) . " " . ucfirst($frequency) . ")" : ""),
             'is_custom' => false,
             'is_recurring' => $category->is_recurring,
             'sort_order' => $category->sort_order
         ]);
+    }
+
+    public static function calculateMonthlyAmount($amount, $frequency)
+    {
+        switch ($frequency) {
+            case 'yearly':
+                return $amount / 12; // Divide yearly by 12 months
+            case 'weekly':
+                return $amount * 4.33; // Multiply weekly by average weeks per month (52/12)
+            case 'daily':
+                return $amount * 30.44; // Multiply daily by average days per month (365/12)
+            case 'monthly':
+            default:
+                return $amount; // Monthly remains the same
+        }
     }
 
     protected static function boot()
