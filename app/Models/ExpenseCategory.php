@@ -17,6 +17,7 @@ class ExpenseCategory extends Model
         'color',
         'is_recurring',
         'default_amount',
+        'frequency',
         'currency',
         'bdt_amount',
         'tooltip',
