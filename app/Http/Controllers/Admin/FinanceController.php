@@ -348,6 +348,7 @@ class FinanceController extends Controller
             'type' => 'required|in:liability',
             'default_amount' => 'required|numeric|min:0',
             'frequency' => 'required|in:monthly,weekly,yearly',
+            'currency' => 'nullable|in:BDT,USD',
             'icon' => 'nullable|string',
             'tooltip' => 'nullable|string'
         ]);
@@ -358,6 +359,8 @@ class FinanceController extends Controller
                 'description' => $request->description,
                 'type' => $request->type,
                 'default_amount' => $request->default_amount,
+                'frequency' => $request->frequency,
+                'currency' => $request->currency ?: 'BDT',
                 'icon' => $request->icon ?: 'fas fa-receipt',
                 'color' => '#ffc107',
                 'is_recurring' => true,
@@ -387,6 +390,8 @@ class FinanceController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'default_amount' => 'required|numeric|min:0',
+            'frequency' => 'required|in:monthly,weekly,yearly',
+            'currency' => 'nullable|in:BDT,USD',
             'icon' => 'nullable|string',
             'tooltip' => 'nullable|string'
         ]);
@@ -396,6 +401,8 @@ class FinanceController extends Controller
                 'name' => $request->name,
                 'description' => $request->description,
                 'default_amount' => $request->default_amount,
+                'frequency' => $request->frequency,
+                'currency' => $request->currency ?: $expense->currency ?: 'BDT',
                 'icon' => $request->icon ?: $expense->icon,
                 'tooltip' => $request->tooltip ?: $request->description
             ]);

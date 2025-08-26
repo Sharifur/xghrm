@@ -93,7 +93,7 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <span class="badge bg-info">{{ formatFrequency(expense.frequency) }}</span>
+                                            <span class="badge" :class="getFrequencyColor(expense.frequency)">{{ formatFrequency(expense.frequency) }}</span>
                                         </td>
                                         <td>
                                             <i :class="expense.icon || 'fas fa-receipt'" class="text-primary"></i>
@@ -157,7 +157,7 @@
                                                                 ৳{{ formatNumber(expense.default_amount) }}
                                                             </span>
                                                         </div>
-                                                        <span class="badge bg-info">{{ formatFrequency(expense.frequency) }}</span>
+                                                        <span class="badge" :class="getFrequencyColor(expense.frequency)">{{ formatFrequency(expense.frequency) }}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -341,6 +341,11 @@ export default {
         const saving = ref(false);
         const expenses = ref([...props.expenses]);
         
+        // Debug: Check what frequency data we're getting
+        console.log('Loaded expenses with frequencies:', 
+            expenses.value.map(exp => ({ name: exp.name, frequency: exp.frequency }))
+        );
+        
         // Pagination and selection
         const selectedExpenses = ref([]);
         const currentPage = ref(1);
@@ -431,13 +436,23 @@ export default {
         };
 
         const formatFrequency = (frequency) => {
+            console.log('Formatting frequency:', frequency);
             const frequencyMap = {
                 'monthly': 'Monthly',
                 'yearly': 'Yearly', 
                 'weekly': 'Weekly',
                 'daily': 'Daily'
             };
-            return frequencyMap[frequency] || 'Monthly';
+            const result = frequencyMap[frequency] || 'Monthly';
+            console.log('Formatted result:', result);
+            return result;
+        };
+
+        const getFrequencyColor = (frequency) => {
+            if (frequency === 'monthly') return 'bg-primary';
+            if (frequency === 'weekly') return 'bg-success';
+            if (frequency === 'yearly') return 'bg-danger';
+            return 'bg-info';
         };
 
         const resetForm = () => {
@@ -495,8 +510,8 @@ export default {
                 }
                 
                 console.log('Saving expense with data:', {
-                    original: { currency: form.currency, amount: form.default_amount },
-                    saving: { currency: saveData.currency, amount: saveData.default_amount }
+                    original: { currency: form.currency, amount: form.default_amount, frequency: form.frequency },
+                    saving: { currency: saveData.currency, amount: saveData.default_amount, frequency: saveData.frequency }
                 });
                 
                 const response = await axios[method](url, saveData);
@@ -788,6 +803,7 @@ export default {
             USD_TO_BDT_RATE,
             formatNumber,
             formatFrequency,
+            getFrequencyColor,
             openAddModal,
             editExpense,
             closeModal,
