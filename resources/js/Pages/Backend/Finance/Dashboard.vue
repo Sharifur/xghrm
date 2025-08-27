@@ -48,17 +48,40 @@
                     </div>
                 </div>
 
-                <!-- Key Financial Metrics -->
+                <!-- Key Financial Metrics - First Row -->
                 <div class="row mb-4">
-                    <!-- Total Revenue -->
+                    <!-- Gross Profit -->
                     <div class="col-lg-6 col-md-6 mb-3">
                         <div class="metric-card revenue-card compact">
                             <div class="metric-content">
-                                <div class="metric-value">৳{{ formatNumber(dashboardData.totalRevenue) }}</div>
-                                <div class="metric-label">Total Revenue</div>
+                                <div class="metric-value">৳{{ formatNumber(dashboardData.grossProfit) }}</div>
+                                <div class="metric-label">Gross Profit</div>
+                                <div class="metric-change positive">
+                                    <i class="fas fa-calculator"></i>
+                                    Including pending payments
+                                </div>
+                                <div class="metric-explanation">
+                                    Total revenue (৳{{ formatNumber(dashboardData.totalGrossRevenue) }}) - Expenses (৳{{ formatNumber(dashboardData.totalExpenses) }})
+                                </div>
+                            </div>
+                            <div class="metric-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Net Profit -->
+                    <div class="col-lg-6 col-md-6 mb-3">
+                        <div class="metric-card revenue-card compact">
+                            <div class="metric-content">
+                                <div class="metric-value">৳{{ formatNumber(dashboardData.netProfit) }}</div>
+                                <div class="metric-label">Net Profit</div>
                                 <div class="metric-change" :class="dashboardData.revenueChange >= 0 ? 'positive' : 'negative'">
                                     <i :class="dashboardData.revenueChange >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
                                     {{ Math.abs(dashboardData.revenueChange) }}% from last month
+                                </div>
+                                <div class="metric-explanation">
+                                    Received revenue (৳{{ formatNumber(dashboardData.grossRevenue) }}) - Expenses (৳{{ formatNumber(dashboardData.totalExpenses) }})
                                 </div>
                             </div>
                             <div class="metric-icon">
@@ -66,7 +89,10 @@
                             </div>
                         </div>
                     </div>
-                    
+                </div>
+
+                <!-- Second Row -->
+                <div class="row mb-4">
                     <!-- Pending Payments -->
                     <div class="col-lg-6 col-md-6 mb-3">
                         <div class="metric-card pending-card compact">
@@ -76,24 +102,27 @@
                                 <div class="pending-count">
                                     {{ dashboardData.pendingCount }} outstanding invoices
                                 </div>
+                                <div class="metric-explanation">
+                                    Not yet received (included in gross, not in net)
+                                </div>
                             </div>
                             <div class="metric-icon">
                                 <i class="fas fa-hourglass-half"></i>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Second Row -->
-                <div class="row mb-4">
-                    <!-- Monthly Recurring Revenue -->
+                    
+                    <!-- Monthly Recurring Expenses -->
                     <div class="col-lg-6 col-md-6 mb-3">
                         <div class="metric-card recurring-card compact">
                             <div class="metric-content">
-                                <div class="metric-value">৳{{ formatNumber(dashboardData.recurringRevenue || 0) }}</div>
-                                <div class="metric-label">Monthly Recurring Revenue</div>
+                                <div class="metric-value">৳{{ formatNumber(dashboardData.monthlyRecurringExpenses || dashboardData.recurringExpenses || 0) }}</div>
+                                <div class="metric-label">Monthly Recurring Expenses</div>
                                 <div class="recurring-count">
-                                    Predictable monthly income
+                                    Fixed monthly operating costs
+                                </div>
+                                <div class="metric-explanation">
+                                    Server, rent, subscriptions & other recurring bills
                                 </div>
                             </div>
                             <div class="metric-icon">
@@ -101,9 +130,12 @@
                             </div>
                         </div>
                     </div>
-                    
+                </div>
+
+                <!-- Third Row -->
+                <div class="row mb-4">
                     <!-- Next Month Forecast -->
-                    <div class="col-lg-6 col-md-6 mb-3">
+                    <div class="col-lg-12 mb-3">
                         <div class="metric-card forecast-card compact">
                             <div class="metric-content">
                                 <div class="metric-value">৳{{ formatNumber(dashboardData.nextMonthForecast || dashboardData.totalRevenue * 1.05) }}</div>
@@ -112,9 +144,12 @@
                                     <template v-if="dashboardData.totalRevenue > 0">
                                         {{ ((dashboardData.nextMonthForecast || dashboardData.totalRevenue * 1.05) > dashboardData.totalRevenue ? '+' : '') }}{{ (((dashboardData.nextMonthForecast || dashboardData.totalRevenue * 1.05) - dashboardData.totalRevenue) / dashboardData.totalRevenue * 100).toFixed(1) }}% projected
                                     </template>
-                                    <template v-else">
+                                    <template v-else>
                                         +5.0% projected growth
                                     </template>
+                                </div>
+                                <div class="metric-explanation">
+                                    Based on current net profit with 5% growth projection
                                 </div>
                             </div>
                             <div class="metric-icon">
@@ -1644,6 +1679,13 @@ export default {
 .metric-card.compact .forecast-trend,
 .metric-card.compact .profit-margin {
     font-size: 0.75rem;
+}
+
+.metric-explanation {
+    font-size: 0.7rem;
+    color: #868e96;
+    margin-top: 0.25rem;
+    font-style: italic;
 }
 
 .metric-card.compact .metric-content {

@@ -1062,6 +1062,14 @@ export default {
     padding: 1.5rem;
 }
 
+/* Ensure form labels are left-aligned */
+.form-label,
+.modal-body label {
+    text-align: left !important;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
 @media (max-width: 768px) {
     .budget-actions {
         flex-direction: column;

@@ -389,12 +389,11 @@
                                         >
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label">Email *</label>
+                                        <label class="form-label">Email</label>
                                         <input 
                                             v-model="clientForm.email" 
                                             type="email" 
                                             class="form-control" 
-                                            required 
                                             placeholder="client@company.com"
                                         >
                                     </div>
@@ -456,7 +455,7 @@
                                         <label class="form-label">Client *</label>
                                         <select v-model="revenueForm.client_id" class="form-select" required>
                                             <option value="">Select Client</option>
-                                            <option v-for="client in topClients" :key="client.id" :value="client.id">
+                                            <option v-for="client in sortedClients" :key="client.id" :value="client.id">
                                                 {{ client.name }}
                                             </option>
                                         </select>
@@ -475,16 +474,28 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label">Amount (BDT) *</label>
-                                        <input 
-                                            v-model.number="revenueForm.amount" 
-                                            type="number" 
-                                            class="form-control" 
-                                            step="0.01"
-                                            min="0"
-                                            required
-                                            placeholder="5000.00"
-                                        >
+                                        <label class="form-label">Amount *</label>
+                                        <div class="input-group">
+                                            <select v-model="revenueForm.currency" class="input-group-text" style="border-right: 0; background: #e9ecef;">
+                                                <option value="BDT">৳</option>
+                                                <option value="USD">$</option>
+                                            </select>
+                                            <input 
+                                                v-model.number="revenueForm.amount" 
+                                                type="number" 
+                                                class="form-control" 
+                                                step="0.01"
+                                                min="0"
+                                                required
+                                                placeholder="5000.00"
+                                            >
+                                        </div>
+                                        <div v-if="revenueForm.currency === 'USD'" class="form-text text-info">
+                                            <small>
+                                                <i class="fas fa-exchange-alt me-1"></i>
+                                                Converted: ৳{{ formatNumber(revenueForm.amount * USD_TO_BDT_RATE) }} BDT (1 USD = {{ USD_TO_BDT_RATE }} BDT)
+                                            </small>
+                                        </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Status *</label>
@@ -586,11 +597,31 @@ export default {
             client_id: '',
             service_type: 'web_development',
             amount: 0,
+            currency: 'BDT',
             status: 'paid',
             expected_date: '',
             invoice_date: '',
             description: '',
             notes: ''
+        });
+
+        // Currency conversion constants
+        const USD_TO_BDT_RATE = 120;
+        const previousRevenueCurrency = ref('BDT');
+
+        // Watch for currency changes and convert amount automatically
+        watch(() => revenueForm.currency, (newCurrency) => {
+            const oldCurrency = previousRevenueCurrency.value;
+            if (oldCurrency && revenueForm.amount > 0 && oldCurrency !== newCurrency) {
+                if (oldCurrency === 'BDT' && newCurrency === 'USD') {
+                    // Convert from BDT to USD
+                    revenueForm.amount = Number((revenueForm.amount / USD_TO_BDT_RATE).toFixed(2));
+                } else if (oldCurrency === 'USD' && newCurrency === 'BDT') {
+                    // Convert from USD to BDT
+                    revenueForm.amount = Number((revenueForm.amount * USD_TO_BDT_RATE).toFixed(2));
+                }
+            }
+            previousRevenueCurrency.value = newCurrency;
         });
 
         // Computed values
@@ -616,6 +647,12 @@ export default {
             return revenues.value
                 .filter(r => r.service_type === 'shopify_app' && r.status === 'paid')
                 .reduce((sum, r) => sum + r.amount, 0);
+        });
+
+        const sortedClients = computed(() => {
+            return clients.value
+                .filter(client => client.is_active !== false)
+                .sort((a, b) => a.name.localeCompare(b.name));
         });
 
         const forecastRevenue = computed(() => {
@@ -767,33 +804,35 @@ export default {
             Object.keys(revenueForm).forEach(key => {
                 if (key === 'service_type') revenueForm[key] = 'web_development';
                 else if (key === 'status') revenueForm[key] = 'paid';
+                else if (key === 'currency') revenueForm[key] = 'BDT';
                 else if (key === 'amount') revenueForm[key] = 0;
                 else revenueForm[key] = '';
             });
+            previousRevenueCurrency.value = 'BDT'; // Reset previous currency tracking
         };
 
         const saveClient = async () => {
             saving.value = true;
             try {
-                // Mock save - in real implementation, this would call API
-                const clientData = {
-                    ...clientForm,
-                    id: Date.now()
-                };
-                clients.value.push(clientData);
-                closeClientModal();
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'Client added successfully',
-                    icon: 'success',
-                    confirmButtonColor: '#28a745',
-                    timer: 3000,
-                    timerProgressBar: true
-                });
+                const response = await axios.post(route('admin.finance.clients.store'), clientForm);
+
+                if (response.data.success) {
+                    clients.value.push(response.data.client);
+                    closeClientModal();
+                    Swal.fire({
+                        title: 'Success!',
+                        text: response.data.message,
+                        icon: 'success',
+                        confirmButtonColor: '#28a745',
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                }
             } catch (error) {
+                console.error('Save failed:', error);
                 Swal.fire({
                     title: 'Error!',
-                    text: 'Failed to save client',
+                    text: error.response?.data?.message || 'Failed to save client',
                     icon: 'error',
                     confirmButtonColor: '#e74a3b'
                 });
@@ -805,26 +844,25 @@ export default {
         const saveRevenue = async () => {
             saving.value = true;
             try {
-                // Mock save - in real implementation, this would call API
-                const revenueData = {
-                    ...revenueForm,
-                    id: Date.now(),
-                    created_at: new Date().toISOString()
-                };
-                revenues.value.push(revenueData);
-                closeRevenueModal();
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'Revenue logged successfully',
-                    icon: 'success',
-                    confirmButtonColor: '#007bff',
-                    timer: 3000,
-                    timerProgressBar: true
-                });
+                const response = await axios.post(route('admin.finance.revenues.store'), revenueForm);
+
+                if (response.data.success) {
+                    revenues.value.push(response.data.revenue);
+                    closeRevenueModal();
+                    Swal.fire({
+                        title: 'Success!',
+                        text: response.data.message,
+                        icon: 'success',
+                        confirmButtonColor: '#007bff',
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                }
             } catch (error) {
+                console.error('Revenue save failed:', error);
                 Swal.fire({
                     title: 'Error!',
-                    text: 'Failed to save revenue',
+                    text: error.response?.data?.message || 'Failed to log revenue',
                     icon: 'error',
                     confirmButtonColor: '#e74a3b'
                 });
@@ -1022,29 +1060,11 @@ export default {
             });
         };
 
-        // Initialize with sample data
+        // Initialize with real data from props - no need for mock data
         onMounted(() => {
-            if (clients.value.length === 0) {
-                clients.value = [
-                    { id: 1, name: 'Tech Startup Inc', email: 'contact@techstartup.com', payment_terms: 'net_30' },
-                    { id: 2, name: 'E-commerce Store', email: 'owner@ecomstore.com', payment_terms: 'net_15' },
-                    { id: 3, name: 'Local Restaurant', email: 'manager@restaurant.com', payment_terms: 'net_30' },
-                    { id: 4, name: 'Marketing Agency', email: 'hello@agency.com', payment_terms: 'net_30' },
-                    { id: 5, name: 'Consulting Firm', email: 'info@consulting.com', payment_terms: 'net_45' }
-                ];
-            }
-
-            if (revenues.value.length === 0) {
-                revenues.value = [
-                    { id: 1, client_id: 1, service_type: 'web_development', amount: 25000, status: 'paid', created_at: '2024-12-15', description: 'E-commerce website development' },
-                    { id: 2, client_id: 2, service_type: 'shopify_app', amount: 1200, status: 'paid', created_at: '2024-12-10', description: 'Monthly app subscription' },
-                    { id: 3, client_id: 3, service_type: 'webflow_template', amount: 5000, status: 'pending', expected_date: '2024-12-30', invoice_date: '2024-12-15', description: 'Custom restaurant template' },
-                    { id: 4, client_id: 4, service_type: 'consulting', amount: 8000, status: 'paid', created_at: '2024-12-20', description: 'Digital strategy consulting' },
-                    { id: 5, client_id: 5, service_type: 'maintenance', amount: 3000, status: 'overdue', expected_date: '2024-12-20', invoice_date: '2024-11-20', description: 'Website maintenance contract' },
-                    { id: 6, client_id: 1, service_type: 'web_development', amount: 15000, status: 'pending', expected_date: '2025-01-15', invoice_date: '2024-12-15', description: 'Phase 2 development' },
-                    { id: 7, client_id: 2, service_type: 'shopify_app', amount: 1200, status: 'pending', expected_date: '2025-01-05', invoice_date: '2024-12-05', description: 'Next month subscription' }
-                ];
-            }
+            // Data is already populated from props
+            console.log('Clients loaded:', clients.value.length);
+            console.log('Revenues loaded:', revenues.value.length);
         });
 
         return {
@@ -1063,11 +1083,13 @@ export default {
             forecastRevenue,
             revenueByService,
             topClients,
+            sortedClients,
             pendingPayments,
             formatNumber,
             getPaymentCardClass,
             getPaymentBadgeClass,
             getPaymentStatus,
+            USD_TO_BDT_RATE,
             closeClientModal,
             closeRevenueModal,
             saveClient,
@@ -1253,6 +1275,14 @@ export default {
 
 .modal-body {
     padding: 1.5rem;
+}
+
+/* Ensure form labels are left-aligned */
+.form-label,
+.modal-body label {
+    text-align: left !important;
+    display: block;
+    margin-bottom: 0.5rem;
 }
 
 @media (max-width: 768px) {

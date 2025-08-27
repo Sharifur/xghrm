@@ -146,6 +146,20 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
         Route::get('/budgets',[\App\Http\Controllers\Admin\FinanceController::class,'budgets'])->name('admin.finance.budgets');
         Route::get('/reports',[\App\Http\Controllers\Admin\FinanceController::class,'reports'])->name('admin.finance.reports');
         Route::get('/documentation',[\App\Http\Controllers\Admin\FinanceController::class,'documentation'])->name('admin.finance.documentation');
+
+        // Client Management
+        Route::get('/clients',[\App\Http\Controllers\Admin\ClientController::class,'index'])->name('admin.finance.clients.index');
+        Route::post('/clients',[\App\Http\Controllers\Admin\ClientController::class,'store'])->name('admin.finance.clients.store');
+        Route::get('/clients/{id}',[\App\Http\Controllers\Admin\ClientController::class,'show'])->name('admin.finance.clients.show');
+        Route::put('/clients/{id}',[\App\Http\Controllers\Admin\ClientController::class,'update'])->name('admin.finance.clients.update');
+        Route::delete('/clients/{id}',[\App\Http\Controllers\Admin\ClientController::class,'destroy'])->name('admin.finance.clients.delete');
+        Route::patch('/clients/{id}/toggle-status',[\App\Http\Controllers\Admin\ClientController::class,'toggleStatus'])->name('admin.finance.clients.toggle.status');
+        
+        // Revenue Management
+        Route::get('/revenues',[\App\Http\Controllers\Admin\ClientController::class,'getRevenues'])->name('admin.finance.revenues.index');
+        Route::post('/revenues',[\App\Http\Controllers\Admin\ClientController::class,'storeRevenue'])->name('admin.finance.revenues.store');
+        Route::put('/revenues/{id}',[\App\Http\Controllers\Admin\ClientController::class,'updateRevenue'])->name('admin.finance.revenues.update');
+        Route::delete('/revenues/{id}',[\App\Http\Controllers\Admin\ClientController::class,'deleteRevenue'])->name('admin.finance.revenues.delete');
     });
 
     /*=================================

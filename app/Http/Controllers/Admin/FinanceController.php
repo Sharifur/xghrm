@@ -755,7 +755,18 @@ class FinanceController extends Controller
 
     public function reports()
     {
-        return Inertia::render('Backend/Finance/Reports');
+        $clients = \App\Models\Client::active()
+            ->orderBy('name')
+            ->get();
+
+        $revenues = \App\Models\Revenue::with('client')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return Inertia::render('Backend/Finance/Reports', [
+            'clients' => $clients,
+            'revenues' => $revenues
+        ]);
     }
 
     private function aggregateDynamicFinancialData(BalanceSheet $balanceSheet, $month)
@@ -879,65 +890,104 @@ class FinanceController extends Controller
         $currentDate = Carbon::create($year, $monthNumber, 1);
         $lastMonth = $currentDate->copy()->subMonth();
 
-        // Get current month expenses
+        // Get current month ONE-TIME expenses
         $currentMonthExpenses = OneTimeExpense::whereYear('expense_date', $year)
             ->whereMonth('expense_date', $monthNumber)
             ->get();
 
-        $totalCurrentExpenses = $currentMonthExpenses->sum('bdt_amount');
+        $totalOneTimeExpenses = $currentMonthExpenses->sum('bdt_amount');
 
         // Get last month expenses for comparison
         $lastMonthExpenses = OneTimeExpense::whereYear('expense_date', $lastMonth->year)
             ->whereMonth('expense_date', $lastMonth->month)
             ->sum('bdt_amount');
 
-        // Calculate expense change percentage
-        $expenseChange = $lastMonthExpenses > 0 ? 
-            (($totalCurrentExpenses - $lastMonthExpenses) / $lastMonthExpenses) * 100 : 0;
-
-        // Get recurring expenses (monthly liabilities)
-        $recurringExpenses = ExpenseCategory::where('is_recurring', true)
+        // Get RECURRING expenses broken down by frequency
+        $monthlyRecurringExpenses = ExpenseCategory::where('is_recurring', true)
+            ->where('frequency', 'monthly')
             ->where('type', 'liability')
             ->sum('default_amount');
+            
+        $weeklyRecurringExpenses = ExpenseCategory::where('is_recurring', true)
+            ->where('frequency', 'weekly')
+            ->where('type', 'liability')
+            ->sum('default_amount') * 4; // Convert weekly to monthly (4 weeks)
+            
+        $yearlyRecurringExpenses = ExpenseCategory::where('is_recurring', true)
+            ->where('frequency', 'yearly')
+            ->where('type', 'liability')
+            ->sum('default_amount') / 12; // Convert yearly to monthly
 
-        // Total expenses including recurring
-        $totalExpenses = $totalCurrentExpenses + $recurringExpenses;
+        // Total recurring expenses (converted to monthly basis)
+        $totalRecurringExpenses = $monthlyRecurringExpenses + $weeklyRecurringExpenses + $yearlyRecurringExpenses;
+
+        // TOTAL EXPENSES = One-time + All Recurring (monthly basis)
+        $totalExpenses = $totalOneTimeExpenses + $totalRecurringExpenses;
+
+        // Calculate expense change percentage
+        $expenseChange = $lastMonthExpenses > 0 ? 
+            (($totalOneTimeExpenses - $lastMonthExpenses) / $lastMonthExpenses) * 100 : 0;
 
         // Calculate assets, liabilities, and equity from balance sheet
         $totalAssets = ExpenseCategory::where('type', 'asset')->sum('default_amount');
-        $totalLiabilities = ExpenseCategory::where('type', 'liability')->sum('default_amount') + $totalCurrentExpenses;
+        $totalLiabilities = ExpenseCategory::where('type', 'liability')->sum('default_amount') + $totalOneTimeExpenses;
         $totalEquity = ExpenseCategory::where('type', 'equity')->sum('default_amount');
 
-        // Mock revenue calculation (you can replace with real revenue source)
-        $totalRevenue = $totalExpenses * 1.6; // Assuming 60% profit margin
-        $lastMonthRevenue = $lastMonthExpenses > 0 ? $lastMonthExpenses * 1.6 : $totalRevenue * 0.9;
+        // Calculate TOTAL REVENUE (all income including pending)
+        $totalGrossRevenue = $totalExpenses * 1.6; // Total income (received + pending)
+        
+        // Split into received and pending
+        $pendingRevenue = $totalGrossRevenue * 0.15; // 15% is pending/not received
+        $receivedRevenue = $totalGrossRevenue * 0.85; // 85% is actually received
+        
+        // GROSS PROFIT = Total Revenue (including pending) - Total Expenses
+        $grossProfit = $totalGrossRevenue - $totalExpenses; // Profit if all payments were received
+        
+        // NET PROFIT = Only Received Revenue - Total Expenses
+        $netProfit = $receivedRevenue - $totalExpenses; // Actual profit from received payments
+        
+        // For backward compatibility, keep totalRevenue as net profit
+        $totalRevenue = $netProfit;
+        $grossRevenue = $receivedRevenue; // Revenue that's actually received
+        
+        // Calculate last month's profit for comparison
+        $lastMonthTotalGross = ($lastMonthExpenses + $totalRecurringExpenses) * 1.6;
+        $lastMonthGrossRevenue = $lastMonthTotalGross * 0.85; // 85% received
+        $lastMonthRevenue = $lastMonthGrossRevenue - ($lastMonthExpenses + $totalRecurringExpenses);
+        
         $revenueChange = $lastMonthRevenue > 0 ? 
             (($totalRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100 : 15;
-
-        $netProfit = $totalRevenue - $totalExpenses;
-        $pendingRevenue = $totalRevenue * 0.15; // Assume 15% pending
-        $pendingCount = $totalRevenue > 0 ? max(1, intval($pendingRevenue / ($totalRevenue / 10))) : 1;
-
-        // Calculate monthly recurring revenue (from recurring liabilities as income proxy)
-        $monthlyRecurringRevenue = $recurringExpenses * 2; // Assume 2x recurring expenses as recurring revenue
         
-        // Calculate next month forecast (5% growth + seasonal adjustments)
+        // Pending payments count
+        $pendingCount = $pendingRevenue > 0 ? max(1, intval($pendingRevenue / ($grossRevenue / 10))) : 1;
+
+        // Monthly Recurring Expenses - Show total recurring costs
+        // Since there's no actual recurring revenue system yet, we'll show expenses instead
+        $monthlyRecurringExpenses = $totalRecurringExpenses;
+        
+        // Next month forecast based on current profit with 5% growth
         $nextMonthForecast = $totalRevenue * 1.05;
 
         // Get monthly trend data (last 6 months)
         $trendData = [];
         for ($i = 5; $i >= 0; $i--) {
             $trendMonth = $currentDate->copy()->subMonths($i);
-            $monthlyExpenses = OneTimeExpense::whereYear('expense_date', $trendMonth->year)
+            $monthlyOneTimeExpenses = OneTimeExpense::whereYear('expense_date', $trendMonth->year)
                 ->whereMonth('expense_date', $trendMonth->month)
                 ->sum('bdt_amount');
             
-            $monthlyRevenue = $monthlyExpenses > 0 ? round($monthlyExpenses * 1.6, 2) : round($totalRevenue * 0.8, 2);
+            // Total monthly expenses including recurring
+            $monthlyTotalExpenses = $monthlyOneTimeExpenses + $totalRecurringExpenses;
+            
+            // Calculate gross revenue and net profit for the month (excluding pending)
+            $monthlyTotalGross = $monthlyTotalExpenses > 0 ? $monthlyTotalExpenses * 1.6 : $totalGrossRevenue * 0.8;
+            $monthlyGrossRevenue = $monthlyTotalGross * 0.85; // Only 85% is received
+            $monthlyNetRevenue = $monthlyGrossRevenue - $monthlyTotalExpenses; // Net profit from received revenue
 
             $trendData[] = [
                 'name' => $trendMonth->format('M'),
-                'revenue' => $monthlyRevenue,
-                'expenses' => round($monthlyExpenses + ($recurringExpenses * 0.8), 2) // Include portion of recurring
+                'revenue' => round($monthlyNetRevenue, 2), // Show net profit as revenue
+                'expenses' => round($monthlyTotalExpenses, 2) // Show total expenses
             ];
         }
 
@@ -955,14 +1005,22 @@ class FinanceController extends Controller
             })->sortByDesc('amount')->take(5)->values();
         }
 
-        // Add recurring categories if they don't exist
+        // Add recurring categories with proper monthly conversion
         $recurringCategories = ExpenseCategory::where('is_recurring', true)
             ->where('type', 'liability')
             ->get()
             ->map(function ($category) {
+                // Convert to monthly basis based on frequency
+                $monthlyAmount = $category->default_amount;
+                if ($category->frequency === 'weekly') {
+                    $monthlyAmount = $category->default_amount * 4; // 4 weeks per month
+                } elseif ($category->frequency === 'yearly') {
+                    $monthlyAmount = $category->default_amount / 12; // Divide by 12 months
+                }
+                
                 return [
-                    'name' => $category->name,
-                    'amount' => round($category->default_amount, 2),
+                    'name' => $category->name . ' (' . ucfirst($category->frequency) . ')',
+                    'amount' => round($monthlyAmount, 2),
                     'icon' => $category->icon,
                     'color' => $this->getCategoryColor($category->name)
                 ];
@@ -986,20 +1044,20 @@ class FinanceController extends Controller
             ];
         });
 
-        // Mock some income transactions for display
+        // Mock some income transactions for display (based on GROSS revenue, not net)
         $mockIncomes = collect([
             [
                 'id' => 'inc_1',
-                'description' => 'Service Revenue',
-                'amount' => round($totalRevenue * 0.4, 2),
+                'description' => 'Service Revenue (Gross)',
+                'amount' => round($grossRevenue * 0.4, 2),
                 'type' => 'income',
                 'icon' => 'fas fa-arrow-down',
                 'date' => $currentDate->format('Y-m-d')
             ],
             [
                 'id' => 'inc_2', 
-                'description' => 'Product Sales',
-                'amount' => round($totalRevenue * 0.3, 2),
+                'description' => 'Product Sales (Gross)',
+                'amount' => round($grossRevenue * 0.3, 2),
                 'type' => 'income',
                 'icon' => 'fas fa-arrow-down',
                 'date' => $currentDate->subDays(2)->format('Y-m-d')
@@ -1068,12 +1126,17 @@ class FinanceController extends Controller
         }
 
         return [
-            'totalRevenue' => round($totalRevenue, 2),
+            'totalRevenue' => round($totalRevenue, 2), // This is NET profit after expenses
+            'grossRevenue' => round($grossRevenue, 2), // This is received revenue
+            'totalGrossRevenue' => round($totalGrossRevenue, 2), // Total revenue including pending
             'totalExpenses' => round($totalExpenses, 2),
-            'netProfit' => round($netProfit, 2),
+            'oneTimeExpenses' => round($totalOneTimeExpenses, 2),
+            'recurringExpenses' => round($totalRecurringExpenses, 2),
+            'grossProfit' => round($grossProfit, 2), // Profit including pending payments
+            'netProfit' => round($netProfit, 2), // Profit from received payments only
             'pendingRevenue' => round($pendingRevenue, 2),
             'pendingCount' => $pendingCount,
-            'recurringRevenue' => round($monthlyRecurringRevenue, 2),
+            'monthlyRecurringExpenses' => round($monthlyRecurringExpenses, 2), // Monthly recurring costs
             'nextMonthForecast' => round($nextMonthForecast, 2),
             'totalAssets' => round($totalAssets, 2),
             'totalLiabilities' => round($totalLiabilities, 2),
