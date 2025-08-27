@@ -136,7 +136,7 @@
                                         <td>{{ expense.description || '-' }}</td>
                                         <td>
                                             <span class="badge bg-warning text-dark">
-                                                ৳{{ formatNumber(expense.default_amount) }}
+                                                ৳{{ formatNumber(expense.bdt_amount || expense.amount || expense.default_amount) }}
                                             </span>
                                         </td>
                                         <td>
@@ -218,7 +218,7 @@
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <div class="expense-amount">
                                                             <span class="badge bg-warning text-dark fs-6">
-                                                                ৳{{ formatNumber(expense.default_amount) }}
+                                                                ৳{{ formatNumber(expense.bdt_amount || expense.amount || expense.default_amount) }}
                                                             </span>
                                                         </div>
                                                         <span class="badge" :class="getFrequencyColor(expense.frequency)">{{ formatFrequency(expense.frequency) }}</span>
@@ -403,12 +403,7 @@ export default {
         const showAddModal = ref(false);
         const editingExpense = ref(null);
         const saving = ref(false);
-        const expenses = ref([...props.expenses]);
-        
-        // Debug: Check what frequency data we're getting
-        console.log('Loaded expenses with frequencies:', 
-            expenses.value.map(exp => ({ name: exp.name, frequency: exp.frequency }))
-        );
+        const expenses = ref([]);
         
         // Pagination and selection
         const selectedExpenses = ref([]);
@@ -495,7 +490,8 @@ export default {
         // Statistics computed properties
         const monthlyTotal = computed(() => {
             return expenses.value.reduce((total, expense) => {
-                const amount = parseFloat(expense.default_amount) || 0;
+                // Use bdt_amount if available, otherwise fall back to amount or default_amount
+                const amount = parseFloat(expense.bdt_amount || expense.amount || expense.default_amount) || 0;
                 
                 // Convert all frequencies to monthly basis
                 if (expense.frequency === 'yearly') {
@@ -512,7 +508,8 @@ export default {
             return expenses.value
                 .filter(expense => expense.frequency === 'weekly')
                 .reduce((total, expense) => {
-                    const amount = parseFloat(expense.default_amount) || 0;
+                    // Use bdt_amount if available, otherwise fall back to amount or default_amount
+                    const amount = parseFloat(expense.bdt_amount || expense.amount || expense.default_amount) || 0;
                     return total + amount;
                 }, 0);
         });
@@ -521,7 +518,8 @@ export default {
             return expenses.value
                 .filter(expense => expense.frequency === 'yearly')
                 .reduce((total, expense) => {
-                    const amount = parseFloat(expense.default_amount) || 0;
+                    // Use bdt_amount if available, otherwise fall back to amount or default_amount
+                    const amount = parseFloat(expense.bdt_amount || expense.amount || expense.default_amount) || 0;
                     return total + amount;
                 }, 0);
         });
@@ -579,7 +577,7 @@ export default {
             editingExpense.value = expense;
             form.name = expense.name;
             form.description = expense.description;
-            form.default_amount = expense.default_amount;
+            form.default_amount = expense.amount || expense.default_amount;
             form.frequency = expense.frequency || 'monthly';
             form.icon = expense.icon;
             form.tooltip = expense.tooltip;
@@ -724,11 +722,11 @@ export default {
             );
             
             const totalBDT = selectedExpensesData.reduce((sum, expense) => {
-                return sum + expense.default_amount; // All amounts are now in BDT
+                return sum + (expense.bdt_amount || expense.amount || expense.default_amount); // All amounts are now in BDT
             }, 0);
 
             const expenseList = selectedExpensesData.slice(0, 5).map(expense => 
-                `• ${expense.name}: ৳${formatNumber(expense.default_amount)}`
+                `• ${expense.name}: ৳${formatNumber(expense.bdt_amount || expense.amount || expense.default_amount)}`
             ).join('<br>');
             
             const moreText = selectedExpensesData.length > 5 ? `<br>...and ${selectedExpensesData.length - 5} more expenses` : '';
@@ -796,11 +794,11 @@ export default {
         const clearAllExpenses = async () => {
             const totalExpenses = expenses.value.length;
             const totalBDT = expenses.value.reduce((sum, expense) => {
-                return sum + expense.default_amount; // All amounts are now in BDT
+                return sum + (expense.bdt_amount || expense.amount || expense.default_amount); // All amounts are now in BDT
             }, 0);
 
             const expenseList = expenses.value.slice(0, 5).map(expense => 
-                `• ${expense.name}: ৳${formatNumber(expense.default_amount)}`
+                `• ${expense.name}: ৳${formatNumber(expense.bdt_amount || expense.amount || expense.default_amount)}`
             ).join('<br>');
             
             const moreText = expenses.value.length > 5 ? `<br>...and ${expenses.value.length - 5} more expenses` : '';
@@ -862,9 +860,9 @@ export default {
                 return [
                     `"${expense.name}"`,
                     `"${expense.description || ''}"`,
-                    expense.default_amount.toFixed(2),
+                    (expense.bdt_amount || expense.amount || expense.default_amount).toFixed(2),
                     'BDT', // All amounts are now stored in BDT
-                    expense.default_amount.toFixed(2),
+                    (expense.bdt_amount || expense.amount || expense.default_amount).toFixed(2),
                     formatFrequency(expense.frequency),
                     `"${expense.icon || 'fas fa-receipt'}"`
                 ].join(',');
@@ -1020,10 +1018,12 @@ export default {
                 }
             } catch (error) {
                 console.error('Error loading expenses with status:', error);
+                // Fallback to props data if API fails
+                expenses.value = [...(props.expenses || [])];
             }
         };
 
-        // Load expenses with status on mount
+        // Load expenses with status immediately on mount
         loadExpensesWithStatus();
 
         return {
