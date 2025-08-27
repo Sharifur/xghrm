@@ -125,6 +125,11 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
         Route::put('/recurring-expenses/{id}',[\App\Http\Controllers\Admin\FinanceController::class,'updateRecurringExpense'])->name('admin.finance.recurring.expenses.update');
         Route::delete('/recurring-expenses/{id}',[\App\Http\Controllers\Admin\FinanceController::class,'deleteRecurringExpense'])->name('admin.finance.recurring.expenses.delete');
         
+        // Recurring Expense Payment Status Management
+        Route::get('/recurring-expenses/with-status',[\App\Http\Controllers\Admin\FinanceController::class,'getRecurringExpensesWithStatus'])->name('admin.finance.recurring.expenses.with-status');
+        Route::post('/recurring-expenses/{id}/mark-paid',[\App\Http\Controllers\Admin\FinanceController::class,'markRecurringExpenseAsPaid'])->name('admin.finance.recurring.expenses.mark-paid');
+        Route::put('/recurring-expenses/{id}/payment-status',[\App\Http\Controllers\Admin\FinanceController::class,'updateRecurringExpensePaymentStatus'])->name('admin.finance.recurring.expenses.payment-status');
+        
         // Assets Management
         Route::get('/assets',[\App\Http\Controllers\Admin\FinanceController::class,'assets'])->name('admin.finance.assets');
         Route::post('/assets/store',[\App\Http\Controllers\Admin\FinanceController::class,'storeAsset'])->name('admin.finance.assets.store');
@@ -142,6 +147,13 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
         Route::post('/expenses/store',[\App\Http\Controllers\Admin\FinanceController::class,'storeExpense'])->name('admin.finance.expenses.store');
         Route::put('/expenses/{id}',[\App\Http\Controllers\Admin\FinanceController::class,'updateExpense'])->name('admin.finance.expenses.update');
         Route::delete('/expenses/{id}',[\App\Http\Controllers\Admin\FinanceController::class,'deleteExpense'])->name('admin.finance.expenses.delete');
+        
+        // Recurring Expense Payments
+        Route::get('/recurring-payments',[\App\Http\Controllers\Admin\FinanceController::class,'getRecurringPayments'])->name('admin.finance.recurring.payments');
+        Route::post('/recurring-payments/store',[\App\Http\Controllers\Admin\FinanceController::class,'storeRecurringPayment'])->name('admin.finance.recurring.payments.store');
+        Route::put('/recurring-payments/{id}',[\App\Http\Controllers\Admin\FinanceController::class,'updateRecurringPayment'])->name('admin.finance.recurring.payments.update');
+        Route::delete('/recurring-payments/{id}',[\App\Http\Controllers\Admin\FinanceController::class,'deleteRecurringPayment'])->name('admin.finance.recurring.payments.delete');
+        Route::post('/recurring-payments/{id}/mark-paid',[\App\Http\Controllers\Admin\FinanceController::class,'markPaymentAsPaid'])->name('admin.finance.recurring.payments.mark-paid');
         
         Route::get('/budgets',[\App\Http\Controllers\Admin\FinanceController::class,'budgets'])->name('admin.finance.budgets');
         Route::get('/reports',[\App\Http\Controllers\Admin\FinanceController::class,'reports'])->name('admin.finance.reports');

@@ -175,7 +175,7 @@
 
                 <!-- Revenue Overview Cards -->
                 <div class="row mb-4">
-                    <div class="col-md-3">
+                    <div class="col-md-6 mb-3">
                         <div class="stat-card">
                             <div class="stat-icon bg-success">
                                 <i class="fas fa-money-bill-wave"></i>
@@ -186,7 +186,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-6 mb-3">
                         <div class="stat-card">
                             <div class="stat-icon bg-warning">
                                 <i class="fas fa-hourglass-half"></i>
@@ -197,18 +197,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="stat-card">
-                            <div class="stat-icon bg-info">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="stat-content">
-                                <div class="stat-value">৳{{ formatNumber(recurringRevenue) }}</div>
-                                <div class="stat-label">Monthly Recurring Revenue</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
+                    <div class="col-md-6 mb-3">
                         <div class="stat-card">
                             <div class="stat-icon bg-primary">
                                 <i class="fas fa-crystal-ball"></i>
@@ -224,7 +213,7 @@
                 <!-- Revenue Streams and Clients -->
                 <div class="row">
                     <!-- Revenue by Service Type -->
-                    <div class="col-lg-6 mb-4">
+                    <div class="col-lg-12 mb-4">
                         <div class="card">
                             <div class="card-header">
                                 <h6 class="mb-0">
@@ -254,43 +243,6 @@
                         </div>
                     </div>
 
-                    <!-- Top Clients -->
-                    <div class="col-lg-6 mb-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-users me-2"></i>
-                                    Top Clients by Revenue
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <div v-for="client in topClients" :key="client.id" class="client-revenue mb-3">
-                                    <div class="client-header d-flex justify-content-between align-items-center mb-2">
-                                        <div class="client-info">
-                                            <i class="fas fa-user-circle me-2 text-primary"></i>
-                                            <strong>{{ client.name }}</strong>
-                                            <small class="text-muted ms-2">{{ client.email }}</small>
-                                        </div>
-                                        <div class="client-amount">৳{{ formatNumber(client.total_revenue) }}</div>
-                                    </div>
-                                    <div class="client-details">
-                                        <div class="row">
-                                            <div class="col-6">
-                                                <small class="text-muted">Last Payment:</small>
-                                                <div class="small">{{ client.last_payment_date }}</div>
-                                            </div>
-                                            <div class="col-6">
-                                                <small class="text-muted">Pending:</small>
-                                                <div class="small" :class="client.pending > 0 ? 'text-warning' : 'text-success'">
-                                                    ৳{{ formatNumber(client.pending) }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Pending Payments Forecast -->
@@ -563,7 +515,7 @@
 <script>
 import AdminMaster from "@/Layouts/AdminMaster.vue";
 import { Head } from '@inertiajs/inertia-vue3';
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
@@ -578,6 +530,7 @@ export default {
         revenues: Array
     },
     setup(props) {
+        console.log('Reports component setup started', props);
         const selectedPeriod = ref('current');
         const showAddClient = ref(false);
         const showAddRevenue = ref(false);
@@ -628,26 +581,21 @@ export default {
         const monthlyRevenue = computed(() => {
             return revenues.value
                 .filter(r => r.status === 'paid' && new Date(r.created_at).getMonth() === new Date().getMonth())
-                .reduce((sum, r) => sum + r.amount, 0);
+                .reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
         });
 
         const totalRevenue = computed(() => {
             return revenues.value
                 .filter(r => r.status === 'paid')
-                .reduce((sum, r) => sum + r.amount, 0);
+                .reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
         });
 
         const pendingRevenue = computed(() => {
             return revenues.value
                 .filter(r => r.status === 'pending' || r.status === 'overdue')
-                .reduce((sum, r) => sum + r.amount, 0);
+                .reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
         });
 
-        const recurringRevenue = computed(() => {
-            return revenues.value
-                .filter(r => r.service_type === 'shopify_app' && r.status === 'paid')
-                .reduce((sum, r) => sum + r.amount, 0);
-        });
 
         const sortedClients = computed(() => {
             return clients.value
@@ -658,7 +606,7 @@ export default {
         const forecastRevenue = computed(() => {
             const lastMonthRevenue = revenues.value
                 .filter(r => r.status === 'paid' && new Date(r.created_at).getMonth() === (new Date().getMonth() - 1))
-                .reduce((sum, r) => sum + r.amount, 0);
+                .reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
             return lastMonthRevenue * 1.1 + pendingRevenue.value * 0.8; // Simple forecast
         });
 
@@ -668,7 +616,7 @@ export default {
                 if (!services[r.service_type]) {
                     services[r.service_type] = { amount: 0, count: 0 };
                 }
-                services[r.service_type].amount += r.amount;
+                services[r.service_type].amount += (parseFloat(r.amount) || 0);
                 services[r.service_type].count += 1;
             });
 
@@ -681,36 +629,6 @@ export default {
             })).sort((a, b) => b.amount - a.amount);
         });
 
-        const topClients = computed(() => {
-            const clientRevenues = {};
-            revenues.value.filter(r => r.status === 'paid').forEach(r => {
-                if (!clientRevenues[r.client_id]) {
-                    clientRevenues[r.client_id] = {
-                        total_revenue: 0,
-                        last_payment_date: null,
-                        pending: 0
-                    };
-                }
-                clientRevenues[r.client_id].total_revenue += r.amount;
-                if (!clientRevenues[r.client_id].last_payment_date || r.created_at > clientRevenues[r.client_id].last_payment_date) {
-                    clientRevenues[r.client_id].last_payment_date = r.created_at;
-                }
-            });
-
-            // Add pending amounts
-            revenues.value.filter(r => r.status === 'pending' || r.status === 'overdue').forEach(r => {
-                if (clientRevenues[r.client_id]) {
-                    clientRevenues[r.client_id].pending += r.amount;
-                }
-            });
-
-            return clients.value.map(client => ({
-                ...client,
-                total_revenue: clientRevenues[client.id]?.total_revenue || 0,
-                last_payment_date: formatDate(clientRevenues[client.id]?.last_payment_date),
-                pending: clientRevenues[client.id]?.pending || 0
-            })).filter(c => c.total_revenue > 0).sort((a, b) => b.total_revenue - a.total_revenue).slice(0, 10);
-        });
 
         const pendingPayments = computed(() => {
             return revenues.value
@@ -814,7 +732,7 @@ export default {
         const saveClient = async () => {
             saving.value = true;
             try {
-                const response = await axios.post(route('admin.finance.clients.store'), clientForm);
+                const response = await axios.post('/admin-home/finance/clients', clientForm);
 
                 if (response.data.success) {
                     clients.value.push(response.data.client);
@@ -844,7 +762,7 @@ export default {
         const saveRevenue = async () => {
             saving.value = true;
             try {
-                const response = await axios.post(route('admin.finance.revenues.store'), revenueForm);
+                const response = await axios.post('/admin-home/finance/revenues', revenueForm);
 
                 if (response.data.success) {
                     revenues.value.push(response.data.revenue);
@@ -1079,10 +997,8 @@ export default {
             monthlyRevenue,
             totalRevenue,
             pendingRevenue,
-            recurringRevenue,
             forecastRevenue,
             revenueByService,
-            topClients,
             sortedClients,
             pendingPayments,
             formatNumber,

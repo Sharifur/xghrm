@@ -20,6 +20,9 @@ class OneTimeExpense extends Model
         'icon',
         'receipt_path',
         'notes',
+        'payment_status',
+        'paid_date',
+        'payment_notes',
         'created_by',
         'updated_by'
     ];
@@ -27,7 +30,8 @@ class OneTimeExpense extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'bdt_amount' => 'decimal:2',
-        'expense_date' => 'date'
+        'expense_date' => 'date',
+        'paid_date' => 'date'
     ];
 
     const USD_TO_BDT_RATE = 120;
@@ -96,5 +100,20 @@ class OneTimeExpense extends Model
     public function scopeByCategory($query, $category)
     {
         return $query->where('category', $category);
+    }
+
+    public function scopePaid($query)
+    {
+        return $query->where('payment_status', 'paid');
+    }
+
+    public function scopeUnpaid($query)
+    {
+        return $query->whereIn('payment_status', ['unpaid', 'pending']);
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('payment_status', 'pending');
     }
 }

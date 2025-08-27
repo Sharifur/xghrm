@@ -22,7 +22,11 @@ class ExpenseCategory extends Model
         'bdt_amount',
         'tooltip',
         'is_active',
-        'sort_order'
+        'sort_order',
+        'last_paid_date',
+        'payment_status',
+        'next_due_date',
+        'payment_notes'
     ];
 
     protected $casts = [
@@ -30,7 +34,9 @@ class ExpenseCategory extends Model
         'bdt_amount' => 'decimal:2',
         'is_recurring' => 'boolean',
         'is_active' => 'boolean',
-        'sort_order' => 'integer'
+        'sort_order' => 'integer',
+        'last_paid_date' => 'date',
+        'next_due_date' => 'date'
     ];
 
     const USD_TO_BDT_RATE = 120;
@@ -53,6 +59,11 @@ class ExpenseCategory extends Model
     public function expenses()
     {
         return $this->hasMany(Expense::class, 'expense_type', 'name');
+    }
+
+    public function recurringPayments()
+    {
+        return $this->hasMany(RecurringExpensePayment::class);
     }
 
     protected static function boot()
@@ -89,5 +100,133 @@ class ExpenseCategory extends Model
             return '৳' . number_format($this->bdt_amount, 2) . ' BDT';
         }
         return null;
+    }
+
+    // Payment Status Calculation Methods
+    public function isDueForPayment()
+    {
+        if (!$this->is_recurring) {
+            return false;
+        }
+
+        $now = now();
+        $lastPaid = $this->last_paid_date;
+
+        if (!$lastPaid) {
+            return true; // Never paid before
+        }
+
+        switch ($this->frequency) {
+            case 'monthly':
+                return $lastPaid->format('Y-m') !== $now->format('Y-m');
+            case 'yearly':
+                return $lastPaid->format('Y') !== $now->format('Y');
+            case 'weekly':
+                return $lastPaid->diffInWeeks($now) >= 1;
+            default:
+                return false;
+        }
+    }
+
+    public function isOverdue()
+    {
+        if (!$this->is_recurring || !$this->next_due_date) {
+            return false;
+        }
+
+        return now()->gt($this->next_due_date);
+    }
+
+    public function calculateNextDueDate()
+    {
+        if (!$this->is_recurring) {
+            return null;
+        }
+
+        $lastPaid = $this->last_paid_date ?: now()->subMonth();
+
+        switch ($this->frequency) {
+            case 'monthly':
+                return $lastPaid->copy()->addMonth();
+            case 'yearly':
+                return $lastPaid->copy()->addYear();
+            case 'weekly':
+                return $lastPaid->copy()->addWeek();
+            default:
+                return null;
+        }
+    }
+
+    public function getCurrentPaymentStatus()
+    {
+        if (!$this->is_recurring) {
+            return 'not_recurring';
+        }
+
+        if ($this->isOverdue()) {
+            return 'overdue';
+        }
+
+        if ($this->isDueForPayment()) {
+            return 'due';
+        }
+
+        return 'paid';
+    }
+
+    public function markAsPaid($paidDate = null, $notes = null)
+    {
+        $paidDate = $paidDate ?: now();
+        
+        $this->update([
+            'last_paid_date' => $paidDate,
+            'payment_status' => 'paid',
+            'next_due_date' => $this->calculateNextDueDate(),
+            'payment_notes' => $notes
+        ]);
+
+        return $this;
+    }
+
+    public function getPendingAmount()
+    {
+        if (!$this->is_recurring) {
+            return 0;
+        }
+
+        $status = $this->getCurrentPaymentStatus();
+        
+        if (in_array($status, ['due', 'overdue'])) {
+            return $this->bdt_amount;
+        }
+
+        return 0;
+    }
+
+    // Scopes for payment status
+    public function scopeDueForPayment($query)
+    {
+        return $query->where('is_recurring', true)
+                    ->where(function($q) {
+                        $q->whereNull('last_paid_date')
+                          ->orWhere(function($q2) {
+                              $q2->where('frequency', 'monthly')
+                                 ->whereRaw('DATE_FORMAT(last_paid_date, "%Y-%m") != ?', [now()->format('Y-m')]);
+                          })
+                          ->orWhere(function($q2) {
+                              $q2->where('frequency', 'yearly')
+                                 ->whereRaw('YEAR(last_paid_date) != ?', [now()->year]);
+                          })
+                          ->orWhere(function($q2) {
+                              $q2->where('frequency', 'weekly')
+                                 ->where('last_paid_date', '<', now()->subWeek());
+                          });
+                    });
+    }
+
+    public function scopeOverdue($query)
+    {
+        return $query->where('is_recurring', true)
+                    ->where('next_due_date', '<', now());
     }
 }

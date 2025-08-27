@@ -376,15 +376,15 @@ export default {
         const fetchFinancialData = async () => {
             try {
                 // Fetch expenses
-                const expensesResponse = await axios.get('/admin/finance/expenses');
+                const expensesResponse = await axios.get(route('admin.finance.expenses'));
                 expenses.value = expensesResponse.data.expenses || [];
                 
                 // Fetch recurring expenses  
-                const recurringResponse = await axios.get('/admin/finance/recurring-expenses');
+                const recurringResponse = await axios.get(route('admin.finance.recurring.expenses'));
                 recurringExpenses.value = recurringResponse.data.expenses || [];
                 
                 // Fetch dashboard data for revenue information
-                const dashboardResponse = await axios.get('/admin/finance/dashboard/data');
+                const dashboardResponse = await axios.get(route('admin.finance.dashboard'));
                 if (dashboardResponse.data.totalRevenue) {
                     // Use dashboard revenue data if available
                     revenues.value = [{
