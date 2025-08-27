@@ -162,6 +162,7 @@
                                         <th>Name</th>
                                         <th>Category</th>
                                         <th>Amount & Currency</th>
+                                        <th>Payment Status</th>
                                         <th>Description</th>
                                         <th>Icon</th>
                                         <th>Actions</th>
@@ -194,6 +195,20 @@
                                         <td>
                                             <span class="badge bg-warning text-dark">
                                                 ৳{{ formatNumber(expense.amount) }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge" :class="{
+                                                'bg-success': expense.payment_status === 'paid',
+                                                'bg-danger': expense.payment_status === 'unpaid',
+                                                'bg-warning': expense.payment_status === 'pending'
+                                            }">
+                                                <i class="fas" :class="{
+                                                    'fa-check-circle': expense.payment_status === 'paid',
+                                                    'fa-times-circle': expense.payment_status === 'unpaid',
+                                                    'fa-clock': expense.payment_status === 'pending'
+                                                }"></i>
+                                                {{ expense.payment_status ? expense.payment_status.charAt(0).toUpperCase() + expense.payment_status.slice(1) : 'Paid' }}
                                             </span>
                                         </td>
                                         <td>{{ expense.description || '-' }}</td>
@@ -413,6 +428,36 @@
                                             <option value="fas fa-shopping-cart">Purchase</option>
                                         </select>
                                     </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Payment Status *</label>
+                                        <select v-model="form.payment_status" class="form-select" required>
+                                            <option value="paid">✅ Paid</option>
+                                            <option value="unpaid">⏳ Unpaid</option>
+                                            <option value="pending">🔄 Pending</option>
+                                        </select>
+                                        <small class="form-text text-muted">Current payment status of this expense</small>
+                                    </div>
+                                </div>
+                                <div class="row" v-if="form.payment_status === 'paid'">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Paid Date</label>
+                                        <input 
+                                            v-model="form.paid_date" 
+                                            type="date" 
+                                            class="form-control"
+                                            :max="new Date().toISOString().split('T')[0]"
+                                        >
+                                        <small class="form-text text-muted">Date when payment was made (optional)</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Payment Notes</label>
+                                        <textarea 
+                                            v-model="form.payment_notes" 
+                                            class="form-control" 
+                                            rows="2" 
+                                            placeholder="Payment method, reference number, etc."
+                                        ></textarea>
+                                    </div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Description</label>
@@ -485,7 +530,10 @@ export default {
             expense_date: new Date().toISOString().split('T')[0],
             category: '',
             icon: 'fas fa-receipt',
-            notes: ''
+            notes: '',
+            payment_status: 'pending',
+            paid_date: null,
+            payment_notes: ''
         });
 
         // Currency conversion constants
@@ -505,6 +553,20 @@ export default {
                 }
             }
             previousCurrency.value = newCurrency;
+        });
+
+        // Watch for payment status changes and auto-set paid_date when status is 'paid'
+        watch(() => form.payment_status, (newStatus, oldStatus) => {
+            if (newStatus === 'paid' && oldStatus !== 'paid') {
+                // Auto-set today's date when changing to paid status
+                if (!form.paid_date) {
+                    form.paid_date = new Date().toISOString().split('T')[0];
+                }
+            } else if (newStatus !== 'paid') {
+                // Clear paid_date when changing away from paid status
+                form.paid_date = null;
+                form.payment_notes = '';
+            }
         });
 
         // Computed properties for pagination
@@ -663,6 +725,9 @@ export default {
             form.category = '';
             form.icon = 'fas fa-receipt';
             form.notes = '';
+            form.payment_status = 'pending';
+            form.paid_date = null;
+            form.payment_notes = '';
             previousCurrency.value = 'BDT'; // Reset previous currency tracking
         };
 
@@ -677,11 +742,15 @@ export default {
             form.description = expense.description;
             form.amount = expense.amount;
             form.currency = expense.currency || 'BDT';
-            form.expense_date = expense.expense_date;
+            form.expense_date = expense.expense_date ? new Date(expense.expense_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
             form.category = expense.category;
             form.icon = expense.icon;
             form.notes = expense.notes;
+            form.payment_status = expense.payment_status || 'paid';
+            form.paid_date = expense.paid_date;
+            form.payment_notes = expense.payment_notes || '';
             previousCurrency.value = expense.currency || 'BDT'; // Set previous currency to current expense currency
+            showAddModal.value = true; // Open the modal for editing
         };
 
         const closeModal = () => {

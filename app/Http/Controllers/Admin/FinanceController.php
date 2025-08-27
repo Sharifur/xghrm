@@ -9,6 +9,7 @@ use App\Models\ExpenseCategory;
 use App\Models\Expense;
 use App\Models\IncomeSource;
 use App\Models\OneTimeExpense;
+use App\Models\RecurringExpensePayment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -654,13 +655,16 @@ class FinanceController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
             'amount' => 'required|numeric|min:0',
             'currency' => 'required|in:BDT,USD',
             'expense_date' => 'required|date',
-            'category' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'icon' => 'nullable|string'
+            'category' => 'required|string|max:100',
+            'icon' => 'nullable|string|max:50',
+            'notes' => 'nullable|string|max:1000',
+            'payment_status' => 'required|in:paid,unpaid,pending',
+            'paid_date' => 'nullable|date',
+            'payment_notes' => 'nullable|string|max:500'
         ]);
 
         try {
@@ -673,6 +677,9 @@ class FinanceController extends Controller
                 'category' => $request->category,
                 'icon' => $request->icon ?? 'fas fa-receipt',
                 'notes' => $request->notes,
+                'payment_status' => $request->payment_status,
+                'paid_date' => $request->paid_date,
+                'payment_notes' => $request->payment_notes,
                 'created_by' => Auth::guard('admin')->id(),
                 'updated_by' => Auth::guard('admin')->id()
             ]);
@@ -694,13 +701,16 @@ class FinanceController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
             'amount' => 'required|numeric|min:0',
             'currency' => 'required|in:BDT,USD',
             'expense_date' => 'required|date',
-            'category' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'icon' => 'nullable|string'
+            'category' => 'required|string|max:100',
+            'icon' => 'nullable|string|max:50',
+            'notes' => 'nullable|string|max:1000',
+            'payment_status' => 'required|in:paid,unpaid,pending',
+            'paid_date' => 'nullable|date',
+            'payment_notes' => 'nullable|string|max:500'
         ]);
 
         try {
@@ -714,6 +724,9 @@ class FinanceController extends Controller
                 'category' => $request->category,
                 'icon' => $request->icon ?? 'fas fa-receipt',
                 'notes' => $request->notes,
+                'payment_status' => $request->payment_status,
+                'paid_date' => $request->paid_date,
+                'payment_notes' => $request->payment_notes,
                 'updated_by' => Auth::guard('admin')->id()
             ]);
 
@@ -779,47 +792,202 @@ class FinanceController extends Controller
             ->whereMonth('expense_date', $monthNumber)
             ->get();
 
-        // Calculate total expenses in BDT
-        $totalExpenses = $monthlyExpenses->sum('bdt_amount');
+        // Calculate ACTUAL unpaid one-time expenses using payment_status
+        $unpaidOneTimeExpenses = OneTimeExpense::whereYear('expense_date', $year)
+            ->whereMonth('expense_date', $monthNumber)
+            ->unpaid() // Using the scope we created
+            ->sum('bdt_amount');
 
-        // Update or create "Monthly Expenses" liability item
-        $expenseItem = $balanceSheet->items()->where('name', 'Monthly Expenses')->first();
-        if (!$expenseItem) {
-            $expenseItem = BalanceSheetItem::create([
-                'balance_sheet_id' => $balanceSheet->id,
-                'type' => 'liability',
-                'name' => 'Monthly Expenses',
-                'amount' => 0,
-                'currency' => 'BDT',
-                'bdt_amount' => 0,
-                'tooltip' => 'Auto-calculated from one-time expenses',
-                'is_custom' => false,
-                'is_recurring' => false,
-                'sort_order' => 100
-            ]);
+        // Calculate ACTUAL unpaid recurring bills using smart payment logic
+        // Get all active recurring expenses and check their payment status
+        $allRecurringExpenses = ExpenseCategory::where('is_recurring', true)
+            ->where('is_active', true)
+            ->where('type', 'liability')
+            ->get();
+
+        // First, clean up any existing unpaid items that are now paid
+        $existingUnpaidItems = $balanceSheet->items()
+            ->where('name', 'like', 'Unpaid:%')
+            ->where('is_recurring', true)
+            ->get();
+
+        foreach ($existingUnpaidItems as $item) {
+            // Extract category name from "Unpaid: Category Name"
+            $categoryName = str_replace('Unpaid: ', '', $item->name);
+            $category = $allRecurringExpenses->firstWhere('name', $categoryName);
+            
+            if (!$category || !$category->isDueForPayment()) {
+                // Remove items for categories that no longer exist or are now paid
+                $item->delete();
+            }
         }
 
-        // Update the expense amount
-        $expenseItem->amount = $totalExpenses;
-        $expenseItem->bdt_amount = $totalExpenses;
-        $expenseItem->currency = 'BDT';
-        $expenseItem->save();
+        // Filter to only unpaid/due expenses
+        $unpaidRecurringExpenses = $allRecurringExpenses->filter(function ($category) {
+            return $category->isDueForPayment(); // Use smart payment logic
+        });
 
-        // Add cash adjustment for expenses (reduce cash assets)
-        $cashItem = $balanceSheet->items()->where('name', 'Cash & Bank')->first();
-        if (!$cashItem) {
-            $cashItem = BalanceSheetItem::create([
-                'balance_sheet_id' => $balanceSheet->id,
-                'type' => 'asset',
-                'name' => 'Cash & Bank',
-                'amount' => 0,
-                'currency' => 'BDT',
-                'bdt_amount' => 0,
-                'tooltip' => 'Cash position after expenses',
-                'is_custom' => false,
-                'is_recurring' => false,
-                'sort_order' => 1
-            ]);
+        // Create or update unpaid liability items for each due recurring expense
+        foreach ($unpaidRecurringExpenses as $category) {
+            $unpaidBillName = "Unpaid: " . $category->name;
+            $recurringItem = $balanceSheet->items()->where('name', $unpaidBillName)->first();
+            
+            if (!$recurringItem) {
+                $recurringItem = BalanceSheetItem::create([
+                    'balance_sheet_id' => $balanceSheet->id,
+                    'type' => 'liability',
+                    'name' => $unpaidBillName,
+                    'amount' => 0,
+                    'currency' => 'BDT',
+                    'bdt_amount' => 0,
+                    'tooltip' => $this->generateRecurringExpenseTooltip($category),
+                    'is_custom' => false,
+                    'is_recurring' => true,
+                    'sort_order' => $category->sort_order + 50
+                ]);
+            }
+
+            // Use the pending amount from smart calculation
+            $pendingAmount = $category->getPendingAmount();
+
+            // Update the unpaid bill amount with actual pending amount
+            $recurringItem->amount = $pendingAmount;
+            $recurringItem->bdt_amount = $pendingAmount;
+            $recurringItem->currency = 'BDT';
+            $recurringItem->tooltip = $this->generateRecurringExpenseTooltip($category);
+            $recurringItem->save();
+        }
+
+        // Create liability item for unpaid one-time expenses (only if there are unpaid amounts)
+        if ($unpaidOneTimeExpenses > 0) {
+            $expenseItem = $balanceSheet->items()->where('name', 'Unpaid One-Time Bills')->first();
+            if (!$expenseItem) {
+                $expenseItem = BalanceSheetItem::create([
+                    'balance_sheet_id' => $balanceSheet->id,
+                    'type' => 'liability',
+                    'name' => 'Unpaid One-Time Bills',
+                    'amount' => 0,
+                    'currency' => 'BDT',
+                    'bdt_amount' => 0,
+                    'tooltip' => $this->generateOneTimeExpenseTooltip($year, $monthNumber, $unpaidOneTimeExpenses),
+                    'is_custom' => false,
+                    'is_recurring' => false,
+                    'sort_order' => 100
+                ]);
+            }
+
+            // Update with ACTUAL unpaid amount
+            $expenseItem->amount = $unpaidOneTimeExpenses;
+            $expenseItem->bdt_amount = $unpaidOneTimeExpenses;
+            $expenseItem->currency = 'BDT';
+            $expenseItem->tooltip = $this->generateOneTimeExpenseTooltip($year, $monthNumber, $unpaidOneTimeExpenses);
+            $expenseItem->save();
+        } else {
+            // Remove the item if there are no unpaid expenses
+            $balanceSheet->items()
+                ->where('name', 'Unpaid One-Time Bills')
+                ->delete();
+        }
+
+        // Load and populate assets from ExpenseCategory
+        $assets = ExpenseCategory::where('type', 'asset')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+
+        foreach ($assets as $asset) {
+            $amount = $asset->default_amount ?: 0;
+            // Convert to BDT if needed
+            if ($asset->currency === 'USD') {
+                $amount = $amount * 120;
+            }
+
+            $assetItem = $balanceSheet->items()->where('name', $asset->name)->first();
+            if (!$assetItem) {
+                // Create new asset item
+                $assetItem = BalanceSheetItem::create([
+                    'balance_sheet_id' => $balanceSheet->id,
+                    'type' => 'asset',
+                    'name' => $asset->name,
+                    'amount' => $amount,
+                    'currency' => $asset->currency ?: 'BDT',
+                    'bdt_amount' => $amount,
+                    'tooltip' => $asset->tooltip ?: $asset->description,
+                    'is_custom' => false,
+                    'is_recurring' => false,
+                    'sort_order' => $asset->sort_order,
+                    'icon' => $asset->icon
+                ]);
+            } else {
+                // Update existing asset item with latest amounts
+                $assetItem->update([
+                    'amount' => $amount,
+                    'currency' => $asset->currency ?: 'BDT',
+                    'bdt_amount' => $amount,
+                    'tooltip' => $asset->tooltip ?: $asset->description,
+                    'icon' => $asset->icon
+                ]);
+            }
+        }
+
+        // Load and populate equity from ExpenseCategory
+        $equityItems = ExpenseCategory::where('type', 'equity')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+
+        foreach ($equityItems as $equity) {
+            $amount = $equity->default_amount ?: 0;
+            // Convert to BDT if needed
+            if ($equity->currency === 'USD') {
+                $amount = $amount * 120;
+            }
+
+            $equityItem = $balanceSheet->items()->where('name', $equity->name)->first();
+            if (!$equityItem) {
+                // Create new equity item
+                $equityItem = BalanceSheetItem::create([
+                    'balance_sheet_id' => $balanceSheet->id,
+                    'type' => 'equity',
+                    'name' => $equity->name,
+                    'amount' => $amount,
+                    'currency' => $equity->currency ?: 'BDT',
+                    'bdt_amount' => $amount,
+                    'tooltip' => $equity->tooltip ?: $equity->description,
+                    'is_custom' => false,
+                    'is_recurring' => false,
+                    'sort_order' => $equity->sort_order,
+                    'icon' => $equity->icon
+                ]);
+            } else {
+                // Update existing equity item with latest amounts
+                $equityItem->update([
+                    'amount' => $amount,
+                    'currency' => $equity->currency ?: 'BDT',
+                    'bdt_amount' => $amount,
+                    'tooltip' => $equity->tooltip ?: $equity->description,
+                    'icon' => $equity->icon
+                ]);
+            }
+        }
+
+        // Add default Cash & Bank asset if no assets exist
+        if ($assets->isEmpty()) {
+            $cashItem = $balanceSheet->items()->where('name', 'Cash & Bank')->first();
+            if (!$cashItem) {
+                $cashItem = BalanceSheetItem::create([
+                    'balance_sheet_id' => $balanceSheet->id,
+                    'type' => 'asset',
+                    'name' => 'Cash & Bank',
+                    'amount' => 50000,
+                    'currency' => 'BDT',
+                    'bdt_amount' => 50000,
+                    'tooltip' => 'Default cash position',
+                    'is_custom' => false,
+                    'is_recurring' => false,
+                    'sort_order' => 1
+                ]);
+            }
         }
 
         // Recalculate totals
@@ -883,6 +1051,123 @@ class FinanceController extends Controller
         return Inertia::render('Backend/Finance/Documentation');
     }
 
+    // Recurring Expense Payment Management
+    public function markRecurringExpenseAsPaid(Request $request, $id)
+    {
+        $request->validate([
+            'paid_date' => 'nullable|date',
+            'payment_notes' => 'nullable|string|max:500'
+        ]);
+
+        try {
+            $expense = ExpenseCategory::findOrFail($id);
+            
+            if (!$expense->is_recurring) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This is not a recurring expense'
+                ], 400);
+            }
+
+            $expense->markAsPaid($request->paid_date, $request->payment_notes);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Recurring expense marked as paid',
+                'expense' => $expense->fresh()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to mark expense as paid: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getRecurringExpensesWithStatus()
+    {
+        try {
+            $expenses = ExpenseCategory::where('is_recurring', true)
+                ->where('is_active', true)
+                ->get()
+                ->map(function ($expense) {
+                    return [
+                        'id' => $expense->id,
+                        'name' => $expense->name,
+                        'description' => $expense->description,
+                        'amount' => $expense->default_amount,
+                        'currency' => $expense->currency,
+                        'bdt_amount' => $expense->bdt_amount,
+                        'frequency' => $expense->frequency,
+                        'type' => $expense->type,
+                        'icon' => $expense->icon,
+                        'color' => $expense->color,
+                        'last_paid_date' => $expense->last_paid_date,
+                        'next_due_date' => $expense->next_due_date ?: $expense->calculateNextDueDate(),
+                        'payment_status' => $expense->getCurrentPaymentStatus(),
+                        'payment_notes' => $expense->payment_notes,
+                        'is_due' => $expense->isDueForPayment(),
+                        'is_overdue' => $expense->isOverdue(),
+                        'pending_amount' => $expense->getPendingAmount(),
+                        'formatted_amount' => $expense->formatted_amount,
+                        'converted_amount' => $expense->converted_amount
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'expenses' => $expenses
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch recurring expenses: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateRecurringExpensePaymentStatus(Request $request, $id)
+    {
+        $request->validate([
+            'payment_status' => 'required|in:paid,unpaid,pending,overdue',
+            'last_paid_date' => 'nullable|date',
+            'payment_notes' => 'nullable|string|max:500'
+        ]);
+
+        try {
+            $expense = ExpenseCategory::findOrFail($id);
+            
+            if (!$expense->is_recurring) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This is not a recurring expense'
+                ], 400);
+            }
+
+            if ($request->payment_status === 'paid') {
+                $expense->markAsPaid($request->last_paid_date, $request->payment_notes);
+            } else {
+                $expense->update([
+                    'payment_status' => $request->payment_status,
+                    'last_paid_date' => $request->last_paid_date,
+                    'payment_notes' => $request->payment_notes,
+                    'next_due_date' => $expense->calculateNextDueDate()
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment status updated successfully',
+                'expense' => $expense->fresh()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update payment status: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     private function getDashboardFinancialData($month)
     {
         $year = substr($month, 0, 4);
@@ -911,7 +1196,7 @@ class FinanceController extends Controller
         $weeklyRecurringExpenses = ExpenseCategory::where('is_recurring', true)
             ->where('frequency', 'weekly')
             ->where('type', 'liability')
-            ->sum('default_amount') * 4; // Convert weekly to monthly (4 weeks)
+            ->sum('default_amount') * 4.33; // Convert weekly to monthly (4.33 weeks)
             
         $yearlyRecurringExpenses = ExpenseCategory::where('is_recurring', true)
             ->where('frequency', 'yearly')
@@ -1013,7 +1298,7 @@ class FinanceController extends Controller
                 // Convert to monthly basis based on frequency
                 $monthlyAmount = $category->default_amount;
                 if ($category->frequency === 'weekly') {
-                    $monthlyAmount = $category->default_amount * 4; // 4 weeks per month
+                    $monthlyAmount = $category->default_amount * 4.33; // 4.33 weeks per month
                 } elseif ($category->frequency === 'yearly') {
                     $monthlyAmount = $category->default_amount / 12; // Divide by 12 months
                 }
@@ -1202,5 +1487,48 @@ class FinanceController extends Controller
         ];
 
         return $colors[$category] ?? 'bg-info';
+    }
+
+    private function generateRecurringExpenseTooltip($category)
+    {
+        $status = $category->getCurrentPaymentStatus();
+        $lastPaid = $category->last_paid_date ? $category->last_paid_date->format('M d, Y') : 'Never';
+        $nextDue = $category->next_due_date ? $category->next_due_date->format('M d, Y') : ($category->calculateNextDueDate() ? $category->calculateNextDueDate()->format('M d, Y') : 'Now');
+        
+        $tooltip = "Recurring {$category->frequency} expense: {$category->name}";
+        
+        if ($category->isOverdue()) {
+            $tooltip .= " (OVERDUE - Due: {$nextDue})";
+        } elseif ($category->isDueForPayment()) {
+            $tooltip .= " (Due: {$nextDue})";
+        }
+        
+        $tooltip .= " | Last Paid: {$lastPaid}";
+        $tooltip .= " | Amount: ৳" . number_format($category->bdt_amount, 2);
+        
+        return $tooltip;
+    }
+
+    private function generateOneTimeExpenseTooltip($year, $monthNumber, $totalAmount)
+    {
+        $unpaidExpenses = OneTimeExpense::whereYear('expense_date', $year)
+            ->whereMonth('expense_date', $monthNumber)
+            ->unpaid()
+            ->get();
+
+        $expenseCount = $unpaidExpenses->count();
+        $pendingCount = $unpaidExpenses->where('payment_status', 'pending')->count();
+        $unpaidCount = $unpaidExpenses->where('payment_status', 'unpaid')->count();
+
+        $tooltip = "Outstanding one-time expenses for {$year}-{$monthNumber} (Total: {$expenseCount} items, ৳" . number_format($totalAmount, 2) . ")";
+        
+        if ($pendingCount > 0) {
+            $tooltip .= " | Pending: {$pendingCount}";
+        }
+        if ($unpaidCount > 0) {
+            $tooltip .= " | Unpaid: {$unpaidCount}";
+        }
+
+        return $tooltip;
     }
 }

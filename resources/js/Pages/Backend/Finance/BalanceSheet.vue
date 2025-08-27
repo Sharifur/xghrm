@@ -305,9 +305,11 @@
                     <div class="col-lg-4 mb-4">
                         <div class="balance-section assets-section">
                             <div class="section-header">
-                                <h5><i class="fas fa-coins me-2"></i>ASSETS</h5>
-                                <small class="text-muted">Things we own</small>
-                                <div class="section-total">৳{{ formatNumber(totals.assets) }}</div>
+                                <div class="section-title-group">
+                                    <h5><i class="fas fa-coins me-2"></i>ASSETS</h5>
+                                    <small class="text-muted">Things we own</small>
+                                </div>
+                                <div class="section-total-inline">৳{{ formatNumber(totals.assets) }}</div>
                             </div>
                             <div class="section-content">
                                 <div v-for="(asset, index) in balanceData.assets" :key="index" class="balance-item readonly-item">
@@ -340,9 +342,11 @@
                     <div class="col-lg-4 mb-4">
                         <div class="balance-section liabilities-section">
                             <div class="section-header">
-                                <h5><i class="fas fa-credit-card me-2"></i>LIABILITIES</h5>
-                                <small class="text-muted">Things we owe</small>
-                                <div class="section-total">৳{{ formatNumber(totals.liabilities) }}</div>
+                                <div class="section-title-group">
+                                    <h5><i class="fas fa-credit-card me-2"></i>LIABILITIES</h5>
+                                    <small class="text-muted">Things we owe</small>
+                                </div>
+                                <div class="section-total-inline">৳{{ formatNumber(totals.liabilities) }}</div>
                             </div>
                             <div class="section-content">
                                 <div v-for="(liability, index) in balanceData.liabilities" :key="index" class="balance-item readonly-item">
@@ -375,9 +379,11 @@
                     <div class="col-lg-4 mb-4">
                         <div class="balance-section equity-section">
                             <div class="section-header">
-                                <h5><i class="fas fa-chart-line me-2"></i>EQUITY</h5>
-                                <small class="text-muted">Company value</small>
-                                <div class="section-total">৳{{ formatNumber(totals.equity) }}</div>
+                                <div class="section-title-group">
+                                    <h5><i class="fas fa-chart-line me-2"></i>EQUITY</h5>
+                                    <small class="text-muted">Company value</small>
+                                </div>
+                                <div class="section-total-inline">৳{{ formatNumber(totals.equity) }}</div>
                             </div>
                             <div class="section-content">
                                 <div v-for="(equity, index) in balanceData.equity" :key="index" class="balance-item readonly-item">
@@ -648,9 +654,7 @@ export default {
 }
 
 .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: block;
     margin-bottom: 20px;
     padding-bottom: 10px;
     border-bottom: 2px solid #f8f9fc;
@@ -789,9 +793,8 @@ export default {
 /* Responsive */
 @media (max-width: 768px) {
     .section-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
     }
     
     .item-header {
@@ -956,6 +959,21 @@ export default {
     border-radius: 6px;
     margin-top: 10px;
     text-align: center;
+}
+
+.section-title-group {
+    margin-bottom: 12px;
+}
+
+.section-total-inline {
+    font-size: 20px;
+    font-weight: bold;
+    color: #5a5c69;
+    background: #e3e6f0;
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-align: center;
+    display: inline-block;
 }
 
 .empty-state {

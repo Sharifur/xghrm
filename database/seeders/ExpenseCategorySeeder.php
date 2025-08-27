@@ -21,6 +21,8 @@ class ExpenseCategorySeeder extends Seeder
                 'icon' => 'fas fa-money-bill-wave',
                 'color' => '#28a745',
                 'is_recurring' => false,
+                'default_amount' => 150000.00,
+                'currency' => 'BDT',
                 'tooltip' => 'All cash available including bank accounts, petty cash, and savings',
                 'sort_order' => 1
             ],
@@ -31,6 +33,8 @@ class ExpenseCategorySeeder extends Seeder
                 'icon' => 'fas fa-hand-holding-usd',
                 'color' => '#28a745',
                 'is_recurring' => false,
+                'default_amount' => 85000.00,
+                'currency' => 'BDT',
                 'tooltip' => 'Payments owed to you by customers for services/products delivered',
                 'sort_order' => 2
             ],
@@ -41,6 +45,8 @@ class ExpenseCategorySeeder extends Seeder
                 'icon' => 'fas fa-laptop',
                 'color' => '#28a745',
                 'is_recurring' => false,
+                'default_amount' => 45000.00,
+                'currency' => 'BDT',
                 'tooltip' => 'Computers, furniture, vehicles, and other business equipment',
                 'sort_order' => 3
             ],
@@ -51,6 +57,8 @@ class ExpenseCategorySeeder extends Seeder
                 'icon' => 'fas fa-boxes',
                 'color' => '#28a745',
                 'is_recurring' => false,
+                'default_amount' => 25000.00,
+                'currency' => 'BDT',
                 'tooltip' => 'Products and materials ready for sale or use',
                 'sort_order' => 4
             ],
@@ -186,6 +194,8 @@ class ExpenseCategorySeeder extends Seeder
                 'icon' => 'fas fa-user-tie',
                 'color' => '#17a2b8',
                 'is_recurring' => false,
+                'default_amount' => 200000.00,
+                'currency' => 'BDT',
                 'tooltip' => 'Money invested by business owners and shareholders',
                 'sort_order' => 1
             ],
@@ -196,6 +206,8 @@ class ExpenseCategorySeeder extends Seeder
                 'icon' => 'fas fa-chart-line',
                 'color' => '#17a2b8',
                 'is_recurring' => false,
+                'default_amount' => 75000.00,
+                'currency' => 'BDT',
                 'tooltip' => 'Profits earned and kept in the business for future use',
                 'sort_order' => 2
             ],
@@ -206,6 +218,8 @@ class ExpenseCategorySeeder extends Seeder
                 'icon' => 'fas fa-trophy',
                 'color' => '#17a2b8',
                 'is_recurring' => false,
+                'default_amount' => 25000.00,
+                'currency' => 'BDT',
                 'tooltip' => 'Net profit earned in the current month',
                 'sort_order' => 3
             ]

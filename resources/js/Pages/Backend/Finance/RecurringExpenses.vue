@@ -45,7 +45,7 @@
                                         <h4 class="text-primary mb-0">৳{{ formatNumber(monthlyTotal) }}</h4>
                                     </div>
                                 </div>
-                                <small class="text-muted">Total monthly recurring costs</small>
+                                <small class="text-muted">All expenses converted to monthly basis</small>
                             </div>
                         </div>
                     </div>
@@ -112,7 +112,8 @@
                                         <th>Description</th>
                                         <th>Amount & Currency</th>
                                         <th>Frequency</th>
-                                        <th>Icon</th>
+                                        <th>Payment Status</th>
+                                        <th>Next Due</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -142,10 +143,27 @@
                                             <span class="badge" :class="getFrequencyColor(expense.frequency)">{{ formatFrequency(expense.frequency) }}</span>
                                         </td>
                                         <td>
-                                            <i :class="expense.icon || 'fas fa-receipt'" class="text-primary"></i>
+                                            <span class="badge" :class="getPaymentStatusColor(expense.payment_status)">
+                                                <i :class="getPaymentStatusIcon(expense.payment_status)"></i>
+                                                {{ formatPaymentStatus(expense.payment_status) }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small v-if="expense.next_due_date" class="text-muted">
+                                                {{ formatDate(expense.next_due_date) }}
+                                            </small>
+                                            <small v-else class="text-muted">-</small>
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
+                                                <button 
+                                                    v-if="expense.payment_status !== 'paid'" 
+                                                    @click="markAsPaid(expense)" 
+                                                    class="btn btn-sm btn-success" 
+                                                    title="Mark as Paid"
+                                                >
+                                                    <i class="fas fa-check"></i>
+                                                </button>
                                                 <button @click="editExpense(expense)" class="btn btn-sm btn-outline-primary">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
@@ -156,7 +174,7 @@
                                         </td>
                                     </tr>
                                     <tr v-if="expenses.length === 0">
-                                        <td colspan="7" class="text-center text-muted">
+                                        <td colspan="8" class="text-center text-muted">
                                             No recurring expenses found. Click "Add Recurring Expense" to get started.
                                         </td>
                                     </tr>
@@ -476,12 +494,18 @@ export default {
 
         // Statistics computed properties
         const monthlyTotal = computed(() => {
-            return expenses.value
-                .filter(expense => expense.frequency === 'monthly')
-                .reduce((total, expense) => {
-                    const amount = parseFloat(expense.default_amount) || 0;
+            return expenses.value.reduce((total, expense) => {
+                const amount = parseFloat(expense.default_amount) || 0;
+                
+                // Convert all frequencies to monthly basis
+                if (expense.frequency === 'yearly') {
+                    return total + (amount / 12); // Divide yearly by 12
+                } else if (expense.frequency === 'weekly') {
+                    return total + (amount * 4.33); // Multiply weekly by 4.33 weeks per month
+                } else { // monthly or default
                     return total + amount;
-                }, 0);
+                }
+            }, 0);
         });
 
         const weeklyTotal = computed(() => {
@@ -870,6 +894,138 @@ export default {
             }
         };
 
+        // Payment Status Methods
+        const getPaymentStatusColor = (status) => {
+            const colors = {
+                'paid': 'bg-success text-white',
+                'unpaid': 'bg-warning text-dark',
+                'pending': 'bg-info text-white',
+                'overdue': 'bg-danger text-white',
+                'due': 'bg-warning text-dark'
+            };
+            return colors[status] || 'bg-secondary text-white';
+        };
+
+        const getPaymentStatusIcon = (status) => {
+            const icons = {
+                'paid': 'fas fa-check-circle',
+                'unpaid': 'fas fa-exclamation-circle',
+                'pending': 'fas fa-clock',
+                'overdue': 'fas fa-exclamation-triangle',
+                'due': 'fas fa-calendar-exclamation'
+            };
+            return icons[status] || 'fas fa-question-circle';
+        };
+
+        const formatPaymentStatus = (status) => {
+            const labels = {
+                'paid': 'Paid',
+                'unpaid': 'Unpaid',
+                'pending': 'Pending',
+                'overdue': 'Overdue',
+                'due': 'Due'
+            };
+            return labels[status] || status;
+        };
+
+        const formatDate = (dateString) => {
+            if (!dateString) return '-';
+            return new Date(dateString).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        };
+
+        const markAsPaid = async (expense) => {
+            const result = await Swal.fire({
+                title: 'Mark as Paid',
+                html: `
+                    <div class="text-left">
+                        <p>Mark <strong>${expense.name}</strong> as paid?</p>
+                        <div class="form-group mt-3">
+                            <label for="paid_date">Payment Date:</label>
+                            <input type="date" id="paid_date" class="form-control" value="${new Date().toISOString().split('T')[0]}">
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="payment_notes">Payment Notes (optional):</label>
+                            <textarea id="payment_notes" class="form-control" rows="3" placeholder="Add any payment notes..."></textarea>
+                        </div>
+                    </div>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                confirmButtonText: 'Mark as Paid',
+                cancelButtonText: 'Cancel',
+                preConfirm: () => {
+                    const paidDate = document.getElementById('paid_date').value;
+                    const paymentNotes = document.getElementById('payment_notes').value;
+                    
+                    if (!paidDate) {
+                        Swal.showValidationMessage('Please select a payment date');
+                        return false;
+                    }
+                    
+                    return { paidDate, paymentNotes };
+                }
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await axios.post(route('admin.finance.recurring.expenses.mark-paid', expense.id), {
+                        paid_date: result.value.paidDate,
+                        payment_notes: result.value.paymentNotes
+                    });
+
+                    if (response.data.success) {
+                        // Update the expense in the list
+                        const index = expenses.value.findIndex(e => e.id === expense.id);
+                        if (index !== -1) {
+                            expenses.value[index] = {
+                                ...expenses.value[index],
+                                payment_status: 'paid',
+                                last_paid_date: result.value.paidDate,
+                                payment_notes: result.value.paymentNotes
+                            };
+                        }
+
+                        await Swal.fire({
+                            title: 'Success!',
+                            text: 'Expense marked as paid successfully.',
+                            icon: 'success',
+                            confirmButtonColor: '#28a745',
+                            timer: 2000,
+                            timerProgressBar: true
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error marking expense as paid:', error);
+                    await Swal.fire({
+                        title: 'Error!',
+                        text: 'Failed to mark expense as paid. Please try again.',
+                        icon: 'error',
+                        confirmButtonColor: '#e74a3b'
+                    });
+                }
+            }
+        };
+
+        // Load expenses with payment status on component mount
+        const loadExpensesWithStatus = async () => {
+            try {
+                const response = await axios.get(route('admin.finance.recurring.expenses.with-status'));
+                if (response.data.success) {
+                    expenses.value = response.data.expenses;
+                }
+            } catch (error) {
+                console.error('Error loading expenses with status:', error);
+            }
+        };
+
+        // Load expenses with status on mount
+        loadExpensesWithStatus();
+
         return {
             expenses,
             showAddModal,
@@ -903,7 +1059,14 @@ export default {
             // Statistics
             monthlyTotal,
             weeklyTotal,
-            yearlyTotal
+            yearlyTotal,
+            // Payment Status
+            getPaymentStatusColor,
+            getPaymentStatusIcon,
+            formatPaymentStatus,
+            formatDate,
+            markAsPaid,
+            loadExpensesWithStatus
         };
     }
 }
