@@ -956,6 +956,14 @@ export default {
     padding: 1.5rem;
 }
 
+/* Ensure form labels are left-aligned */
+.form-label,
+.modal-body label {
+    text-align: left !important;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
 .card {
     border: 1px solid #e3e6f0;
     border-radius: 0.35rem;
