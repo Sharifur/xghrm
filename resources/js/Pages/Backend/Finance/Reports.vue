@@ -371,11 +371,14 @@
                                                     <small class="text-muted">{{ payment.description }}</small>
                                                 </div>
                                             </div>
-                                            <div class="payment-status mt-2">
-                                                <span class="badge bg-success w-100">
+                                            <div class="payment-actions mt-2 d-flex justify-content-between align-items-center">
+                                                <span class="badge bg-success flex-grow-1 me-2">
                                                     <i class="fas fa-check me-1"></i>
                                                     Payment Received
                                                 </span>
+                                                <button @click="deletePaidPayment(payment)" class="btn btn-sm btn-outline-danger" title="Delete this payment record">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -1298,6 +1301,64 @@ export default {
             });
         };
 
+        const deletePaidPayment = async (payment) => {
+            const result = await Swal.fire({
+                title: 'Delete Paid Payment?',
+                html: `
+                    <div class="text-left">
+                        <p>Are you sure you want to delete this payment record?</p>
+                        <div class="mt-3">
+                            <p><strong>Client:</strong> ${payment.client_name}</p>
+                            <p><strong>Amount:</strong> ৳${formatNumber(payment.bdt_amount || payment.amount)}</p>
+                            <p><strong>Service:</strong> ${formatServiceType(payment.service_type)}</p>
+                            <p><strong>Paid Date:</strong> ${formatDate(payment.paid_date || payment.created_at)}</p>
+                        </div>
+                        <div class="alert alert-warning mt-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Warning:</strong> This action cannot be undone. The payment record will be permanently deleted.
+                        </div>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await axios.delete(`/admin-home/finance/revenues/${payment.id}`);
+                    
+                    if (response.data.success) {
+                        // Remove the payment from the revenues array
+                        const index = revenues.value.findIndex(r => r.id === payment.id);
+                        if (index !== -1) {
+                            revenues.value.splice(index, 1);
+                        }
+                        
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: 'The payment record has been deleted.',
+                            icon: 'success',
+                            confirmButtonColor: '#28a745',
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
+                    }
+                } catch (error) {
+                    console.error('Delete failed:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: error.response?.data?.message || 'Failed to delete payment record',
+                        icon: 'error',
+                        confirmButtonColor: '#e74a3b'
+                    });
+                }
+            }
+        };
+
         // Initialize with real data from props - no need for mock data
         onMounted(() => {
             // Data is already populated from props
@@ -1345,7 +1406,8 @@ export default {
             removePendingPayment,
             clearAllPendingPayments,
             exportPendingPayments,
-            exportPaidPayments
+            exportPaidPayments,
+            deletePaidPayment
         };
     }
 }
