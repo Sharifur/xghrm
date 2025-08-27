@@ -161,15 +161,47 @@ class ClientController extends Controller
     }
 
     // Revenue Management Methods
-    public function getRevenues()
+    public function getRevenues(Request $request)
     {
-        $revenues = Revenue::with('client')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $period = $request->get('period', 'current');
+        $now = now();
+        
+        $query = Revenue::with('client');
+        
+        // Apply period filtering
+        switch ($period) {
+            case 'current':
+                $query->whereMonth('created_at', $now->month)
+                      ->whereYear('created_at', $now->year);
+                break;
+            case 'quarter':
+                $currentQuarter = ceil($now->month / 3);
+                $startMonth = ($currentQuarter - 1) * 3 + 1;
+                $endMonth = $currentQuarter * 3;
+                $query->whereBetween('created_at', [
+                    $now->copy()->month($startMonth)->startOfMonth(),
+                    $now->copy()->month($endMonth)->endOfMonth()
+                ]);
+                break;
+            case 'year':
+                $query->whereYear('created_at', $now->year);
+                break;
+            case 'all':
+                // No additional filtering for 'all'
+                break;
+            default:
+                // Default to current month
+                $query->whereMonth('created_at', $now->month)
+                      ->whereYear('created_at', $now->year);
+                break;
+        }
+        
+        $revenues = $query->orderBy('created_at', 'desc')->get();
 
         return response()->json([
             'success' => true,
-            'revenues' => $revenues
+            'revenues' => $revenues,
+            'period' => $period
         ]);
     }
 
@@ -177,7 +209,7 @@ class ClientController extends Controller
     {
         $request->validate([
             'client_id' => 'required|exists:clients,id',
-            'service_type' => 'required|in:webflow_template,shopify_app,web_development,consulting,maintenance,other',
+            'service_type' => 'required|in:webflow_template,shopify_app,web_development,consulting,maintenance,envato,other',
             'amount' => 'required|numeric|min:0',
             'currency' => 'required|in:BDT,USD',
             'status' => 'required|in:paid,pending,overdue',
@@ -228,7 +260,7 @@ class ClientController extends Controller
     {
         $request->validate([
             'client_id' => 'required|exists:clients,id',
-            'service_type' => 'required|in:webflow_template,shopify_app,web_development,consulting,maintenance,other',
+            'service_type' => 'required|in:webflow_template,shopify_app,web_development,consulting,maintenance,envato,other',
             'amount' => 'required|numeric|min:0',
             'currency' => 'required|in:BDT,USD',
             'status' => 'required|in:paid,pending,overdue',

@@ -320,6 +320,154 @@
                     </div>
                 </div>
 
+                <!-- Paid Payments This Month -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-check-circle me-2 text-success"></i>
+                                    Paid Payments - This Month
+                                    <span class="badge bg-success ms-2">{{ paidPaymentsThisMonth.length }}</span>
+                                </h6>
+                                <div class="d-flex align-items-center">
+                                    <span class="text-success fw-bold me-3">
+                                        Total: ৳{{ formatNumber(paidRevenueThisMonth) }}
+                                    </span>
+                                    <button @click="exportPaidPayments" class="btn btn-outline-success btn-sm">
+                                        <i class="fas fa-download me-1"></i>
+                                        Export CSV
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div v-for="payment in paidPaymentsThisMonth" :key="payment.id" class="col-lg-4 col-md-6 mb-4">
+                                        <div class="paid-payment-card">
+                                            <div class="payment-header">
+                                                <div class="payment-client">
+                                                    <i class="fas fa-user-circle me-2 text-success"></i>
+                                                    <strong>{{ payment.client_name }}</strong>
+                                                </div>
+                                                <div class="payment-amount text-success">
+                                                    ৳{{ payment.formatted_amount }}
+                                                </div>
+                                            </div>
+                                            <div class="payment-details">
+                                                <div class="payment-service">
+                                                    <i :class="payment.service_icon" class="me-2"></i>
+                                                    {{ formatServiceType(payment.service_type) }}
+                                                </div>
+                                                <div class="payment-date text-muted">
+                                                    <i class="fas fa-calendar-check me-2"></i>
+                                                    Paid: {{ payment.formatted_paid_date }}
+                                                </div>
+                                                <div v-if="payment.currency === 'USD'" class="payment-currency text-info">
+                                                    <i class="fas fa-dollar-sign me-2"></i>
+                                                    <small>${{ formatNumber(payment.amount) }} USD</small>
+                                                </div>
+                                                <div class="payment-description" v-if="payment.description">
+                                                    <i class="fas fa-info-circle me-2"></i>
+                                                    <small class="text-muted">{{ payment.description }}</small>
+                                                </div>
+                                            </div>
+                                            <div class="payment-status mt-2">
+                                                <span class="badge bg-success w-100">
+                                                    <i class="fas fa-check me-1"></i>
+                                                    Payment Received
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div v-if="paidPaymentsThisMonth.length === 0" class="col-12">
+                                        <div class="text-center py-5">
+                                            <i class="fas fa-inbox text-muted mb-3" style="font-size: 4rem;"></i>
+                                            <h5 class="text-muted">No Paid Payments This Month</h5>
+                                            <p class="text-muted">No payments have been received this month yet.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Revenue List for Selected Period -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-list me-2"></i>
+                                    Revenue Items for Selected Period ({{ getPeriodLabel(selectedPeriod) }})
+                                    <span class="badge bg-primary ms-2">{{ periodFilteredRevenues.length }}</span>
+                                </h6>
+                                <div class="text-muted">
+                                    Total: ৳{{ formatNumber(periodFilteredTotal) }}
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div v-if="periodFilteredRevenues.length === 0" class="text-center py-5">
+                                    <i class="fas fa-inbox text-muted mb-3" style="font-size: 3rem;"></i>
+                                    <h5 class="text-muted">No Revenue Items Found</h5>
+                                    <p class="text-muted">No revenue items found for the selected period. Add some revenue to see them here!</p>
+                                </div>
+                                <div v-else class="row">
+                                    <div v-for="revenue in periodFilteredRevenues" :key="revenue.id" class="col-lg-6 col-xl-4 mb-3">
+                                        <div class="revenue-item-card">
+                                            <div class="revenue-header d-flex justify-content-between align-items-start">
+                                                <div class="revenue-client">
+                                                    <div class="d-flex align-items-center">
+                                                        <i :class="revenue.service_icon" class="me-2 text-primary"></i>
+                                                        <div>
+                                                            <strong class="d-block">{{ revenue.client_name }}</strong>
+                                                            <small class="text-muted">{{ formatServiceType(revenue.service_type) }}</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="revenue-status">
+                                                    <span class="badge" :class="`bg-${revenue.status_color}`">
+                                                        {{ revenue.status.charAt(0).toUpperCase() + revenue.status.slice(1) }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="revenue-details mt-2">
+                                                <div class="revenue-amount">
+                                                    <strong class="text-success">৳{{ revenue.formatted_amount }}</strong>
+                                                    <span v-if="revenue.currency === 'USD'" class="text-muted ms-2">
+                                                        (${{ formatNumber(revenue.amount) }} USD)
+                                                    </span>
+                                                </div>
+                                                <div class="revenue-meta mt-2">
+                                                    <small class="text-muted d-block" v-if="revenue.description">
+                                                        <i class="fas fa-comment-alt me-1"></i>
+                                                        {{ revenue.description }}
+                                                    </small>
+                                                    <small class="text-muted d-block">
+                                                        <i class="fas fa-calendar me-1"></i>
+                                                        {{ formatDate(revenue.created_at || revenue.invoice_date) }}
+                                                    </small>
+                                                    <small v-if="revenue.status !== 'paid' && revenue.expected_date" class="text-warning d-block">
+                                                        <i class="fas fa-clock me-1"></i>
+                                                        Expected: {{ formatDate(revenue.expected_date) }}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div class="revenue-actions mt-2" v-if="revenue.status !== 'paid'">
+                                                <button @click="markPaid(revenue)" class="btn btn-sm btn-success me-1">
+                                                    <i class="fas fa-check me-1"></i>
+                                                    Mark Paid
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Add Client Modal -->
                 <div v-if="showAddClient" class="modal-overlay" @click="closeClientModal">
                     <div class="modal-content" @click.stop>
@@ -420,6 +568,7 @@
                                             <option value="web_development">Web Development</option>
                                             <option value="consulting">Consulting</option>
                                             <option value="maintenance">Maintenance Contract</option>
+                                            <option value="envato">Envato</option>
                                             <option value="other">Other Service</option>
                                         </select>
                                     </div>
@@ -531,12 +680,14 @@ export default {
     },
     setup(props) {
         console.log('Reports component setup started', props);
+        console.log('Clients received:', props.clients);
+        console.log('Revenues received:', props.revenues);
         const selectedPeriod = ref('current');
         const showAddClient = ref(false);
         const showAddRevenue = ref(false);
         const saving = ref(false);
-        const clients = ref([...props.clients || []]);
-        const revenues = ref([...props.revenues || []]);
+        const clients = ref([...(props.clients || [])]);
+        const revenues = ref([...(props.revenues || [])]);
 
         const clientForm = reactive({
             name: '',
@@ -562,6 +713,61 @@ export default {
         const USD_TO_BDT_RATE = 120;
         const previousRevenueCurrency = ref('BDT');
 
+        // Helper functions (defined early to be used in computed properties)
+        const formatNumber = (num) => {
+            return new Intl.NumberFormat('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(num || 0);
+        };
+
+        const formatServiceType = (type) => {
+            if (!type) return 'Unknown Service';
+            const types = {
+                webflow_template: 'Webflow Templates',
+                shopify_app: 'Shopify Apps',
+                web_development: 'Web Development',
+                consulting: 'Consulting',
+                maintenance: 'Maintenance',
+                envato: 'Envato',
+                other: 'Other Services'
+            };
+            return types[type] || type;
+        };
+
+        const getServiceIcon = (type) => {
+            if (!type) return 'fas fa-star';
+            const icons = {
+                webflow_template: 'fas fa-globe',
+                shopify_app: 'fas fa-shopping-cart',
+                web_development: 'fas fa-code',
+                consulting: 'fas fa-handshake',
+                maintenance: 'fas fa-cogs',
+                envato: 'fas fa-download',
+                other: 'fas fa-star'
+            };
+            return icons[type] || 'fas fa-star';
+        };
+
+        const getServiceColor = (type) => {
+            if (!type) return 'bg-secondary';
+            const colors = {
+                webflow_template: 'bg-success',
+                shopify_app: 'bg-info',
+                web_development: 'bg-primary',
+                consulting: 'bg-warning',
+                maintenance: 'bg-secondary',
+                envato: 'bg-danger',
+                other: 'bg-dark'
+            };
+            return colors[type] || 'bg-secondary';
+        };
+
+        const formatDate = (dateString) => {
+            if (!dateString) return 'N/A';
+            return new Date(dateString).toLocaleDateString();
+        };
+
         // Watch for currency changes and convert amount automatically
         watch(() => revenueForm.currency, (newCurrency) => {
             const oldCurrency = previousRevenueCurrency.value;
@@ -585,22 +791,37 @@ export default {
         });
 
         const totalRevenue = computed(() => {
-            return revenues.value
-                .filter(r => r.status === 'paid')
-                .reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            try {
+                return (revenues.value || [])
+                    .filter(r => r && r.status === 'paid')
+                    .reduce((sum, r) => sum + (parseFloat(r.bdt_amount || r.amount) || 0), 0);
+            } catch (error) {
+                console.error('Error in totalRevenue:', error);
+                return 0;
+            }
         });
 
         const pendingRevenue = computed(() => {
-            return revenues.value
-                .filter(r => r.status === 'pending' || r.status === 'overdue')
-                .reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            try {
+                return (revenues.value || [])
+                    .filter(r => r && (r.status === 'pending' || r.status === 'overdue'))
+                    .reduce((sum, r) => sum + (parseFloat(r.bdt_amount || r.amount) || 0), 0);
+            } catch (error) {
+                console.error('Error in pendingRevenue:', error);
+                return 0;
+            }
         });
 
 
         const sortedClients = computed(() => {
-            return clients.value
-                .filter(client => client.is_active !== false)
-                .sort((a, b) => a.name.localeCompare(b.name));
+            try {
+                return (clients.value || [])
+                    .filter(client => client && client.is_active !== false)
+                    .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            } catch (error) {
+                console.error('Error in sortedClients:', error);
+                return [];
+            }
         });
 
         const forecastRevenue = computed(() => {
@@ -642,54 +863,92 @@ export default {
                 .sort((a, b) => new Date(a.expected_date) - new Date(b.expected_date));
         });
 
-        // Helper functions
-        const formatNumber = (num) => {
-            return new Intl.NumberFormat('en-US', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(num || 0);
-        };
+        // Paid payments this month
+        const paidPaymentsThisMonth = computed(() => {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            
+            return revenues.value
+                .filter(r => {
+                    if (r.status !== 'paid') return false;
+                    const paidDate = new Date(r.paid_date || r.created_at);
+                    return paidDate.getMonth() === currentMonth && paidDate.getFullYear() === currentYear;
+                })
+                .map(r => ({
+                    ...r,
+                    client_name: clients.value.find(c => c.id === r.client_id)?.name || 'Unknown Client',
+                    service_icon: getServiceIcon(r.service_type),
+                    formatted_amount: formatNumber(r.bdt_amount || r.amount || 0),
+                    formatted_paid_date: formatDate(r.paid_date || r.created_at)
+                }))
+                .sort((a, b) => new Date(b.paid_date || b.created_at) - new Date(a.paid_date || a.created_at));
+        });
 
-        const formatServiceType = (type) => {
-            const types = {
-                webflow_template: 'Webflow Templates',
-                shopify_app: 'Shopify Apps',
-                web_development: 'Web Development',
-                consulting: 'Consulting',
-                maintenance: 'Maintenance',
-                other: 'Other Services'
-            };
-            return types[type] || type;
-        };
+        const paidRevenueThisMonth = computed(() => {
+            return paidPaymentsThisMonth.value.reduce((sum, r) => {
+                return sum + (parseFloat(r.bdt_amount) || parseFloat(r.amount) || 0);
+            }, 0);
+        });
 
-        const getServiceIcon = (type) => {
-            const icons = {
-                webflow_template: 'fas fa-globe',
-                shopify_app: 'fas fa-shopping-cart',
-                web_development: 'fas fa-code',
-                consulting: 'fas fa-handshake',
-                maintenance: 'fas fa-cogs',
-                other: 'fas fa-star'
-            };
-            return icons[type] || 'fas fa-star';
-        };
+        // Filter revenues by selected period
+        const periodFilteredRevenues = computed(() => {
+            try {
+                const now = new Date();
+                const currentMonth = now.getMonth();
+                const currentYear = now.getFullYear();
 
-        const getServiceColor = (type) => {
-            const colors = {
-                webflow_template: 'bg-success',
-                shopify_app: 'bg-info',
-                web_development: 'bg-primary',
-                consulting: 'bg-warning',
-                maintenance: 'bg-secondary',
-                other: 'bg-dark'
-            };
-            return colors[type] || 'bg-secondary';
-        };
+                return (revenues.value || [])
+                    .filter(r => {
+                        if (!r || (!r.created_at && !r.invoice_date)) return false;
+                        
+                        const revenueDate = new Date(r.created_at || r.invoice_date);
+                        if (isNaN(revenueDate.getTime())) return false;
+                        
+                        switch (selectedPeriod.value) {
+                            case 'current':
+                                return revenueDate.getMonth() === currentMonth && revenueDate.getFullYear() === currentYear;
+                            case 'quarter':
+                                const currentQuarter = Math.floor(currentMonth / 3);
+                                const revenueQuarter = Math.floor(revenueDate.getMonth() / 3);
+                                return revenueQuarter === currentQuarter && revenueDate.getFullYear() === currentYear;
+                            case 'year':
+                                return revenueDate.getFullYear() === currentYear;
+                            case 'all':
+                                return true;
+                            default:
+                                return revenueDate.getMonth() === currentMonth && revenueDate.getFullYear() === currentYear;
+                        }
+                    })
+                    .map(r => ({
+                        ...r,
+                        client_name: (clients.value || []).find(c => c && c.id === r.client_id)?.name || 'Unknown Client',
+                        service_icon: getServiceIcon(r.service_type || 'other'),
+                        formatted_amount: formatNumber(r.bdt_amount || r.amount || 0),
+                        status_color: r.status === 'paid' ? 'success' : r.status === 'pending' ? 'warning' : 'danger'
+                    }))
+                    .sort((a, b) => {
+                        const dateA = new Date(a.created_at || a.invoice_date);
+                        const dateB = new Date(b.created_at || b.invoice_date);
+                        return dateB - dateA;
+                    });
+            } catch (error) {
+                console.error('Error in periodFilteredRevenues:', error);
+                return [];
+            }
+        });
 
-        const formatDate = (dateString) => {
-            if (!dateString) return 'N/A';
-            return new Date(dateString).toLocaleDateString();
-        };
+        const periodFilteredTotal = computed(() => {
+            try {
+                return periodFilteredRevenues.value.reduce((sum, r) => {
+                    return sum + (parseFloat(r.bdt_amount) || parseFloat(r.amount) || 0);
+                }, 0);
+            } catch (error) {
+                console.error('Error in periodFilteredTotal:', error);
+                return 0;
+            }
+        });
+
 
         const getPaymentCardClass = (payment) => {
             if (payment.status === 'overdue') return 'payment-overdue';
@@ -829,8 +1088,28 @@ export default {
             });
         };
 
-        const updatePeriod = () => {
+        const updatePeriod = async () => {
             console.log('Period changed to:', selectedPeriod.value);
+            try {
+                const response = await axios.get('/admin-home/finance/revenues', {
+                    params: { period: selectedPeriod.value }
+                });
+                if (response.data.success) {
+                    revenues.value = response.data.revenues;
+                }
+            } catch (error) {
+                console.error('Error updating period:', error);
+            }
+        };
+
+        const getPeriodLabel = (period) => {
+            const labels = {
+                'current': 'This Month',
+                'quarter': 'This Quarter',
+                'year': 'This Year',
+                'all': 'All Time'
+            };
+            return labels[period] || 'This Month';
         };
 
         const removePendingPayment = async (payment) => {
@@ -978,6 +1257,47 @@ export default {
             });
         };
 
+        const exportPaidPayments = () => {
+            if (paidPaymentsThisMonth.value.length === 0) {
+                Swal.fire({
+                    title: 'No Data to Export',
+                    text: 'There are no paid payments this month to export',
+                    icon: 'info',
+                    confirmButtonColor: '#007bff'
+                });
+                return;
+            }
+
+            let csvContent = "Client,Service Type,Amount (BDT),Currency,Paid Date,Description,Notes\n";
+            
+            paidPaymentsThisMonth.value.forEach(payment => {
+                const amount = payment.bdt_amount || payment.amount || 0;
+                const currency = payment.currency || 'BDT';
+                const paidDate = formatDate(payment.paid_date || payment.created_at);
+                csvContent += `"${payment.client_name}","${formatServiceType(payment.service_type)}",${amount},"${currency}","${paidDate}","${payment.description || ''}","${payment.notes || ''}"\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Paid-Payments-${new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            Swal.fire({
+                title: 'Export Complete!',
+                text: `Paid payments exported to CSV file with ${paidPaymentsThisMonth.value.length} records`,
+                icon: 'success',
+                confirmButtonColor: '#28a745',
+                timer: 3000,
+                timerProgressBar: true
+            });
+        };
+
         // Initialize with real data from props - no need for mock data
         onMounted(() => {
             // Data is already populated from props
@@ -1001,7 +1321,15 @@ export default {
             revenueByService,
             sortedClients,
             pendingPayments,
+            paidPaymentsThisMonth,
+            paidRevenueThisMonth,
+            periodFilteredRevenues,
+            periodFilteredTotal,
             formatNumber,
+            formatServiceType,
+            getServiceIcon,
+            getServiceColor,
+            formatDate,
             getPaymentCardClass,
             getPaymentBadgeClass,
             getPaymentStatus,
@@ -1013,9 +1341,11 @@ export default {
             markPaid,
             sendReminder,
             updatePeriod,
+            getPeriodLabel,
             removePendingPayment,
             clearAllPendingPayments,
-            exportPendingPayments
+            exportPendingPayments,
+            exportPaidPayments
         };
     }
 }
@@ -1201,6 +1531,77 @@ export default {
     margin-bottom: 0.5rem;
 }
 
+/* Revenue Item Cards */
+.revenue-item-card {
+    background: white;
+    border: 1px solid #e3e6f0;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.revenue-item-card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Paid Payment Cards */
+.paid-payment-card {
+    background: #f0f8f0;
+    border: 1px solid #d4edda;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(40, 167, 69, 0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.paid-payment-card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(40, 167, 69, 0.2);
+    transform: translateY(-2px);
+}
+
+.paid-payment-card .payment-client {
+    display: flex;
+    align-items: center;
+    color: #155724;
+}
+
+.paid-payment-card .payment-amount {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.paid-payment-card .payment-service {
+    margin-bottom: 0.5rem;
+    color: #666;
+}
+
+.paid-payment-card .payment-description,
+.paid-payment-card .payment-currency {
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+.revenue-header {
+    margin-bottom: 0.75rem;
+}
+
+.revenue-amount {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.revenue-meta small {
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+}
+
+.revenue-actions {
+    border-top: 1px solid #f8f9fc;
+    padding-top: 0.75rem;
+}
+
 @media (max-width: 768px) {
     .stat-card {
         text-align: center;
@@ -1212,6 +1613,10 @@ export default {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
+    }
+    
+    .revenue-item-card {
+        margin-bottom: 1rem;
     }
 }
 </style>
