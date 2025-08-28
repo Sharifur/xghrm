@@ -215,7 +215,9 @@
                                                         <i class="fas fa-info-circle me-1"></i>
                                                         {{ expense.description }}
                                                     </p>
-                                                    <div class="d-flex justify-content-between align-items-center">
+                                                    
+                                                    <!-- Amount and Frequency Row -->
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
                                                         <div class="expense-amount">
                                                             <span class="badge bg-warning text-dark fs-6">
                                                                 ৳{{ formatNumber(expense.bdt_amount || expense.amount || expense.default_amount) }}
@@ -223,17 +225,50 @@
                                                         </div>
                                                         <span class="badge" :class="getFrequencyColor(expense.frequency)">{{ formatFrequency(expense.frequency) }}</span>
                                                     </div>
+                                                    
+                                                    <!-- Payment Status and Next Due Row -->
+                                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                                        <div class="payment-status-mobile">
+                                                            <span class="badge" :class="getPaymentStatusColor(expense.payment_status)">
+                                                                <i :class="getPaymentStatusIcon(expense.payment_status)" class="me-1"></i>
+                                                                {{ formatPaymentStatus(expense.payment_status) }}
+                                                            </span>
+                                                        </div>
+                                                        <div class="next-due-mobile" v-if="expense.next_due_date">
+                                                            <small class="text-muted">
+                                                                <i class="fas fa-calendar-alt me-1"></i>
+                                                                Due: {{ formatDate(expense.next_due_date) }}
+                                                            </small>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                             
                                             <!-- Right side: Action buttons -->
-                                            <div class="expense-actions d-flex flex-column gap-2">
-                                                <button @click="editExpense(expense)" class="btn btn-outline-primary btn-sm mobile-btn">
-                                                    <i class="fas fa-edit"></i>
+                                            <div class="expense-actions">
+                                                <!-- Mark as Paid button (full width on top) -->
+                                                <button 
+                                                    v-if="expense.payment_status !== 'paid'" 
+                                                    @click="markAsPaid(expense)" 
+                                                    class="btn btn-success btn-sm w-100 mb-2 mobile-btn-paid"
+                                                    title="Mark as Paid"
+                                                >
+                                                    <i class="fas fa-check me-1"></i>
+                                                    <span class="d-none d-sm-inline">Mark Paid</span>
+                                                    <span class="d-sm-none">Paid</span>
                                                 </button>
-                                                <button @click="deleteExpense(expense.id)" class="btn btn-outline-danger btn-sm mobile-btn">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                                
+                                                <!-- Edit and Delete buttons in a row -->
+                                                <div class="d-flex gap-2">
+                                                    <button @click="editExpense(expense)" class="btn btn-outline-primary btn-sm mobile-btn flex-fill">
+                                                        <i class="fas fa-edit"></i>
+                                                        <span class="d-none d-sm-inline ms-1">Edit</span>
+                                                    </button>
+                                                    <button @click="deleteExpense(expense.id)" class="btn btn-outline-danger btn-sm mobile-btn flex-fill">
+                                                        <i class="fas fa-trash"></i>
+                                                        <span class="d-none d-sm-inline ms-1">Delete</span>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1177,20 +1212,33 @@ export default {
 }
 
 .mobile-btn {
-    padding: 0.25rem 0.4rem;
+    padding: 0.375rem 0.5rem;
     font-size: 0.75rem;
-    min-width: 20px;
-    min-height: 20px;
+    min-width: auto;
     border-radius: 0.25rem;
-    width: 20px;
-    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
+    white-space: nowrap;
 }
 
 .mobile-btn i {
-    font-size: 0.7rem;
+    font-size: 0.875rem;
+}
+
+.mobile-btn-paid {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+/* Payment status mobile styling */
+.payment-status-mobile .badge {
+    font-size: 0.75rem;
+    padding: 0.375em 0.6em;
+}
+
+.next-due-mobile {
+    font-size: 0.75rem;
 }
 
 .expense-name {
@@ -1210,7 +1258,22 @@ export default {
 
 .mobile-expense-card .expense-actions {
     flex-shrink: 0;
-    min-width: 28px; /* Accommodate button width + gap */
+    min-width: 100px; /* Accommodate buttons properly */
+}
+
+@media (max-width: 400px) {
+    .mobile-expense-card .expense-actions {
+        width: 100%;
+        margin-top: 0.75rem;
+    }
+    
+    .mobile-expense-card .d-flex.align-items-start {
+        flex-wrap: wrap;
+    }
+    
+    .mobile-expense-card .expense-info {
+        width: calc(100% - 40px);
+    }
 }
 
 .mobile-expense-card .expense-info {
@@ -1376,6 +1439,52 @@ export default {
     
     .modal-body {
         padding: 1rem;
+    }
+}
+
+/* Additional responsive fixes for very small screens */
+@media (max-width: 375px) {
+    .mobile-expense-card .expense-actions {
+        width: 100%;
+        margin-top: 1rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #dee2e6;
+    }
+    
+    .mobile-expense-card .d-flex.align-items-start {
+        flex-direction: column;
+    }
+    
+    .mobile-expense-card .expense-info {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .mobile-btn-paid {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    .payment-status-mobile,
+    .next-due-mobile {
+        display: inline-block;
+        margin-bottom: 0.25rem;
+    }
+}
+
+/* Ensure good visibility on tablets in portrait mode */
+@media (max-width: 991px) and (min-width: 768px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .table {
+        min-width: 700px;
+    }
+    
+    .btn-group .btn-sm {
+        margin: 0 2px;
     }
 }
 

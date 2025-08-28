@@ -5,23 +5,30 @@
             <div class="dashboard-settings margin-top-40">
                 <!-- Header Section -->
                 <div class="card mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0">
-                            <i class="fas fa-chart-line me-2"></i>
-                            Revenue Tracking & Client Forecasting
-                        </h4>
-                        <div class="d-flex gap-2">
-                            <select v-model="selectedPeriod" @change="updatePeriod" class="form-select form-select-sm" style="width: 150px;">
-                                <option value="current">This Month</option>
-                                <option value="quarter">This Quarter</option>
-                                <option value="year">This Year</option>
-                            </select>
-                            <button @click="showAddClient = true" class="btn btn-success">
-                                <i class="fas fa-user-plus"></i> Add Client
-                            </button>
-                            <button @click="showAddRevenue = true" class="btn btn-primary">
-                                <i class="fas fa-dollar-sign"></i> Log Revenue
-                            </button>
+                    <div class="card-header">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                            <h4 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>
+                                <span class="d-none d-sm-inline">Revenue Tracking & Client Forecasting</span>
+                                <span class="d-sm-none">Revenue & Clients</span>
+                            </h4>
+                            <div class="d-flex flex-wrap gap-2 w-100 w-md-auto justify-content-start justify-content-md-end">
+                                <select v-model="selectedPeriod" @change="updatePeriod" class="form-select form-select-sm flex-grow-1 flex-md-grow-0" style="max-width: 150px;">
+                                    <option value="current">This Month</option>
+                                    <option value="quarter">This Quarter</option>
+                                    <option value="year">This Year</option>
+                                </select>
+                                <button @click="showAddClient = true" class="btn btn-success btn-sm flex-fill flex-md-grow-0">
+                                    <i class="fas fa-user-plus"></i> 
+                                    <span class="d-none d-sm-inline">Add Client</span>
+                                    <span class="d-sm-none">Client</span>
+                                </button>
+                                <button @click="showAddRevenue = true" class="btn btn-primary btn-sm flex-fill flex-md-grow-0">
+                                    <i class="fas fa-dollar-sign"></i> 
+                                    <span class="d-none d-sm-inline">Log Revenue</span>
+                                    <span class="d-sm-none">Revenue</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="card-body">
@@ -249,20 +256,25 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-clock me-2"></i>
-                                    Pending Payments Forecast - Next 90 Days
-                                </h6>
-                                <div class="header-actions">
-                                    <button @click="clearAllPendingPayments" class="btn btn-outline-danger btn-sm me-2" :disabled="pendingPayments.length === 0">
-                                        <i class="fas fa-trash-alt me-1"></i>
-                                        Clear All
-                                    </button>
-                                    <button @click="exportPendingPayments" class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-download me-1"></i>
-                                        Export CSV
-                                    </button>
+                            <div class="card-header">
+                                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-clock me-2"></i>
+                                        <span class="d-none d-sm-inline">Pending Payments Forecast - Next 90 Days</span>
+                                        <span class="d-sm-none">Pending Payments</span>
+                                    </h6>
+                                    <div class="header-actions d-flex gap-2">
+                                        <button @click="clearAllPendingPayments" class="btn btn-outline-danger btn-sm" :disabled="pendingPayments.length === 0">
+                                            <i class="fas fa-trash-alt me-1"></i>
+                                            <span class="d-none d-sm-inline">Clear All</span>
+                                            <span class="d-sm-none">Clear</span>
+                                        </button>
+                                        <button @click="exportPendingPayments" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-download me-1"></i>
+                                            <span class="d-none d-sm-inline">Export CSV</span>
+                                            <span class="d-sm-none">Export</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="card-body">
@@ -324,20 +336,24 @@
                 <div class="row mt-4">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-check-circle me-2 text-success"></i>
-                                    Paid Payments - This Month
-                                    <span class="badge bg-success ms-2">{{ paidPaymentsThisMonth.length }}</span>
-                                </h6>
-                                <div class="d-flex align-items-center">
-                                    <span class="text-success fw-bold me-3">
-                                        Total: ৳{{ formatNumber(paidRevenueThisMonth) }}
-                                    </span>
-                                    <button @click="exportPaidPayments" class="btn btn-outline-success btn-sm">
-                                        <i class="fas fa-download me-1"></i>
-                                        Export CSV
-                                    </button>
+                            <div class="card-header">
+                                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-check-circle me-2 text-success"></i>
+                                        <span class="d-none d-sm-inline">Paid Payments - This Month</span>
+                                        <span class="d-sm-none">Paid This Month</span>
+                                        <span class="badge bg-success ms-2">{{ paidPaymentsThisMonth.length }}</span>
+                                    </h6>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <span class="text-success fw-bold">
+                                            Total: ৳{{ formatNumber(paidRevenueThisMonth) }}
+                                        </span>
+                                        <button @click="exportPaidPayments" class="btn btn-outline-success btn-sm">
+                                            <i class="fas fa-download me-1"></i>
+                                            <span class="d-none d-sm-inline">Export CSV</span>
+                                            <span class="d-sm-none">Export</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="card-body">
@@ -1664,6 +1680,7 @@ export default {
     padding-top: 0.75rem;
 }
 
+/* Mobile responsiveness */
 @media (max-width: 768px) {
     .stat-card {
         text-align: center;
@@ -1679,6 +1696,84 @@ export default {
     
     .revenue-item-card {
         margin-bottom: 1rem;
+    }
+    
+    /* Header button improvements */
+    .card-header .btn {
+        min-height: 38px;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .card-header h4 {
+        font-size: 1.1rem;
+        width: 100%;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .card-header .form-select {
+        min-height: 38px;
+    }
+}
+
+/* Very small devices */
+@media (max-width: 375px) {
+    .card-header h4 {
+        font-size: 1rem;
+    }
+    
+    .card-header h4 i {
+        font-size: 0.9rem;
+    }
+    
+    .card-header .btn {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.6rem;
+        min-height: 36px;
+    }
+    
+    .card-header .btn i {
+        font-size: 0.8rem;
+    }
+    
+    .card-header .form-select {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.5rem;
+        min-height: 36px;
+    }
+    
+    /* Make buttons full width on very small screens */
+    .card-header .d-flex.flex-wrap {
+        flex-direction: column;
+    }
+    
+    .card-header .btn,
+    .card-header .form-select {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+/* Tablets in portrait mode */
+@media (min-width: 768px) and (max-width: 991px) {
+    .card-header h4 {
+        font-size: 1.25rem;
+    }
+    
+    .card-header .btn {
+        padding: 0.375rem 0.75rem;
+    }
+}
+
+/* Ensure buttons are always visible */
+.card-header .d-flex {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Remove scrollbar on desktop */
+@media (min-width: 992px) {
+    .card-header .d-flex {
+        overflow-x: visible;
     }
 }
 </style>
