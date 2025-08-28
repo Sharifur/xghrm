@@ -220,16 +220,12 @@ class ClientController extends Controller
         ]);
 
         try {
-            // Convert amount to BDT for consistent storage
-            $amount = $request->amount;
-            $bdtAmount = $request->currency === 'USD' ? $amount * Revenue::USD_TO_BDT_RATE : $amount;
-
             $revenue = Revenue::create([
                 'client_id' => $request->client_id,
                 'service_type' => $request->service_type,
-                'amount' => $amount,
+                'amount' => $request->amount,
                 'currency' => $request->currency,
-                'bdt_amount' => $bdtAmount,
+                // Let the model's boot method handle bdt_amount calculation
                 'status' => $request->status,
                 'expected_date' => $request->expected_date,
                 'invoice_date' => $request->invoice_date,
@@ -273,16 +269,12 @@ class ClientController extends Controller
         try {
             $revenue = Revenue::findOrFail($id);
 
-            // Convert amount to BDT for consistent storage
-            $amount = $request->amount;
-            $bdtAmount = $request->currency === 'USD' ? $amount * Revenue::USD_TO_BDT_RATE : $amount;
-            
             $revenue->update([
                 'client_id' => $request->client_id,
                 'service_type' => $request->service_type,
-                'amount' => $amount,
+                'amount' => $request->amount,
                 'currency' => $request->currency,
-                'bdt_amount' => $bdtAmount,
+                // Let the model's boot method handle bdt_amount calculation
                 'status' => $request->status,
                 'expected_date' => $request->expected_date,
                 'invoice_date' => $request->invoice_date,

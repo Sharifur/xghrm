@@ -286,7 +286,7 @@
                                                     <i class="fas fa-user-circle me-2"></i>
                                                     <strong>{{ payment.client_name }}</strong>
                                                 </div>
-                                                <div class="payment-amount">৳{{ formatNumber(payment.amount) }}</div>
+                                                <div class="payment-amount">৳{{ payment.formatted_amount }}</div>
                                             </div>
                                             <div class="payment-details">
                                                 <div class="payment-service">
@@ -299,6 +299,10 @@
                                                     <span class="badge ms-2" :class="getPaymentBadgeClass(payment)">
                                                         {{ getPaymentStatus(payment) }}
                                                     </span>
+                                                </div>
+                                                <div v-if="payment.currency === 'USD'" class="payment-currency text-info">
+                                                    <i class="fas fa-dollar-sign me-2"></i>
+                                                    <small>${{ formatNumber(payment.original_amount) }} USD</small>
                                                 </div>
                                                 <div class="payment-notes" v-if="payment.notes">
                                                     <i class="fas fa-sticky-note me-2"></i>
@@ -787,18 +791,8 @@ export default {
             return new Date(dateString).toLocaleDateString();
         };
 
-        // Watch for currency changes and convert amount automatically
+        // Track currency changes (removed automatic conversion to let backend handle it)
         watch(() => revenueForm.currency, (newCurrency) => {
-            const oldCurrency = previousRevenueCurrency.value;
-            if (oldCurrency && revenueForm.amount > 0 && oldCurrency !== newCurrency) {
-                if (oldCurrency === 'BDT' && newCurrency === 'USD') {
-                    // Convert from BDT to USD
-                    revenueForm.amount = Number((revenueForm.amount / USD_TO_BDT_RATE).toFixed(2));
-                } else if (oldCurrency === 'USD' && newCurrency === 'BDT') {
-                    // Convert from USD to BDT
-                    revenueForm.amount = Number((revenueForm.amount * USD_TO_BDT_RATE).toFixed(2));
-                }
-            }
             previousRevenueCurrency.value = newCurrency;
         });
 
@@ -877,7 +871,9 @@ export default {
                     ...r,
                     client_name: clients.value.find(c => c.id === r.client_id)?.name || 'Unknown Client',
                     service_icon: getServiceIcon(r.service_type),
-                    expected_date: formatDate(r.expected_date)
+                    expected_date: formatDate(r.expected_date),
+                    formatted_amount: formatNumber(r.bdt_amount || r.amount || 0),
+                    original_amount: r.amount
                 }))
                 .sort((a, b) => new Date(a.expected_date) - new Date(b.expected_date));
         });
@@ -1070,7 +1066,7 @@ export default {
         const markPaid = async (payment) => {
             const result = await Swal.fire({
                 title: 'Mark as Paid?',
-                text: `Mark payment of ৳${formatNumber(payment.amount)} as received?`,
+                text: `Mark payment of ৳${formatNumber(payment.bdt_amount || payment.amount)} as received?`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#28a745',
@@ -1134,11 +1130,11 @@ export default {
         const removePendingPayment = async (payment) => {
             const result = await Swal.fire({
                 title: 'Remove Pending Payment?',
-                text: `Remove pending payment of ৳${formatNumber(payment.amount)} from ${payment.client_name}?`,
+                text: `Remove pending payment of ৳${formatNumber(payment.bdt_amount || payment.amount)} from ${payment.client_name}?`,
                 html: `
                     <div class="text-left">
                         <p><strong>Client:</strong> ${payment.client_name}</p>
-                        <p><strong>Amount:</strong> ৳${formatNumber(payment.amount)}</p>
+                        <p><strong>Amount:</strong> ৳${formatNumber(payment.bdt_amount || payment.amount)}</p>
                         <p><strong>Service:</strong> ${formatServiceType(payment.service_type)}</p>
                         <p><strong>Expected Date:</strong> ${payment.expected_date}</p>
                     </div>
@@ -1252,7 +1248,8 @@ export default {
             let csvContent = "Client,Service Type,Amount (BDT),Status,Expected Date,Invoice Date,Description,Notes\n";
             
             pendingPayments.value.forEach(payment => {
-                csvContent += `"${payment.client_name}","${formatServiceType(payment.service_type)}",${payment.amount},"${payment.status}","${payment.expected_date}","${formatDate(payment.invoice_date)}","${payment.description || ''}","${payment.notes || ''}"\n`;
+                const amount = payment.bdt_amount || payment.amount || 0;
+                csvContent += `"${payment.client_name}","${formatServiceType(payment.service_type)}",${amount},"${payment.status}","${payment.expected_date}","${formatDate(payment.invoice_date)}","${payment.description || ''}","${payment.notes || ''}"\n`;
             });
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
