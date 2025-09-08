@@ -144,6 +144,7 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
         
         // One-time Expenses
         Route::get('/expenses',[\App\Http\Controllers\Admin\FinanceController::class,'expenses'])->name('admin.finance.expenses');
+        Route::get('/expenses/with-search',[\App\Http\Controllers\Admin\FinanceController::class,'getExpensesWithSearch'])->name('admin.finance.expenses.with-search');
         Route::post('/expenses/store',[\App\Http\Controllers\Admin\FinanceController::class,'storeExpense'])->name('admin.finance.expenses.store');
         Route::put('/expenses/{id}',[\App\Http\Controllers\Admin\FinanceController::class,'updateExpense'])->name('admin.finance.expenses.update');
         Route::delete('/expenses/{id}',[\App\Http\Controllers\Admin\FinanceController::class,'deleteExpense'])->name('admin.finance.expenses.delete');

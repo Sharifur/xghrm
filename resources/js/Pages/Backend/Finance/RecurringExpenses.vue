@@ -81,22 +81,60 @@
 
                 <!-- Expenses List -->
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Current Recurring Expenses</h5>
-                        <div class="d-flex align-items-center gap-3">
-                            <div v-if="expenses.length > 0" class="form-check">
-                                <input 
-                                    class="form-check-input" 
-                                    type="checkbox" 
-                                    :checked="isAllSelected" 
-                                    @change="toggleSelectAll"
-                                    id="selectAllRecurring"
-                                >
-                                <label class="form-check-label" for="selectAllRecurring">
-                                    Select All
-                                </label>
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <h5 class="mb-0">Current Recurring Expenses</h5>
+                            <div class="d-flex align-items-center gap-3 flex-wrap">
+                                <!-- Search Input -->
+                                <div class="search-container">
+                                    <div class="input-group" style="min-width: 250px;">
+                                        <span class="input-group-text">
+                                            <i v-if="isLoading" class="fas fa-spinner fa-spin"></i>
+                                            <i v-else class="fas fa-search"></i>
+                                        </span>
+                                        <input
+                                            v-model="searchQuery"
+                                            type="text"
+                                            class="form-control"
+                                            placeholder="Search by expense name..."
+                                            @input="resetPaginationOnSearch"
+                                        >
+                                        <button
+                                            v-if="searchQuery"
+                                            @click="clearSearch"
+                                            class="btn btn-outline-secondary"
+                                            type="button"
+                                            title="Reset search"
+                                        >
+                                            <i class="fas fa-undo me-1"></i>
+                                            <span class="d-none d-md-inline">Reset</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div v-if="filteredExpenses.length > 0" class="form-check">
+                                    <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        :checked="isAllSelected"
+                                        @change="toggleSelectAll"
+                                        id="selectAllRecurring"
+                                    >
+                                    <label class="form-check-label" for="selectAllRecurring">
+                                        Select All
+                                    </label>
+                                </div>
+                                <div class="results-info">
+                                    <span class="text-muted">
+                                        <span v-if="isLoading">Loading...</span>
+                                        <span v-else>
+                                            {{ paginatedExpenses.length }} of {{ totalItems }} items
+                                            <span v-if="searchQuery" class="text-info">
+                                                (search results for "{{ searchQuery }}")
+                                            </span>
+                                        </span>
+                                    </span>
+                                </div>
                             </div>
-                            <span class="text-muted">{{ paginatedExpenses.length }} of {{ expenses.length }} items</span>
                         </div>
                     </div>
                     <div class="card-body">
@@ -121,10 +159,10 @@
                                     <tr v-for="expense in paginatedExpenses" :key="expense.id">
                                         <td>
                                             <div class="form-check">
-                                                <input 
-                                                    class="form-check-input" 
-                                                    type="checkbox" 
-                                                    :value="expense.id" 
+                                                <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    :value="expense.id"
                                                     v-model="selectedExpenses"
                                                     :id="`recurring-expense-${expense.id}`"
                                                 >
@@ -156,10 +194,10 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <button 
-                                                    v-if="expense.payment_status !== 'paid'" 
-                                                    @click="markAsPaid(expense)" 
-                                                    class="btn btn-sm btn-success" 
+                                                <button
+                                                    v-if="expense.payment_status !== 'paid'"
+                                                    @click="markAsPaid(expense)"
+                                                    class="btn btn-sm btn-success"
                                                     title="Mark as Paid"
                                                 >
                                                     <i class="fas fa-check"></i>
@@ -173,9 +211,21 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr v-if="expenses.length === 0">
-                                        <td colspan="8" class="text-center text-muted">
-                                            No recurring expenses found. Click "Add Recurring Expense" to get started.
+                                    <tr v-if="totalItems === 0 && !searchQuery">
+                                        <td colspan="8" class="text-center text-muted py-4">
+                                            <i class="fas fa-receipt fa-2x mb-3 d-block text-secondary"></i>
+                                            <p class="mb-0">No recurring expenses found.<br>Click "Add Recurring Expense" to get started.</p>
+                                        </td>
+                                    </tr>
+                                    <tr v-else-if="totalItems === 0 && searchQuery">
+                                        <td colspan="8" class="text-center text-muted py-5">
+                                            <div class="d-flex flex-column align-items-center">
+                                                <i class="fas fa-search fa-2x mb-3 text-secondary"></i>
+                                                <div class="mb-3">
+                                                    <p class="mb-2">No expenses match your search "{{ searchQuery }}".</p>
+                                                    <p class="text-muted small mb-0">Try adjusting your search terms or reset to view all expenses.</p>
+                                                </div>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -184,9 +234,28 @@
 
                         <!-- Mobile Card View -->
                         <div class="d-md-none">
-                            <div v-if="expenses.length === 0" class="text-center text-muted py-5">
+                            <div v-if="totalItems === 0 && !searchQuery" class="text-center text-muted py-5">
                                 <i class="fas fa-receipt fa-3x mb-3"></i>
                                 <p>No recurring expenses found.<br>Click "Add Recurring Expense" to get started.</p>
+                            </div>
+                            <div v-else-if="totalItems === 0 && searchQuery" class="text-center text-muted py-5">
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="fas fa-search fa-3x mb-3 text-secondary"></i>
+                                    <div class="mb-3">
+                                        <p class="mb-2">No expenses match your search "{{ searchQuery }}".</p>
+                                        <p class="text-muted small">Try adjusting your search terms or reset to view all expenses.</p>
+                                    </div>
+                                    <div class="d-flex gap-2 flex-wrap justify-content-center">
+                                        <button @click="clearSearch" class="btn btn-outline-primary">
+                                            <i class="fas fa-undo me-1"></i>
+                                            Reset Search
+                                        </button>
+                                        <button @click="showAddModal = true" class="btn btn-primary">
+                                            <i class="fas fa-plus me-1"></i>
+                                            Add Expense
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                             <div v-for="expense in paginatedExpenses" :key="expense.id" class="mobile-expense-card mb-3">
                                 <div class="card border-start border-warning border-3">
@@ -194,28 +263,28 @@
                                         <div class="d-flex align-items-start gap-3">
                                             <!-- Left side: Checkbox -->
                                             <div class="form-check">
-                                                <input 
-                                                    class="form-check-input mobile-checkbox" 
-                                                    type="checkbox" 
-                                                    :value="expense.id" 
+                                                <input
+                                                    class="form-check-input mobile-checkbox"
+                                                    type="checkbox"
+                                                    :value="expense.id"
                                                     v-model="selectedExpenses"
                                                     :id="`mobile-expense-${expense.id}`"
                                                 >
                                             </div>
-                                            
+
                                             <!-- Center: Expense Info -->
                                             <div class="expense-info flex-grow-1">
                                                 <div class="d-flex align-items-center mb-2">
                                                     <i :class="expense.icon || 'fas fa-receipt'" class="text-primary me-2 fs-5"></i>
                                                     <h6 class="mb-0 expense-name fw-bold">{{ expense.name }}</h6>
                                                 </div>
-                                                
+
                                                 <div class="expense-details">
                                                     <p class="text-muted mb-2 small" v-if="expense.description">
                                                         <i class="fas fa-info-circle me-1"></i>
                                                         {{ expense.description }}
                                                     </p>
-                                                    
+
                                                     <!-- Amount and Frequency Row -->
                                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                                         <div class="expense-amount">
@@ -225,7 +294,7 @@
                                                         </div>
                                                         <span class="badge" :class="getFrequencyColor(expense.frequency)">{{ formatFrequency(expense.frequency) }}</span>
                                                     </div>
-                                                    
+
                                                     <!-- Payment Status and Next Due Row -->
                                                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                                                         <div class="payment-status-mobile">
@@ -243,13 +312,13 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            
+
                                             <!-- Right side: Action buttons -->
                                             <div class="expense-actions">
                                                 <!-- Mark as Paid button (full width on top) -->
-                                                <button 
-                                                    v-if="expense.payment_status !== 'paid'" 
-                                                    @click="markAsPaid(expense)" 
+                                                <button
+                                                    v-if="expense.payment_status !== 'paid'"
+                                                    @click="markAsPaid(expense)"
                                                     class="btn btn-success btn-sm w-100 mb-2 mobile-btn-paid"
                                                     title="Mark as Paid"
                                                 >
@@ -257,7 +326,7 @@
                                                     <span class="d-none d-sm-inline">Mark Paid</span>
                                                     <span class="d-sm-none">Paid</span>
                                                 </button>
-                                                
+
                                                 <!-- Edit and Delete buttons in a row -->
                                                 <div class="d-flex gap-2">
                                                     <button @click="editExpense(expense)" class="btn btn-outline-primary btn-sm mobile-btn flex-fill">
@@ -275,11 +344,14 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Pagination -->
-                        <div v-if="expenses.length > itemsPerPage" class="d-flex justify-content-between align-items-center mt-4">
+                        <div v-if="totalItems > itemsPerPage" class="d-flex justify-content-between align-items-center mt-4">
                             <div class="text-muted">
-                                Showing {{ ((currentPage - 1) * itemsPerPage) + 1 }} to {{ Math.min(currentPage * itemsPerPage, expenses.length) }} of {{ expenses.length }} entries
+                                Showing {{ ((currentPage - 1) * itemsPerPage) + 1 }} to {{ Math.min(currentPage * itemsPerPage, totalItems) }} of {{ totalItems }} entries
+                                <span v-if="searchQuery" class="text-info">
+                                    (search results)
+                                </span>
                             </div>
                             <nav aria-label="Recurring expenses pagination">
                                 <ul class="pagination pagination-sm mb-0">
@@ -288,10 +360,10 @@
                                             <i class="fas fa-chevron-left"></i>
                                         </button>
                                     </li>
-                                    <li 
-                                        v-for="page in visiblePages" 
-                                        :key="page" 
-                                        class="page-item" 
+                                    <li
+                                        v-for="page in visiblePages"
+                                        :key="page"
+                                        class="page-item"
                                         :class="{ active: page === currentPage }"
                                     >
                                         <button class="page-link" @click="changePage(page)">{{ page }}</button>
@@ -319,11 +391,11 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Name *</label>
-                                        <input 
-                                            v-model="form.name" 
-                                            type="text" 
-                                            class="form-control" 
-                                            required 
+                                        <input
+                                            v-model="form.name"
+                                            type="text"
+                                            class="form-control"
+                                            required
                                             placeholder="e.g., Office Rent, Server Bills"
                                         >
                                     </div>
@@ -334,13 +406,13 @@
                                                 <option value="BDT">৳</option>
                                                 <option value="USD">$</option>
                                             </select>
-                                            <input 
-                                                v-model.number="form.default_amount" 
-                                                type="number" 
-                                                class="form-control" 
+                                            <input
+                                                v-model.number="form.default_amount"
+                                                type="number"
+                                                class="form-control"
                                                 step="0.01"
                                                 min="0"
-                                                required 
+                                                required
                                                 placeholder="0.00"
                                                 @input="updateConvertedAmount"
                                             >
@@ -384,19 +456,19 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Description</label>
-                                    <textarea 
-                                        v-model="form.description" 
-                                        class="form-control" 
-                                        rows="3" 
+                                    <textarea
+                                        v-model="form.description"
+                                        class="form-control"
+                                        rows="3"
                                         placeholder="Brief description of this expense"
                                     ></textarea>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Tooltip (Help Text)</label>
-                                    <input 
-                                        v-model="form.tooltip" 
-                                        type="text" 
-                                        class="form-control" 
+                                    <input
+                                        v-model="form.tooltip"
+                                        type="text"
+                                        class="form-control"
                                         placeholder="Help text shown to users"
                                     >
                                 </div>
@@ -439,11 +511,14 @@ export default {
         const editingExpense = ref(null);
         const saving = ref(false);
         const expenses = ref([]);
-        
-        // Pagination and selection
+
+        // Pagination, selection, and search
         const selectedExpenses = ref([]);
         const currentPage = ref(1);
         const itemsPerPage = ref(10);
+        const searchQuery = ref('');
+        const isLoading = ref(false);
+        const searchDebounceTimeout = ref(null);
 
         const form = reactive({
             name: '',
@@ -463,7 +538,7 @@ export default {
         // Watch for currency changes and convert amount automatically
         watch(() => form.currency, (newCurrency) => {
             const oldCurrency = previousCurrency.value;
-            
+
             if (oldCurrency && form.default_amount > 0 && oldCurrency !== newCurrency) {
                 if (oldCurrency === 'BDT' && newCurrency === 'USD') {
                     // Convert from BDT to USD
@@ -476,21 +551,19 @@ export default {
             previousCurrency.value = newCurrency;
         });
 
-        // Computed properties for pagination
-        const totalPages = computed(() => Math.ceil(expenses.value.length / itemsPerPage.value));
-        
-        const paginatedExpenses = computed(() => {
-            const sortedExpenses = expenses.value.sort((a, b) => b.id - a.id); // Sort by ID descending (newest first)
-            const start = (currentPage.value - 1) * itemsPerPage.value;
-            const end = start + itemsPerPage.value;
-            return sortedExpenses.slice(start, end);
-        });
-        
+        // Server-side pagination data
+        const totalItems = ref(0);
+        const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value));
+
+        // Use expenses directly since they're already paginated from server
+        const paginatedExpenses = computed(() => expenses.value);
+        const filteredExpenses = computed(() => expenses.value);
+
         const visiblePages = computed(() => {
             const total = totalPages.value;
             const current = currentPage.value;
             const pages = [];
-            
+
             if (total <= 7) {
                 for (let i = 1; i <= total; i++) {
                     pages.push(i);
@@ -512,13 +585,13 @@ export default {
                     pages.push(total);
                 }
             }
-            
+
             return pages.filter(page => page !== '...' || pages.indexOf(page) !== pages.lastIndexOf(page));
         });
 
         // Selection computed properties
         const isAllSelected = computed(() => {
-            return paginatedExpenses.value.length > 0 && 
+            return paginatedExpenses.value.length > 0 &&
                    paginatedExpenses.value.every(expense => selectedExpenses.value.includes(expense.id));
         });
 
@@ -527,7 +600,7 @@ export default {
             return expenses.value.reduce((total, expense) => {
                 // Use bdt_amount if available, otherwise fall back to amount or default_amount
                 const amount = parseFloat(expense.bdt_amount || expense.amount || expense.default_amount) || 0;
-                
+
                 // Convert all frequencies to monthly basis
                 if (expense.frequency === 'yearly') {
                     return total + (amount / 12); // Divide yearly by 12
@@ -572,7 +645,7 @@ export default {
             console.log('Formatting frequency:', frequency);
             const frequencyMap = {
                 'monthly': 'Monthly',
-                'yearly': 'Yearly', 
+                'yearly': 'Yearly',
                 'weekly': 'Weekly',
                 'daily': 'Daily'
             };
@@ -629,24 +702,24 @@ export default {
         const saveExpense = async () => {
             saving.value = true;
             try {
-                const url = editingExpense.value 
+                const url = editingExpense.value
                     ? route('admin.finance.recurring.expenses.update', editingExpense.value.id)
                     : route('admin.finance.recurring.expenses.store');
-                
+
                 const method = editingExpense.value ? 'put' : 'post';
-                
+
                 // Convert USD to BDT before saving to database
                 const saveData = { ...form };
                 if (form.currency === 'USD') {
                     saveData.default_amount = form.default_amount * USD_TO_BDT_RATE;
                     saveData.currency = 'BDT';
                 }
-                
+
                 console.log('Saving expense with data:', {
                     original: { currency: form.currency, amount: form.default_amount, frequency: form.frequency },
                     saving: { currency: saveData.currency, amount: saveData.default_amount, frequency: saveData.frequency }
                 });
-                
+
                 const response = await axios[method](url, saveData);
 
                 if (response.data.success) {
@@ -657,7 +730,7 @@ export default {
                     } else {
                         expenses.value.push(response.data.expense);
                     }
-                    
+
                     closeModal();
                     Swal.fire({
                         title: 'Success!',
@@ -697,7 +770,7 @@ export default {
 
             try {
                 const response = await axios.delete(route('admin.finance.recurring.expenses.delete', id));
-                
+
                 if (response.data.success) {
                     expenses.value = expenses.value.filter(e => e.id !== id);
                     Swal.fire({
@@ -725,11 +798,65 @@ export default {
             // Already handled in the template with reactive binding
         };
 
+        // Server-side search and pagination functions
+        const fetchExpenses = async (resetPage = false) => {
+            if (resetPage) {
+                currentPage.value = 1;
+            }
+
+            isLoading.value = true;
+            try {
+                const params = {
+                    page: currentPage.value,
+                    per_page: itemsPerPage.value
+                };
+
+                if (searchQuery.value.trim()) {
+                    params.search = searchQuery.value.trim();
+                }
+
+                const response = await axios.get(route('admin.finance.recurring.expenses.with-status'), { params });
+
+                if (response.data.success) {
+                    expenses.value = response.data.expenses;
+                    totalItems.value = response.data.pagination.total;
+                }
+            } catch (error) {
+                console.error('Error fetching expenses:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to load expenses. Please try again.',
+                    icon: 'error',
+                    confirmButtonColor: '#e74a3b'
+                });
+            } finally {
+                isLoading.value = false;
+            }
+        };
+
+        const clearSearch = () => {
+            searchQuery.value = '';
+            selectedExpenses.value = [];
+            fetchExpenses(true);
+        };
+
+        const resetPaginationOnSearch = () => {
+            if (searchDebounceTimeout.value) {
+                clearTimeout(searchDebounceTimeout.value);
+            }
+
+            searchDebounceTimeout.value = setTimeout(() => {
+                selectedExpenses.value = [];
+                fetchExpenses(true);
+            }, 500); // Debounce search by 500ms
+        };
+
         // Pagination functions
         const changePage = (page) => {
             if (page >= 1 && page <= totalPages.value && page !== '...') {
                 currentPage.value = page;
                 selectedExpenses.value = []; // Clear selection when changing pages
+                fetchExpenses();
             }
         };
 
@@ -752,18 +879,18 @@ export default {
             if (selectedExpenses.value.length === 0) return;
 
             const selectedCount = selectedExpenses.value.length;
-            const selectedExpensesData = expenses.value.filter(expense => 
+            const selectedExpensesData = expenses.value.filter(expense =>
                 selectedExpenses.value.includes(expense.id)
             );
-            
+
             const totalBDT = selectedExpensesData.reduce((sum, expense) => {
                 return sum + (expense.bdt_amount || expense.amount || expense.default_amount); // All amounts are now in BDT
             }, 0);
 
-            const expenseList = selectedExpensesData.slice(0, 5).map(expense => 
+            const expenseList = selectedExpensesData.slice(0, 5).map(expense =>
                 `• ${expense.name}: ৳${formatNumber(expense.bdt_amount || expense.amount || expense.default_amount)}`
             ).join('<br>');
-            
+
             const moreText = selectedExpensesData.length > 5 ? `<br>...and ${selectedExpensesData.length - 5} more expenses` : '';
 
             const result = await Swal.fire({
@@ -790,23 +917,23 @@ export default {
 
             try {
                 // Delete selected expenses one by one
-                const deletePromises = selectedExpenses.value.map(expenseId => 
+                const deletePromises = selectedExpenses.value.map(expenseId =>
                     axios.delete(route('admin.finance.recurring.expenses.delete', expenseId))
                 );
-                
+
                 await Promise.all(deletePromises);
-                
+
                 // Remove from local array
-                expenses.value = expenses.value.filter(expense => 
+                expenses.value = expenses.value.filter(expense =>
                     !selectedExpenses.value.includes(expense.id)
                 );
-                
+
                 // Clear selection and adjust pagination if necessary
                 selectedExpenses.value = [];
                 if (currentPage.value > totalPages.value && totalPages.value > 0) {
                     currentPage.value = totalPages.value;
                 }
-                
+
                 Swal.fire({
                     title: 'Expenses Deleted!',
                     text: `Successfully removed ${selectedCount} recurring expenses.`,
@@ -832,10 +959,10 @@ export default {
                 return sum + (expense.bdt_amount || expense.amount || expense.default_amount); // All amounts are now in BDT
             }, 0);
 
-            const expenseList = expenses.value.slice(0, 5).map(expense => 
+            const expenseList = expenses.value.slice(0, 5).map(expense =>
                 `• ${expense.name}: ৳${formatNumber(expense.bdt_amount || expense.amount || expense.default_amount)}`
             ).join('<br>');
-            
+
             const moreText = expenses.value.length > 5 ? `<br>...and ${expenses.value.length - 5} more expenses` : '';
 
             const result = await Swal.fire({
@@ -862,14 +989,14 @@ export default {
 
             try {
                 // Since we don't have a bulk delete endpoint, delete them one by one
-                const deletePromises = expenses.value.map(expense => 
+                const deletePromises = expenses.value.map(expense =>
                     axios.delete(route('admin.finance.recurring.expenses.delete', expense.id))
                 );
-                
+
                 await Promise.all(deletePromises);
-                
+
                 expenses.value.splice(0);
-                
+
                 Swal.fire({
                     title: 'All Expenses Cleared!',
                     text: `Successfully removed ${totalExpenses} recurring expenses.`,
@@ -906,7 +1033,7 @@ export default {
             const csvContent = csvHeader + csvRows;
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
-            
+
             if (link.download !== undefined) {
                 const url = URL.createObjectURL(blob);
                 link.setAttribute('href', url);
@@ -915,7 +1042,7 @@ export default {
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                
+
                 Swal.fire({
                     title: 'Export Complete!',
                     text: 'Recurring expenses have been exported to CSV.',
@@ -994,12 +1121,12 @@ export default {
                 preConfirm: () => {
                     const paidDate = document.getElementById('paid_date').value;
                     const paymentNotes = document.getElementById('payment_notes').value;
-                    
+
                     if (!paidDate) {
                         Swal.showValidationMessage('Please select a payment date');
                         return false;
                     }
-                    
+
                     return { paidDate, paymentNotes };
                 }
             });
@@ -1044,22 +1171,8 @@ export default {
             }
         };
 
-        // Load expenses with payment status on component mount
-        const loadExpensesWithStatus = async () => {
-            try {
-                const response = await axios.get(route('admin.finance.recurring.expenses.with-status'));
-                if (response.data.success) {
-                    expenses.value = response.data.expenses;
-                }
-            } catch (error) {
-                console.error('Error loading expenses with status:', error);
-                // Fallback to props data if API fails
-                expenses.value = [...(props.expenses || [])];
-            }
-        };
-
         // Load expenses with status immediately on mount
-        loadExpensesWithStatus();
+        fetchExpenses();
 
         return {
             expenses,
@@ -1079,6 +1192,14 @@ export default {
             updateConvertedAmount,
             clearAllExpenses,
             exportExpenses,
+            // Search
+            searchQuery,
+            filteredExpenses,
+            clearSearch,
+            resetPaginationOnSearch,
+            fetchExpenses,
+            isLoading,
+            totalItems,
             // Pagination
             selectedExpenses,
             currentPage,
@@ -1100,8 +1221,7 @@ export default {
             getPaymentStatusIcon,
             formatPaymentStatus,
             formatDate,
-            markAsPaid,
-            loadExpensesWithStatus
+            markAsPaid
         };
     }
 }
@@ -1266,11 +1386,11 @@ export default {
         width: 100%;
         margin-top: 0.75rem;
     }
-    
+
     .mobile-expense-card .d-flex.align-items-start {
         flex-wrap: wrap;
     }
-    
+
     .mobile-expense-card .expense-info {
         width: calc(100% - 40px);
     }
@@ -1298,17 +1418,17 @@ export default {
     .mobile-btn:hover {
         transform: none;
     }
-    
+
     .mobile-btn:active {
         transform: scale(0.95);
         transition: transform 0.1s;
     }
-    
+
     .mobile-expense-card:hover {
         transform: none;
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     }
-    
+
     .mobile-expense-card:active {
         transform: translateY(1px);
     }
@@ -1336,7 +1456,7 @@ export default {
         align-items: center;
         justify-content: center;
     }
-    
+
     .btn-sm i {
         font-size: 0.8rem;
     }
@@ -1354,7 +1474,7 @@ export default {
         align-items: center;
         justify-content: center;
     }
-    
+
     .btn-sm i {
         font-size: 0.7rem;
     }
@@ -1373,6 +1493,61 @@ export default {
     min-height: 20px;
 }
 
+/* Search container styles */
+.search-container .input-group {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.search-container .input-group-text {
+    background-color: #f8f9fa;
+    border-color: #ced4da;
+    color: #6c757d;
+    border-right: 0;
+}
+
+.search-container .form-control {
+    border-left: 0;
+    border-right: 0;
+    box-shadow: none;
+}
+
+.search-container .form-control:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.search-container .btn-outline-secondary {
+    border-left: 0;
+    border-color: #ced4da;
+    color: #6c757d;
+    background-color: transparent;
+    padding: 0.375rem 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-container .btn-outline-secondary:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+    color: #495057;
+}
+
+.search-container .btn-outline-secondary:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.search-container .btn-outline-secondary:active {
+    background-color: #dee2e6;
+    border-color: #adb5bd;
+}
+
+.results-info {
+    font-size: 0.875rem;
+}
+
 /* Mobile and Tablet Responsive Styles */
 @media (max-width: 768px) {
     .card-header .d-flex {
@@ -1380,63 +1555,74 @@ export default {
         gap: 15px;
         align-items: flex-start !important;
     }
-    
+
     .card-header h4 {
         font-size: 1.1rem;
     }
-    
+
+    .search-container .input-group {
+        min-width: 100% !important;
+        max-width: 100%;
+    }
+
+    .results-info {
+        width: 100%;
+        text-align: center;
+        font-size: 0.8rem;
+    }
+
     .btn-group {
         flex-direction: column;
         width: 100%;
         gap: 8px;
     }
-    
+
     .btn-group .btn {
         width: 100%;
         margin-right: 0;
         margin-bottom: 8px;
     }
-    
+
     .table-responsive {
         font-size: 0.85rem;
     }
-    
+
     .table th, .table td {
         padding: 0.5rem 0.25rem;
         vertical-align: middle;
     }
-    
+
     .badge {
         font-size: 0.65rem;
         padding: 0.35em 0.5em;
     }
-    
+
     .form-check-input {
         transform: scale(1.2);
     }
-    
+
     .pagination {
         flex-wrap: wrap;
         justify-content: center;
     }
-    
+
     .pagination .page-link {
         font-size: 0.8rem;
         padding: 0.4rem 0.6rem;
     }
-    
+
     .d-flex.justify-content-between {
         flex-direction: column;
         gap: 15px;
         text-align: center;
     }
-    
+
     .modal-content {
         margin: 10px;
         width: calc(100% - 20px);
         max-height: calc(100vh - 20px);
     }
-    
+
     .modal-body {
         padding: 1rem;
     }
@@ -1450,21 +1636,21 @@ export default {
         padding-top: 0.75rem;
         border-top: 1px solid #dee2e6;
     }
-    
+
     .mobile-expense-card .d-flex.align-items-start {
         flex-direction: column;
     }
-    
+
     .mobile-expense-card .expense-info {
         width: 100%;
         margin-bottom: 0.5rem;
     }
-    
+
     .mobile-btn-paid {
         padding: 0.5rem 0.75rem;
         font-size: 0.85rem;
     }
-    
+
     .payment-status-mobile,
     .next-due-mobile {
         display: inline-block;
@@ -1478,11 +1664,11 @@ export default {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
-    
+
     .table {
         min-width: 700px;
     }
-    
+
     .btn-group .btn-sm {
         margin: 0 2px;
     }
@@ -1493,15 +1679,15 @@ export default {
     .btn-group {
         gap: 8px;
     }
-    
+
     .table th, .table td {
         padding: 0.6rem 0.4rem;
     }
-    
+
     .badge {
         font-size: 0.7rem;
     }
-    
+
     .modal-content {
         max-width: 90%;
     }
@@ -1513,27 +1699,27 @@ export default {
         font-size: 1rem;
         line-height: 1.3;
     }
-    
+
     .table th:first-child,
     .table td:first-child {
         width: 30px;
         padding: 0.3rem 0.1rem;
     }
-    
+
     .table th:nth-child(3),
     .table td:nth-child(3) {
         min-width: 100px;
     }
-    
+
     .btn {
         font-size: 0.8rem;
         padding: 0.4rem 0.7rem;
     }
-    
+
     .form-control {
         font-size: 16px; /* Prevents zoom on iOS */
     }
-    
+
     .pagination .page-item {
         margin: 1px;
     }
