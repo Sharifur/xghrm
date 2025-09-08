@@ -1084,11 +1084,29 @@ class FinanceController extends Controller
         }
     }
 
-    public function getRecurringExpensesWithStatus()
+    public function getRecurringExpensesWithStatus(Request $request)
     {
         try {
-            $expenses = ExpenseCategory::where('is_recurring', true)
-                ->where('is_active', true)
+            $query = ExpenseCategory::where('is_recurring', true)
+                ->where('is_active', true);
+
+            // Add search functionality
+            if ($request->has('search') && $request->search) {
+                $searchTerm = $request->search;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('name', 'LIKE', '%' . $searchTerm . '%')
+                      ->orWhere('description', 'LIKE', '%' . $searchTerm . '%');
+                });
+            }
+
+            // Add pagination support
+            $perPage = $request->get('per_page', 10);
+            $page = $request->get('page', 1);
+            
+            $totalCount = $query->count();
+            $expenses = $query->orderBy('name')
+                ->skip(($page - 1) * $perPage)
+                ->take($perPage)
                 ->get()
                 ->map(function ($expense) {
                     return [
@@ -1116,7 +1134,15 @@ class FinanceController extends Controller
 
             return response()->json([
                 'success' => true,
-                'expenses' => $expenses
+                'expenses' => $expenses,
+                'pagination' => [
+                    'current_page' => $page,
+                    'per_page' => $perPage,
+                    'total' => $totalCount,
+                    'last_page' => ceil($totalCount / $perPage),
+                    'from' => (($page - 1) * $perPage) + 1,
+                    'to' => min($page * $perPage, $totalCount)
+                ]
             ]);
         } catch (\Exception $e) {
             return response()->json([
