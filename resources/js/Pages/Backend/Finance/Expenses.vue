@@ -133,7 +133,33 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Expense Records</h5>
-                        <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+                            <!-- Search Input -->
+                            <div class="search-container">
+                                <div class="input-group" style="min-width: 250px;">
+                                    <span class="input-group-text">
+                                        <i v-if="isLoading" class="fas fa-spinner fa-spin"></i>
+                                        <i v-else class="fas fa-search"></i>
+                                    </span>
+                                    <input 
+                                        v-model="searchQuery"
+                                        type="text" 
+                                        class="form-control" 
+                                        placeholder="Search by expense name, category, or description..."
+                                        @input="handleSearch"
+                                    >
+                                    <button 
+                                        v-if="searchQuery" 
+                                        @click="clearSearch" 
+                                        class="btn btn-outline-secondary"
+                                        type="button"
+                                        title="Reset search"
+                                    >
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
                             <div v-if="expenses.length > 0" class="form-check">
                                 <input 
                                     class="form-check-input" 
@@ -146,7 +172,20 @@
                                     Select All
                                 </label>
                             </div>
-                            <span class="text-muted">{{ paginatedExpenses.length }} of {{ expenses.length }} items</span>
+                            <div class="results-info">
+                                <span class="text-muted">
+                                    <span v-if="totalItems > 0">
+                                        {{ ((currentPage - 1) * itemsPerPage) + 1 }} to {{ Math.min(currentPage * itemsPerPage, totalItems) }} of {{ totalItems }} items
+                                        <span v-if="searchQuery" class="text-info">
+                                            (search results for "{{ searchQuery }}")
+                                        </span>
+                                    </span>
+                                    <span v-else class="text-muted">
+                                        <span v-if="!searchQuery">No expenses found</span>
+                                        <span v-else>No results found for "{{ searchQuery }}"</span>
+                                    </span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                     <div class="card-body">
@@ -169,7 +208,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="expense in paginatedExpenses" :key="expense.id">
+                                    <tr v-for="expense in expenses" :key="expense.id">
                                         <td>
                                             <div class="form-check">
                                                 <input 
@@ -226,9 +265,26 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr v-if="expenses.length === 0">
-                                        <td colspan="8" class="text-center text-muted">
-                                            No expenses found. Click "Add Expense" to record your first expense.
+                                    <tr v-if="totalItems === 0 && !searchQuery">
+                                        <td colspan="9" class="text-center text-muted py-4">
+                                            <i class="fas fa-receipt fa-2x mb-3 d-block text-secondary"></i>
+                                            <p class="mb-0">No expenses found.<br>Click "Add Expense" to record your first expense.</p>
+                                        </td>
+                                    </tr>
+                                    <tr v-else-if="totalItems === 0 && searchQuery">
+                                        <td colspan="9" class="text-center text-muted py-4">
+                                            <div class="d-flex flex-column align-items-center">
+                                                <i class="fas fa-search fa-2x mb-3 text-secondary"></i>
+                                                <p class="mb-2">No expenses found for <strong>"{{ searchQuery }}"</strong></p>
+                                                <div class="d-flex gap-2">
+                                                    <button @click="clearSearch" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-times"></i> Clear Search
+                                                    </button>
+                                                    <button @click="openAddModal" class="btn btn-sm btn-warning">
+                                                        <i class="fas fa-plus"></i> Add Expense
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -237,11 +293,25 @@
 
                         <!-- Mobile Card View -->
                         <div class="d-md-none">
-                            <div v-if="expenses.length === 0" class="text-center text-muted py-5">
+                            <div v-if="totalItems === 0 && !searchQuery" class="text-center text-muted py-5">
                                 <i class="fas fa-receipt fa-3x mb-3"></i>
                                 <p>No expenses found.<br>Click "Add Expense" to record your first expense.</p>
                             </div>
-                            <div v-for="expense in paginatedExpenses" :key="expense.id" class="mobile-expense-card mb-3">
+                            <div v-else-if="totalItems === 0 && searchQuery" class="text-center text-muted py-5">
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="fas fa-search fa-3x mb-3 text-secondary"></i>
+                                    <p class="mb-2">No expenses found for <strong>"{{ searchQuery }}"</strong></p>
+                                    <div class="d-flex gap-2">
+                                        <button @click="clearSearch" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-times"></i> Clear Search
+                                        </button>
+                                        <button @click="openAddModal" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-plus"></i> Add Expense
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-for="expense in expenses" :key="expense.id" class="mobile-expense-card mb-3">
                                 <div class="card border-start border-warning border-3">
                                     <div class="card-body p-3">
                                         <div class="d-flex align-items-start gap-3">
@@ -309,9 +379,14 @@
                         </div>
                         
                         <!-- Pagination -->
-                        <div v-if="expenses.length > itemsPerPage" class="d-flex justify-content-between align-items-center mt-4">
+                        <div v-if="totalItems > itemsPerPage" class="d-flex justify-content-between align-items-center mt-4">
                             <div class="text-muted">
-                                Showing {{ ((currentPage - 1) * itemsPerPage) + 1 }} to {{ Math.min(currentPage * itemsPerPage, expenses.length) }} of {{ expenses.length }} entries
+                                <span v-if="totalItems > 0">
+                                    Showing {{ ((currentPage - 1) * itemsPerPage) + 1 }} to {{ Math.min(currentPage * itemsPerPage, totalItems) }} of {{ totalItems }} entries
+                                    <span v-if="searchQuery" class="text-info">
+                                        (search results)
+                                    </span>
+                                </span>
                             </div>
                             <nav aria-label="Expenses pagination">
                                 <ul class="pagination pagination-sm mb-0">
@@ -326,7 +401,8 @@
                                         class="page-item" 
                                         :class="{ active: page === currentPage }"
                                     >
-                                        <button class="page-link" @click="changePage(page)">{{ page }}</button>
+                                        <button class="page-link" @click="changePage(page)" v-if="page !== '...'">{{ page }}</button>
+                                        <span class="page-link" v-else>{{ page }}</span>
                                     </li>
                                     <li class="page-item" :class="{ disabled: currentPage === totalPages }">
                                         <button class="page-link" @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">
@@ -517,6 +593,12 @@ export default {
         const saving = ref(false);
         const expenses = ref([...props.expenses]);
         
+        // Search functionality
+        const searchQuery = ref('');
+        const isLoading = ref(false);
+        const totalItems = ref(props.expenses.length);
+        let searchTimeout = null;
+        
         // Pagination and selection
         const selectedExpenses = ref([]);
         const currentPage = ref(1);
@@ -569,15 +651,8 @@ export default {
             }
         });
 
-        // Computed properties for pagination
-        const totalPages = computed(() => Math.ceil(expenses.value.length / itemsPerPage.value));
-        
-        const paginatedExpenses = computed(() => {
-            const sortedExpenses = expenses.value.sort((a, b) => b.id - a.id); // Sort by ID descending (newest first)
-            const start = (currentPage.value - 1) * itemsPerPage.value;
-            const end = start + itemsPerPage.value;
-            return sortedExpenses.slice(start, end);
-        });
+        // Computed properties for pagination (server-side)
+        const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value));
         
         const visiblePages = computed(() => {
             const total = totalPages.value;
@@ -613,8 +688,8 @@ export default {
 
         // Selection computed properties
         const isAllSelected = computed(() => {
-            return paginatedExpenses.value.length > 0 && 
-                   paginatedExpenses.value.every(expense => selectedExpenses.value.includes(expense.id));
+            return expenses.value.length > 0 && 
+                   expenses.value.every(expense => selectedExpenses.value.includes(expense.id));
         });
 
         // Monthly statistics computed properties
@@ -847,11 +922,61 @@ export default {
             }
         };
 
+        // Search and data fetching
+        const fetchExpenses = async (resetPage = false) => {
+            if (resetPage) currentPage.value = 1;
+            isLoading.value = true;
+            try {
+                const params = {
+                    page: currentPage.value,
+                    per_page: itemsPerPage.value
+                };
+                
+                if (searchQuery.value.trim()) {
+                    params.search = searchQuery.value.trim();
+                }
+                
+                const response = await axios.get(route('admin.finance.expenses.with-search'), { params });
+                
+                if (response.data.success) {
+                    expenses.value = response.data.expenses;
+                    totalItems.value = response.data.pagination.total;
+                } else {
+                    throw new Error(response.data.message || 'Failed to fetch expenses');
+                }
+            } catch (error) {
+                console.error('Error fetching expenses:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: error.response?.data?.message || 'Failed to load expenses. Please try again.',
+                    icon: 'error',
+                    confirmButtonColor: '#f6c23e'
+                });
+            } finally {
+                isLoading.value = false;
+            }
+        };
+
+        const handleSearch = () => {
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+            searchTimeout = setTimeout(() => {
+                fetchExpenses(true); // Reset to page 1 when searching
+            }, 500);
+        };
+
+        const clearSearch = () => {
+            searchQuery.value = '';
+            fetchExpenses(true); // Reset to page 1 when clearing
+        };
+
         // Pagination functions
         const changePage = (page) => {
             if (page >= 1 && page <= totalPages.value && page !== '...') {
                 currentPage.value = page;
                 selectedExpenses.value = []; // Clear selection when changing pages
+                fetchExpenses(); // Fetch data for the new page
             }
         };
 
@@ -859,11 +984,11 @@ export default {
         const toggleSelectAll = () => {
             if (isAllSelected.value) {
                 // Deselect all current page items
-                const currentPageIds = paginatedExpenses.value.map(expense => expense.id);
+                const currentPageIds = expenses.value.map(expense => expense.id);
                 selectedExpenses.value = selectedExpenses.value.filter(id => !currentPageIds.includes(id));
             } else {
                 // Select all current page items
-                const currentPageIds = paginatedExpenses.value.map(expense => expense.id);
+                const currentPageIds = expenses.value.map(expense => expense.id);
                 const newSelections = currentPageIds.filter(id => !selectedExpenses.value.includes(id));
                 selectedExpenses.value.push(...newSelections);
             }
@@ -1069,12 +1194,18 @@ export default {
             deleteExpense,
             clearAllExpenses,
             exportExpenses,
+            // Search functionality
+            searchQuery,
+            isLoading,
+            totalItems,
+            handleSearch,
+            clearSearch,
+            fetchExpenses,
             // Pagination
             selectedExpenses,
             currentPage,
             itemsPerPage,
             totalPages,
-            paginatedExpenses,
             visiblePages,
             changePage,
             // Selection
@@ -1401,6 +1532,61 @@ export default {
     min-height: 20px;
 }
 
+/* Search container styles */
+.search-container .input-group {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.search-container .input-group-text {
+    background-color: #f8f9fa;
+    border-color: #ced4da;
+    color: #6c757d;
+    border-right: 0;
+}
+
+.search-container .form-control {
+    border-left: 0;
+    border-right: 0;
+    box-shadow: none;
+}
+
+.search-container .form-control:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.search-container .btn-outline-secondary {
+    border-left: 0;
+    border-color: #ced4da;
+    color: #6c757d;
+    background-color: transparent;
+    padding: 0.375rem 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-container .btn-outline-secondary:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+    color: #495057;
+}
+
+.search-container .btn-outline-secondary:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.search-container .btn-outline-secondary:active {
+    background-color: #dee2e6;
+    border-color: #adb5bd;
+}
+
+.results-info {
+    font-size: 0.875rem;
+}
+
 /* Enhanced Mobile and Tablet Responsive Styles */
 @media (max-width: 768px) {
     .card-header .d-flex {
@@ -1411,6 +1597,17 @@ export default {
     
     .card-header h4 {
         font-size: 1.1rem;
+    }
+    
+    .search-container .input-group {
+        min-width: 100% !important;
+        max-width: 100%;
+    }
+    
+    .results-info {
+        width: 100%;
+        text-align: center;
+        font-size: 0.8rem;
     }
     
     .btn-group {

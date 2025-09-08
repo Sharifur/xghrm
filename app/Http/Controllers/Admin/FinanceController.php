@@ -651,6 +651,53 @@ class FinanceController extends Controller
         ]);
     }
 
+    public function getExpensesWithSearch(Request $request)
+    {
+        try {
+            $query = OneTimeExpense::with(['creator', 'updater']);
+
+            // Add search functionality
+            if ($request->has('search') && $request->search) {
+                $searchTerm = $request->search;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('name', 'LIKE', '%' . $searchTerm . '%')
+                      ->orWhere('description', 'LIKE', '%' . $searchTerm . '%')
+                      ->orWhere('category', 'LIKE', '%' . $searchTerm . '%')
+                      ->orWhere('notes', 'LIKE', '%' . $searchTerm . '%');
+                });
+            }
+
+            // Add pagination support
+            $perPage = $request->get('per_page', 10);
+            $page = $request->get('page', 1);
+            
+            $totalCount = $query->count();
+            $expenses = $query->orderBy('expense_date', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->skip(($page - 1) * $perPage)
+                ->take($perPage)
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'expenses' => $expenses,
+                'pagination' => [
+                    'current_page' => $page,
+                    'per_page' => $perPage,
+                    'total' => $totalCount,
+                    'last_page' => ceil($totalCount / $perPage),
+                    'from' => (($page - 1) * $perPage) + 1,
+                    'to' => min($page * $perPage, $totalCount)
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch expenses: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function storeExpense(Request $request)
     {
         $request->validate([
