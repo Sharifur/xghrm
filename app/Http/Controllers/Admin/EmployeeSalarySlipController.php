@@ -155,4 +155,43 @@ class EmployeeSalarySlipController extends Controller
         SalarySlip::find($id)->delete();
         return back();
     }
+
+    public function monthlySalaryReport(Request $request){
+        $month = $request->month ?? now()->format('Y-m');
+
+        $salaries = SalarySlip::with('employee')
+            ->when(!empty($month), function ($q) use ($month) {
+                $q->whereYear('month', Carbon::parse($month)->year)
+                  ->whereMonth('month', Carbon::parse($month)->month);
+            })
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($item) {
+                $extraEarnings   = json_decode($item->extraEarningFields, true) ?? [];
+                $extraDeductions = json_decode($item->extraDeductionFields, true) ?? [];
+
+                $grossEarning = (float) $item->salary;
+                foreach ($extraEarnings as $earning) {
+                    if (!empty($earning['amount']) && $earning['amount'] > 0) {
+                        $grossEarning += (float) $earning['amount'];
+                    }
+                }
+
+                $grossDeduction = 0;
+                foreach ($extraDeductions as $deduction) {
+                    if (!empty($deduction['amount']) && $deduction['amount'] > 0) {
+                        $grossDeduction += (float) $deduction['amount'];
+                    }
+                }
+
+                $item->finalSalary = round($grossEarning - $grossDeduction, 2);
+                $item->monthName   = Carbon::parse($item->month)->format('F Y');
+                return $item;
+            });
+
+        return Inertia::render('Backend/SalaraySlip/MonthlySalaryReport', [
+            'salaries' => $salaries,
+            'month'    => $month,
+        ]);
+    }
 }
