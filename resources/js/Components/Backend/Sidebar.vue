@@ -34,8 +34,13 @@
                     </Link>
                 </li>
                 <li>
-                    <Link :href="route('admin.employee.salary.slip')" :class="{'active' : $page.url.startsWith('/salary-slip')}">
+                    <Link :href="route('admin.employee.salary.slip')" :class="{'active' : $page.url === '/admin-home/employee/salary-slip/all'}">
                         Salary Slip
+                    </Link>
+                </li>
+                <li>
+                    <Link :href="route('admin.employee.salary.monthly.report')" :class="{'active' : $page.url.startsWith('/admin-home/employee/salary-slip/monthly-report')}">
+                        Monthly Salary Report
                     </Link>
                 </li>
                 <li>

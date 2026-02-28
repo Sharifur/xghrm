@@ -95,6 +95,7 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
         /* salary slip */
         Route::group(['prefix' => 'salary-slip'],function (){
             Route::get('all',[\App\Http\Controllers\Admin\EmployeeSalarySlipController::class,'index'])->name('admin.employee.salary.slip');
+            Route::get('monthly-report',[\App\Http\Controllers\Admin\EmployeeSalarySlipController::class,'monthlySalaryReport'])->name('admin.employee.salary.monthly.report');
             Route::get('create',[\App\Http\Controllers\Admin\EmployeeSalarySlipController::class,'create'])->name('admin.employee.salary.slip.create');
             Route::post('create',[\App\Http\Controllers\Admin\EmployeeSalarySlipController::class,'store']);
             Route::get('edit/{id}',[\App\Http\Controllers\Admin\EmployeeSalarySlipController::class,'edit'])->name('admin.employee.salary.slip.edit');
