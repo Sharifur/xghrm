@@ -157,6 +157,11 @@
                 </li>
             </ul>
         </li>
+        <li class="list" :class="{'active' : $page.url.startsWith('/admin-home/ai-applications')}">
+            <Link :href="route('admin.ai.applications')">
+                AI Applications
+            </Link>
+        </li>
         <li class="list logoutbtn">
             <Link :href="route('admin.logout')" method="post"  as="button" >
                 <i class="las la-sign-out-alt"></i> Log Out

@@ -202,4 +202,15 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
         Route::post('/disable-mail-verify',[\App\Http\Controllers\Admin\UserManageController::class,'disable_mail_verify'])->name('admin.users.disable.mail.verify');
     });
 
+    /*=================================
+        AI APPLICATIONS ROUTES
+    ==================================*/
+    Route::group(['prefix' => 'ai-applications'], function () {
+        Route::get('/all', [\App\Http\Controllers\Admin\ApiApplicationController::class, 'index'])->name('admin.ai.applications');
+        Route::post('/store', [\App\Http\Controllers\Admin\ApiApplicationController::class, 'store'])->name('admin.ai.applications.store');
+        Route::post('/{id}/toggle', [\App\Http\Controllers\Admin\ApiApplicationController::class, 'toggleActive'])->name('admin.ai.applications.toggle');
+        Route::post('/{id}/regenerate', [\App\Http\Controllers\Admin\ApiApplicationController::class, 'regenerate'])->name('admin.ai.applications.regenerate');
+        Route::post('/{id}/delete', [\App\Http\Controllers\Admin\ApiApplicationController::class, 'destroy'])->name('admin.ai.applications.delete');
+    });
+
 });
