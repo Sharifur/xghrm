@@ -158,8 +158,8 @@
             </ul>
         </li>
         <li class="list" :class="{'active' : $page.url.startsWith('/admin-home/ai-applications')}">
-            <Link :href="route('admin.ai.applications')">
-                AI Applications
+            <Link href="/admin-home/ai-applications/all">
+                API Applications
             </Link>
         </li>
         <li class="list logoutbtn">
