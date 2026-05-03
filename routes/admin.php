@@ -102,6 +102,7 @@ Route::group(['prefix' => 'admin-home','middleware' => ['auth:admin']],function 
             Route::get('view/{id}',[\App\Http\Controllers\Admin\EmployeeSalarySlipController::class,'view'])->name('admin.employee.salary.slip.view');
             Route::post('update',[\App\Http\Controllers\Admin\EmployeeSalarySlipController::class,'update'])->name('admin.employee.salary.slip.update');
             Route::post('delete/{id}',[\App\Http\Controllers\Admin\EmployeeSalarySlipController::class,'delete'])->name('admin.employee.salary.slip.delete');
+            Route::post('bulk-delete',[\App\Http\Controllers\Admin\EmployeeSalarySlipController::class,'bulkDelete'])->name('admin.employee.salary.slip.bulk.delete');
         });
 
     });
