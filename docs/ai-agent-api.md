@@ -810,9 +810,10 @@ GET    /payslips/export/{month}
 | Field | Status | Notes |
 |---|---|---|
 | `leaveBalance` | Always `null` | Not calculated yet; can be derived from attendance_logs |
-| `workingDays` / `presentDays` on payslip | Always `null` | Not yet pulled from attendance data |
+| `workingDays` | Calculated | Working days in the month excluding Friday + Saturday |
+| `presentDays` | Calculated | C/In count for the month from attendance_logs |
 | `contractEndsAt` | Always `null` | No contract end date field in the database |
-| `paidAt` on mark-paid | Not persisted | Endpoint returns success but field is not stored |
+| `paidAt` on mark-paid | Persisted | Stored in `salary_slips.paid_at` column (migration added) |
 | Multi-day leave in one request | Not supported | System records one log per day; submit per-day or handle range in agent |
 | Leave `reason` field | Always `null` in response | Not stored in the current attendance log schema |
 | Lunch for WFH days | Included | Lunch is currently counted for all C/In days including work-from-home |
@@ -824,8 +825,6 @@ GET    /payslips/export/{month}
 | Item | Description |
 |---|---|
 | Configurable payroll settings | Add an admin settings page for lunch rate (currently hardcoded at 50 BDT), late penalty, and other per-day rates so admins can adjust without a code change |
-| Exclude WFH days from lunch | Count `C/In` days minus days with a `work-from-home` log; only office-present days earn lunch |
-| Sick/unpaid leave deduction | Deduct proportional daily rate for `leave` and `sick-leave` days (daily rate = salary / working days in month) |
-| Late arrival deduction | Employees checked in after 10:15 AM have a `late_arrival` flag — optionally deduct a fixed penalty per late day |
-| Surface `presentDays` in response | Populate `workingDays` and `presentDays` from C/In count at generate time instead of returning `null` |
-| Persist `paidAt` | `mark-paid` endpoint currently does not save the `paidAt` timestamp; add a `paid_at` column to `salary_slips` |
+| Sick/unpaid leave deduction | Deduct proportional daily rate for `leave` and `sick-leave` days. Currently admin enters this manually via PATCH. Formula: `round(salary / workingDays * leaveDays, 2)` |
+| Late arrival deduction | Employees checked in after 10:15 AM — optionally deduct a fixed penalty per late day |
+| Configurable payroll settings | Move lunch rate (50 BDT) and other per-day rates to an admin settings page so they can be changed without a deploy |

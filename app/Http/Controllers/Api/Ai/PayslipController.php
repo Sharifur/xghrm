@@ -196,6 +196,9 @@ class PayslipController extends Controller
             return response()->json(['error' => 'Payslip not found'], 404);
         }
 
+        $paidAt = $request->paidAt ? Carbon::parse($request->paidAt) : now();
+        $slip->update(['paid_at' => $paidAt]);
+
         return response()->json($this->format($slip->load('employee')));
     }
 
@@ -236,22 +239,35 @@ class PayslipController extends Controller
     {
         $bonus = $this->sumFields($slip->extraEarningFields);
         $deductions = $this->sumFields($slip->extraDeductionFields);
+        $monthDate = Carbon::parse($slip->month);
+
+        $inCount = AttendanceLog::where('employee_id', $slip->employee_id)
+            ->whereYear('date_time', $monthDate->year)
+            ->whereMonth('date_time', $monthDate->month)
+            ->where('type', 'C/In')
+            ->count();
+
+        $outCount = AttendanceLog::where('employee_id', $slip->employee_id)
+            ->whereYear('date_time', $monthDate->year)
+            ->whereMonth('date_time', $monthDate->month)
+            ->where('type', 'C/Out')
+            ->count();
 
         return [
             'id' => (string) $slip->id,
             'employeeId' => (string) $slip->employee_id,
             'employeeName' => $slip->employee?->name,
-            'month' => Carbon::parse($slip->month)->format('Y-m'),
+            'month' => $monthDate->format('Y-m'),
             'baseSalary' => (float) $slip->salary,
             'bonus' => $bonus,
             'deductions' => $deductions,
             'netSalary' => $slip->salary + $bonus - $deductions,
             'currency' => 'BDT',
-            'workingDays' => null,
-            'presentDays' => null,
+            'workingDays' => $this->workingDaysInMonth($monthDate),
+            'presentDays' => max($inCount, $outCount),
             'status' => 'approved',
             'approvedAt' => $slip->updated_at->toISOString(),
-            'paidAt' => null,
+            'paidAt' => $slip->paid_at?->toISOString(),
             'createdAt' => $slip->created_at->toISOString(),
         ];
     }
@@ -259,6 +275,18 @@ class PayslipController extends Controller
     private function calcNet(SalarySlip $slip): float
     {
         return $slip->salary + $this->sumFields($slip->extraEarningFields) - $this->sumFields($slip->extraDeductionFields);
+    }
+
+    private function workingDaysInMonth(Carbon $month): int
+    {
+        $period = \Carbon\CarbonPeriod::create(
+            $month->copy()->startOfMonth(),
+            $month->copy()->endOfMonth()
+        );
+
+        return collect($period)
+            ->filter(fn($d) => !in_array($d->dayOfWeek, [Carbon::FRIDAY, Carbon::SATURDAY]))
+            ->count();
     }
 
     private function sumFields(?string $json): float
