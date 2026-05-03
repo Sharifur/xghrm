@@ -621,9 +621,12 @@ Auto-calculates on generation:
 ```json
 {
   "generated": 10,
-  "skipped": 2,
   "noAttendance": 1,
-  "data": [ /* Payslip[] — generated slips only (not skipped) */ ]
+  "alreadyGenerated": [
+    { "employeeId": "12", "employeeName": "Rahim Uddin", "slipId": "33" }
+  ],
+  "alreadyGeneratedNote": "2 employee(s) already had a payslip for December 2025 and were skipped.",
+  "data": [ /* Payslip[] — newly generated slips only */ ]
 }
 ```
 
