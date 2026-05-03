@@ -136,12 +136,12 @@ Content-Type: application/json
   "employeeName": "Rahim Uddin",
   "month": "2025-12",
   "baseSalary": 50000.0,
-  "bonus": 5000.0,
-  "deductions": 2000.0,
-  "netSalary": 53000.0,
+  "bonus": 1200.0,
+  "deductions": 5000.0,
+  "netSalary": 46200.0,
   "currency": "BDT",
-  "workingDays": null,
-  "presentDays": null,
+  "workingDays": 26,
+  "presentDays": 24,
   "status": "approved",
   "approvedAt": "2025-12-25T12:00:00.000000Z",
   "paidAt": null,
@@ -149,8 +149,11 @@ Content-Type: application/json
 }
 ```
 
-> `bonus` and `deductions` are stored inside the `extraEarningFields` and `extraDeductionFields` JSON columns. Use the `PATCH /payslips/{id}` endpoint to set them.  
-> `workingDays` and `presentDays` are `null` — not yet derived from attendance logs.  
+> `bonus` is the sum of all entries in `extraEarningFields` (e.g. lunch allowance, incentive). Use `PATCH /payslips/{id}` to add a manual "Bonus" line item.  
+> `deductions` is the sum of all entries in `extraDeductionFields` (e.g. advance salary). Use `PATCH /payslips/{id}` to add a manual "Manual Deduction" line item.  
+> `workingDays` — calendar working days in the month, excluding Friday and Saturday.  
+> `presentDays` — actual C/In attendance count for the month from `attendance_logs`.  
+> `paidAt` — `null` until `POST /payslips/{id}/mark-paid` is called.  
 > `status` is always returned as `"approved"` — the system does not distinguish draft/paid states internally yet.
 
 ---
@@ -807,24 +810,34 @@ GET    /payslips/export/{month}
 
 ## Known Limitations
 
-| Field | Status | Notes |
-|---|---|---|
-| `leaveBalance` | Always `null` | Not calculated yet; can be derived from attendance_logs |
-| `workingDays` | Calculated | Working days in the month excluding Friday + Saturday |
-| `presentDays` | Calculated | C/In count for the month from attendance_logs |
-| `contractEndsAt` | Always `null` | No contract end date field in the database |
-| `paidAt` on mark-paid | Persisted | Stored in `salary_slips.paid_at` column (migration added) |
-| Multi-day leave in one request | Not supported | System records one log per day; submit per-day or handle range in agent |
-| Leave `reason` field | Always `null` in response | Not stored in the current attendance log schema |
-| Lunch for WFH days | Included | Lunch is currently counted for all C/In days including work-from-home |
+| Field | Notes |
+|---|---|
+| `leaveBalance` | Always `null` — not calculated yet; can be derived from `attendance_logs` |
+| `contractEndsAt` | Always `null` — no contract end date field in the database |
+| `contractExpiring` in alerts | Always `[]` — same reason as above |
+| Multi-day leave in one request | Not supported — system records one log per day; submit per day or track range in the agent |
+| Leave `reason` field | Always `null` in response — not stored in the current `attendance_logs` schema |
+| Sick/leave salary deduction | Not auto-calculated — admin adds manually via `PATCH /payslips/{id}`. Formula when needed: `round(salary / workingDays * leaveDays, 2)` |
 
 ---
 
-## Recommendations (not yet implemented)
+## Payroll Calculation Reference
+
+| Item | How it works |
+|---|---|
+| **Lunch allowance** | 50 BDT × C/In days. WFH days have no C/In record so they are automatically excluded |
+| **Advance deduction** | Total from `advance_salaries` for the same month. Auto-applied at generate time |
+| **Working days** | Calendar days in the month minus all Fridays and Saturdays |
+| **Present days** | `MAX(C/In count, C/Out count)` from `attendance_logs` for the month |
+| **Net salary** | `baseSalary + bonus - deductions` |
+| **Lunch rate** | Hardcoded at 50 BDT. Planned: move to admin settings |
+
+---
+
+## Roadmap
 
 | Item | Description |
 |---|---|
-| Configurable payroll settings | Add an admin settings page for lunch rate (currently hardcoded at 50 BDT), late penalty, and other per-day rates so admins can adjust without a code change |
-| Sick/unpaid leave deduction | Deduct proportional daily rate for `leave` and `sick-leave` days. Currently admin enters this manually via PATCH. Formula: `round(salary / workingDays * leaveDays, 2)` |
-| Late arrival deduction | Employees checked in after 10:15 AM — optionally deduct a fixed penalty per late day |
-| Configurable payroll settings | Move lunch rate (50 BDT) and other per-day rates to an admin settings page so they can be changed without a deploy |
+| Configurable payroll settings | Admin page to set lunch rate, late penalty, and other per-day rates without a code change |
+| Late arrival deduction | Auto-deduct a fixed penalty for employees with C/In after 10:15 AM |
+| Leave balance | Calculate remaining annual leave days from `attendance_logs` and return in the `leaveBalance` field |
