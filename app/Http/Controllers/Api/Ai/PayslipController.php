@@ -61,9 +61,9 @@ class PayslipController extends Controller
         $monthDate = Carbon::parse($request->month);
         $employees = Employee::where('status', 1)->get();
         $generated = 0;
-        $skipped = 0;
         $noAttendance = 0;
         $slips = [];
+        $alreadyGenerated = [];
 
         foreach ($employees as $employee) {
             $existing = SalarySlip::where('employee_id', $employee->id)
@@ -72,8 +72,11 @@ class PayslipController extends Controller
                 ->first();
 
             if ($existing) {
-                $skipped++;
-                $slips[] = $existing->load('employee');
+                $alreadyGenerated[] = [
+                    'employeeId' => (string) $employee->id,
+                    'employeeName' => $employee->name,
+                    'slipId' => (string) $existing->id,
+                ];
                 continue;
             }
 
@@ -126,8 +129,11 @@ class PayslipController extends Controller
 
         return response()->json([
             'generated' => $generated,
-            'skipped' => $skipped,
             'noAttendance' => $noAttendance,
+            'alreadyGenerated' => $alreadyGenerated,
+            'alreadyGeneratedNote' => count($alreadyGenerated) > 0
+                ? count($alreadyGenerated) . ' employee(s) already had a payslip for ' . $monthDate->format('F Y') . ' and were skipped.'
+                : null,
             'data' => array_map(fn($s) => $this->format($s), $slips),
         ], 201);
     }
