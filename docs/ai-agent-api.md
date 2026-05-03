@@ -601,7 +601,11 @@ X-Signature: abc123...
 
 #### `POST /payslips/generate`
 
-Generate draft payslips for all active employees for a month. Idempotent — skips employees who already have a slip for that month.
+Generate payslips for all active employees for a month. Idempotent — skips employees who already have a slip for that month. Employees with zero attendance (C/In = 0) for the month are also skipped.
+
+Auto-calculates on generation:
+- **Lunch allowance** — 50 BDT × present days (C/In count), stored as `{"description": "N Days Lunch", "amount": X}` in earnings
+- **Advance salary deduction** — total advance taken for that month from `advance_salaries`, stored as `{"description": "Advance Salary", "amount": X}` in deductions
 
 **Request body**
 ```json
@@ -615,7 +619,8 @@ Generate draft payslips for all active employees for a month. Idempotent — ski
 {
   "generated": 10,
   "skipped": 2,
-  "data": [ /* Payslip[] — all slips for that month */ ]
+  "noAttendance": 1,
+  "data": [ /* Payslip[] — generated slips only (not skipped) */ ]
 }
 ```
 
@@ -623,7 +628,7 @@ Generate draft payslips for all active employees for a month. Idempotent — ski
 
 #### `PATCH /payslips/{id}`
 
-Update bonus or deductions on a payslip. Both fields are optional.
+Add or update a manual bonus or deduction entry on a payslip. Both fields are optional. Auto-generated entries (lunch, advance) are preserved — this only sets the "Bonus" and "Manual Deduction" line items.
 
 **Request body**
 ```json
@@ -810,3 +815,17 @@ GET    /payslips/export/{month}
 | `paidAt` on mark-paid | Not persisted | Endpoint returns success but field is not stored |
 | Multi-day leave in one request | Not supported | System records one log per day; submit per-day or handle range in agent |
 | Leave `reason` field | Always `null` in response | Not stored in the current attendance log schema |
+| Lunch for WFH days | Included | Lunch is currently counted for all C/In days including work-from-home |
+
+---
+
+## Recommendations (not yet implemented)
+
+| Item | Description |
+|---|---|
+| Configurable payroll settings | Add an admin settings page for lunch rate (currently hardcoded at 50 BDT), late penalty, and other per-day rates so admins can adjust without a code change |
+| Exclude WFH days from lunch | Count `C/In` days minus days with a `work-from-home` log; only office-present days earn lunch |
+| Sick/unpaid leave deduction | Deduct proportional daily rate for `leave` and `sick-leave` days (daily rate = salary / working days in month) |
+| Late arrival deduction | Employees checked in after 10:15 AM have a `late_arrival` flag — optionally deduct a fixed penalty per late day |
+| Surface `presentDays` in response | Populate `workingDays` and `presentDays` from C/In count at generate time instead of returning `null` |
+| Persist `paidAt` | `mark-paid` endpoint currently does not save the `paidAt` timestamp; add a `paid_at` column to `salary_slips` |
