@@ -6,6 +6,13 @@
                 <div class="header-wrap d-flex justify-content-between">
                     <h2 class="dashboards-title margin-bottom-40">All Salary Slip</h2>
                     <div class="btn-wrp">
+                        <button
+                            v-if="selected.length > 0"
+                            class="btn btn-danger m-1"
+                            @click="bulkDeleteItems"
+                        >
+                            Delete Selected ({{ selected.length }})
+                        </button>
                         <Link class="btn btn-info m-1" :href="route('admin.employee.salary.slip.create')">Add New</Link>
                     </div>
                 </div>
@@ -16,6 +23,9 @@
                 <div class="table-responsive">
                     <table class="table table-stripped">
                         <thead>
+                        <th>
+                            <input type="checkbox" :checked="isAllSelected" @change="toggleAll"/>
+                        </th>
                         <th>Id</th>
                         <th>Employee Name</th>
                         <th>Salary Month</th>
@@ -25,6 +35,9 @@
                         </thead>
                         <tbody>
                         <tr v-for="salary in salaryList()" v-bind:key="salary.id">
+                            <td>
+                                <input type="checkbox" :value="salary.id" v-model="selected"/>
+                            </td>
                             <td>{{salary.id}}</td>
                             <td>{{ salary?.employee?.name }}</td>
                             <td>{{ salary.monthName }} {{ salary.year }}</td>
@@ -52,42 +65,58 @@
 </template>
 
 <script>
-import {Link, useForm, usePage,Head} from "@inertiajs/inertia-vue3";
+import {Link, useForm, usePage, Head} from "@inertiajs/inertia-vue3";
 import Pagination from "@/Components/Pagination.vue";
 import AdminMaster from "@/Layouts/AdminMaster.vue";
 import Swal from "sweetalert2";
 import StatusShow from "@/Components/StatusShow.vue";
 import BsButton from "@/Components/BsForm/Button.vue";
 import Select from "@/Components/BsForm/Select.vue";
-
+import {computed, ref} from "vue";
 
 export default {
     name: "Employee",
     layout: AdminMaster,
-    components:{
+    components: {
         Select, BsButton,
         StatusShow,
         Link,
         Pagination,
         Head
     },
-    setup(){
-        function salaryList(){
+    setup() {
+        const selected = ref([]);
+
+        function salaryList() {
             return usePage().props.value.allSalaries.data;
+        }
+
+        const isAllSelected = computed(() => {
+            const rows = salaryList();
+            return rows.length > 0 && rows.every(s => selected.value.includes(s.id));
+        });
+
+        function toggleAll(e) {
+            if (e.target.checked) {
+                selected.value = salaryList().map(s => s.id);
+            } else {
+                selected.value = [];
+            }
         }
 
         const filterData = useForm({
             employee: usePage().props.value.employee,
         });
-        function filterFormSubmit(){
+
+        function filterFormSubmit() {
             filterData.get(route('admin.employee.salary.slip'));
         }
-        function employeesList(){
-            return usePage().props.value.employees
+
+        function employeesList() {
+            return usePage().props.value.employees;
         }
 
-        function deleteItem(item){
-            console.log('test')
+        function deleteItem(item) {
             Swal.fire({
                 title: 'Are you sure?',
                 text: "You won't be able to revert this!",
@@ -97,38 +126,59 @@ export default {
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Yes, delete it!'
             }).then((result) => {
-                const EmployeeData = useForm({id:item.id})
                 if (result.isConfirmed) {
-                    // write code for delete salary slip
-                    EmployeeData.post(route('admin.employee.salary.slip.delete',item.id),{
-                        onFinish : () => {
-                            Swal.fire(
-                                'Deleted!',
-                                'Entry deleted.',
-                                'success'
-                            )
+                    const form = useForm({id: item.id});
+                    form.post(route('admin.employee.salary.slip.delete', item.id), {
+                        onSuccess: () => {
+                            selected.value = selected.value.filter(id => id !== item.id);
+                            Swal.fire('Deleted!', 'Entry deleted.', 'success');
                         }
                     });
                 }
-            })
+            });
         }
-        function salaryListLinks(){
+
+        function bulkDeleteItems() {
+            Swal.fire({
+                title: `Delete ${selected.value.length} slip(s)?`,
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete all!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = useForm({ids: selected.value});
+                    form.post(route('admin.employee.salary.slip.bulk.delete'), {
+                        onSuccess: () => {
+                            selected.value = [];
+                            Swal.fire('Deleted!', 'Selected entries deleted.', 'success');
+                        }
+                    });
+                }
+            });
+        }
+
+        function salaryListLinks() {
             return usePage().props.value.allSalaries.links;
         }
 
-
         return {
+            selected,
+            isAllSelected,
+            toggleAll,
             salaryListLinks,
             salaryList,
             deleteItem,
+            bulkDeleteItems,
             filterData,
             employeesList,
-            filterFormSubmit
-        }
+            filterFormSubmit,
+        };
     }
 }
 </script>
 
 <style scoped>
-
 </style>

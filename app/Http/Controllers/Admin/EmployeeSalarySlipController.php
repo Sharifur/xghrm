@@ -156,6 +156,12 @@ class EmployeeSalarySlipController extends Controller
         return back();
     }
 
+    public function bulkDelete(Request $request){
+        $request->validate(['ids' => 'required|array', 'ids.*' => 'integer']);
+        SalarySlip::whereIn('id', $request->ids)->delete();
+        return back();
+    }
+
     public function monthlySalaryReport(Request $request){
         $month = $request->month ?? now()->format('Y-m');
 

@@ -1,1 +1,0 @@
-import{L as e,H as n,r as s,s as t,o as a}from"./app-Do3xLmp-.js";import{_ as c}from"./_plugin-vue_export-helper-DlAUqK2U.js";const r={components:{Head:n,Link:e},props:{canLogin:Boolean,canRegister:Boolean}};function p(_,m,i,l,d,f){const o=s("Head");return a(),t(o,{title:"Welcome"})}const H=c(r,[["render",p]]);export{H as default};
